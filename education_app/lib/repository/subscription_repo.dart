@@ -1,0 +1,86 @@
+import 'dart:io';
+import 'package:education_app/model/post_subscription_model.dart';
+import 'package:education_app/model/subscription_histroy_model.dart';
+import 'package:education_app/resources/exports.dart';
+import 'package:http/http.dart' as http;
+
+class SubscriptionRepo {
+  final BaseApiServices _apiServices = NetworkApiServices();
+
+  /// Fetch subscription plans (GET)
+  Future<GetSubscriptionModel> getSubscription() async {
+    try {
+      final response =
+          await _apiServices.getGetApiResponse(AppUrl.getSubscription);
+
+      if (kDebugMode) {
+        print("GET Subscription Response: $response");
+      }
+
+      return GetSubscriptionModel.fromJson(response);
+    } catch (error) {
+      if (kDebugMode) {
+        print("GET Subscription Error: $error");
+      }
+      rethrow;
+    }
+  }
+
+  /// Fetch subscription plans (GET)
+  Future<SubscriptionHistoryModel> getSubscriptionHistory(int userId) async {
+    try {
+      final response =
+      await _apiServices.getGetApiResponse("${AppUrl.getSubscriptionHistory}$userId");
+
+      if (kDebugMode) {
+        print("GET Subscription Response: $response");
+      }
+
+      return SubscriptionHistoryModel.fromJson(response);
+    } catch (error) {
+      if (kDebugMode) {
+        print("GET Subscription Error: $error");
+      }
+      rethrow;
+    }
+  }
+
+    /// Post subscription data (multipart/form-data)
+  Future<PostSubscriptionModel> postSubscription({
+    required String userId,
+    required String testId,
+    required String subscriptionId,
+    required String amount,
+    required String date,
+    required File screenshotImage,
+  }) async {
+    try {
+      final data = <String, dynamic>{
+        'user_id': userId,
+        'test_id': testId,
+        'subscription_id': subscriptionId,
+        'amount': amount,
+        'payment_date': date,
+        'payment_image': await http.MultipartFile.fromPath(
+            'payment_image', screenshotImage.path),
+      };
+
+      // Send the multipart request
+      final response = await _apiServices.getPostMultipartRequestApiResponse(
+        AppUrl.postSubscription,
+        data,
+      );
+
+      if (kDebugMode) {
+        print("POST Subscription Raw Response: $response");
+      }
+
+      return PostSubscriptionModel.fromJson(response);
+    } catch (error) {
+      if (kDebugMode) {
+        print("POST Subscription Error: $error");
+      }
+      rethrow;
+    }
+  }
+}
