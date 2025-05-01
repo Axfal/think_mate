@@ -26,8 +26,8 @@ class ProfileRepository {
     };
 
     try {
-      final response =
-      await _apiServices.getPostMultipartRequestApiResponse(AppUrl.changePassword, data);
+      final response = await _apiServices.getPostMultipartRequestApiResponse(
+          AppUrl.changePassword, data);
 
       debugPrint("Change Password API Response: $response");
 
@@ -38,4 +38,33 @@ class ProfileRepository {
     }
   }
 
+  Future<dynamic> updateProfileApi(dynamic data) async {
+    try {
+      debugPrint("Updating profile with data: $data");
+
+      // Use the same endpoint and method as changePassword
+      final response = await _apiServices.getPostMultipartRequestApiResponse(
+        AppUrl.changePassword,
+        data,
+      );
+
+      debugPrint("Profile update response: $response");
+      return response;
+    } catch (e) {
+      debugPrint("Error in updateProfileApi: $e");
+      rethrow;
+    }
+  }
+
+  Future<dynamic> updatePasswordApi(dynamic data) async {
+    try {
+      final response = await _apiServices.getPostApiResponse(
+        '${AppUrl.baseUrl}/update_password.php',
+        data,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

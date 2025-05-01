@@ -5,6 +5,11 @@ class RoutesName {
 
   static const String signup = "signup_screen";
 
+  static const String resetPassword = "reset_password_screen";
+
+  static const String enterOtpAndResetPassword =
+      "enter_otp_and_reset_password_screen";
+
   static const String home = "home_screen";
 
   static const String course = "course_screen";
@@ -34,4 +39,6 @@ class RoutesName {
   static const String previousTestScreen = "previous_test_screen";
 
   static const String createdMockTestScreen = "created_screen";
+
+  static const String terms = "/terms";
 }

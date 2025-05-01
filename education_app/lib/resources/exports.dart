@@ -78,3 +78,5 @@ export 'package:education_app/repository/book_mark_repo.dart';
 export 'package:education_app/view_model/provider/book_mark_provider.dart';
 export 'package:education_app/model/get_book_mark_model.dart';
 export 'package:education_app/model/delete_book_mark.dart';
+export 'package:education_app/ui/view/auth_screen/reset_password_screen.dart';
+export 'package:education_app/ui/view/auth_screen/enter_otp_and_reset_password_screen.dart';

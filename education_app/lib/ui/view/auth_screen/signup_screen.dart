@@ -17,6 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool _obscureText = true;
   String? selectedTestId;
+  bool isTermsAccepted = false;
 
   @override
   void initState() {
@@ -38,13 +39,12 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -54,115 +54,261 @@ class _SignupScreenState extends State<SignupScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Create Your Account!",
-                      style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87)),
+                  Text(
+                    "Create Account",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
                   SizedBox(height: 10),
-                  const Text("Sign up to get started",
-                      style: TextStyle(fontSize: 16, color: Colors.black54)),
+                  Text(
+                    "Sign up to get started",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.greyText,
+                        ),
+                  ),
                   SizedBox(height: 30),
-
-                  _buildTextField(
-                      usernameController, "Username", Icons.person, false),
+                  TextFormField(
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      labelText: 'Username',
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter username';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 20),
-
-                  _buildTextField(emailController, "Email", Icons.email, false,
-                      keyboardType: TextInputType.emailAddress),
+                  TextFormField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter email';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 20),
-
-                  _buildTextField(phoneController, "Phone", Icons.phone, false,
-                      keyboardType: TextInputType.phone),
+                  TextFormField(
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: 'Phone',
+                      prefixIcon: Icon(Icons.phone),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter phone';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 20),
-
-                  _buildTextField(
-                      addressController, "Address", Icons.location_on, false),
+                  TextFormField(
+                    controller: addressController,
+                    decoration: InputDecoration(
+                      labelText: 'Address',
+                      prefixIcon: Icon(Icons.location_on),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter address';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 20),
-
-                  _buildTextField(
-                      passwordController, "Password", Icons.lock, true),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter password';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 20),
-
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please confirm password';
+                      }
+                      if (value != passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
                   // Dropdown for Test ID
                   authProvider.loading
-                      ? Center(child:CupertinoActivityIndicator(color: Colors.white))
-                      : (authProvider.courseList == null || authProvider.courseList!.data == null || authProvider.courseList!.data!.isEmpty)
-                      ? Text("No subjects available", style: TextStyle(color: Colors.red))
-                      : DropdownButtonFormField<String>(
-                    value: selectedTestId,
-                    decoration: InputDecoration(
-                      labelText: "Select Subject",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    items: authProvider.courseList!.data!.map((subject) {
-                      return DropdownMenuItem(
-                        value: subject.id.toString(),
-                        child: Text(subject.testName ?? "Unknown"),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedTestId = value;
-                      });
-                    },
-                    validator: (value) =>
-                    value == null ? "Please select a Subject" : null,
-                  ),
-
-
+                      ? Center(
+                          child: CupertinoActivityIndicator(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        )
+                      : (authProvider.courseList == null ||
+                              authProvider.courseList!.data == null ||
+                              authProvider.courseList!.data!.isEmpty)
+                          ? Text(
+                              "No subjects available",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            )
+                          : DropdownButtonFormField<String>(
+                              value: selectedTestId,
+                              decoration: InputDecoration(
+                                labelText: "Select Subject",
+                              ),
+                              items:
+                                  authProvider.courseList!.data!.map((subject) {
+                                return DropdownMenuItem(
+                                  value: subject.id.toString(),
+                                  child: Text(subject.testName ?? "Unknown"),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedTestId = value;
+                                });
+                              },
+                              validator: (value) => value == null
+                                  ? "Please select a Subject"
+                                  : null,
+                            ),
                   SizedBox(height: 30),
-
+                  // Terms and Conditions Checkbox
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isTermsAccepted,
+                        onChanged: (value) {
+                          setState(() {
+                            isTermsAccepted = value ?? false;
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/terms');
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              children: [
+                                TextSpan(text: 'I agree to the '),
+                                TextSpan(
+                                  text: 'Terms and Conditions',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!isTermsAccepted)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'Please accept the terms and conditions',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                      ),
+                    ),
+                  SizedBox(height: 30),
                   // Signup Button
-                  SizedBox(
+                  Container(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.deepPurple,
+                          AppColors.lightPurple,
+                        ],
                       ),
-                      onPressed: authProvider.loading
-                          ? null : () {
-                        if (_formKey.currentState!.validate()) {
-                          final data = {
-                            "username": usernameController.text.trim(),
-                            "email": emailController.text.trim(),
-                            "phone": phoneController.text.trim(),
-                            "address": addressController.text.trim(),
-                            "password": passwordController.text.trim(),
-                            "test_id": selectedTestId,
-                          };
-                          authProvider.signUp(context, data);
-                        }
-                      },
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purpleShadow,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: isTermsAccepted
+                          ? () {
+                              if (_formKey.currentState!.validate()) {
+                                final data = {
+                                  "username": usernameController.text.trim(),
+                                  "email": emailController.text.trim(),
+                                  "phone": phoneController.text.trim(),
+                                  "address": addressController.text.trim(),
+                                  "password": passwordController.text.trim(),
+                                  "test_id": selectedTestId,
+                                };
+                                authProvider.signUp(context, data);
+                              }
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: authProvider.loading
-                          ? Center(child:CupertinoActivityIndicator(color: Colors.white))
-                          : Text("Sign Up",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          ? CupertinoActivityIndicator(
+                              color: AppColors.whiteColor,
+                            )
+                          : Text("Sign Up"),
                     ),
                   ),
                   SizedBox(height: 20),
-
                   // Already have an account?
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Already have an account?",
-                          style: TextStyle(color: Colors.black54)),
+                      Text(
+                        "Already have an account?",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.greyText,
+                            ),
+                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text("Login",
-                            style: TextStyle(
-                                color: AppColors.primaryColor,
-                                fontWeight: FontWeight.bold)),
+                        child: Text("Login"),
                       ),
                     ],
                   ),

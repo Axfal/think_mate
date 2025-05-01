@@ -1,5 +1,6 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,147 +16,167 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
 
   @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image(
-                    image: AssetImage("assets/images/login.png"), height: 200),
-                Text(
-                  "Welcome Back!",
-                  style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87),
-                ),
-                SizedBox(height: 10),
-                const Text(
-                  "Login to continue",
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
-                ),
-                SizedBox(height: 30),
-                TextFormField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: "Email",
-                    labelStyle: TextStyle(color: AppColors.primaryColor),
-                    hintText: "Enter your email",
-                    prefixIcon:
-                        Icon(Icons.email, color: AppColors.primaryColor),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: AppColors.primaryColor, width: 2)),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)),
+            child: AutofillGroup(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image(
+                    image: AssetImage("assets/images/login.png"),
+                    height: 200,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Email cannot be empty";
-                    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                        .hasMatch(value)) {
-                      return "Enter a valid email";
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: _obscureText,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    labelStyle: TextStyle(color: AppColors.primaryColor),
-                    hintText: "Enter your password",
-                    prefixIcon: Icon(Icons.lock, color: AppColors.primaryColor),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureText = !_obscureText;
-                        });
-                      },
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: AppColors.primaryColor, width: 2)),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                  Text(
+                    "Welcome Back!",
+                    style: Theme.of(context).textTheme.headlineLarge,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Password cannot be empty";
-                    } else if (value.length < 6) {
-                      return "Password must be at least 6 characters";
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                  SizedBox(height: 10),
+                  Text(
+                    "Login to continue",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.greyText,
+                        ),
+                  ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [AutofillHints.email],
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email),
                     ),
-                    onPressed: authProvider.loading
-                        ? null
-                        : () {
-                      if (_formKey.currentState!.validate()) {
-                        final data = {
-                          "email": emailController.text,
-                          "password": passwordController.text.toString(),
-                        };
-
-                        authProvider.signIn(context, data);
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter email';
                       }
+                      return null;
                     },
-                    child: authProvider.loading
-                        ? CupertinoActivityIndicator(color: Colors.white)
-                        : const Text(
-                            "Login",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
                   ),
-                ),
-                SizedBox(height: 10),
-                // Forgot Password & Signup
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {}, // Navigate to Forgot Password Screen
-                      child: Text("Forgot Password?",
-                          style: TextStyle(color: AppColors.primaryColor)),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: _obscureText,
+                    autofillHints: const [AutofillHints.password],
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, RoutesName.signup);
-                      },
-                      child: Text("Create an account",
-                          style: TextStyle(color: AppColors.primaryColor)),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter password';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 30),
+                  Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.deepPurple,
+                          AppColors.lightPurple,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purpleShadow,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                    child: ElevatedButton(
+                      onPressed: authProvider.loading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                final data = {
+                                  "email": emailController.text,
+                                  "password":
+                                      passwordController.text.toString(),
+                                };
+
+                                await authProvider.signIn(context, data);
+                                if (authProvider.userSession != null) {
+                                  TextInput.finishAutofillContext();
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: authProvider.loading
+                          ? CupertinoActivityIndicator(
+                              color: AppColors.whiteColor,
+                            )
+                          : Text("Login"),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  // Forgot Password & Signup
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(
+                              context, RoutesName.resetPassword);
+                        },
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, RoutesName.signup);
+                        },
+                        child: Text(
+                          "Create an account",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

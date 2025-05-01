@@ -4,8 +4,18 @@ import 'package:education_app/resources/exports.dart';
 import 'package:education_app/view_model/provider/profile_provider.dart';
 
 Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       child: Container(
-        decoration: BoxDecoration(color: AppColors.primaryColor),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.deepPurple,
+              AppColors.lightPurple,
+            ],
+          ),
+        ),
         child: Consumer<BottomNavigatorBarProvider>(
           builder: (context, provider, child) {
             final String baseUrl =
@@ -22,58 +32,143 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
               imageUrl = defaultImageUrl;
             }
 
-            return ListView(children: [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage:
-                          (imageUrl.isNotEmpty && !imageUrl.contains("null"))
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // Header
+                Container(
+                  padding: EdgeInsets.fromLTRB(20, 40, 20, 20),
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteOverlay15,
+                  ),
+                  child: Column(
+                    children: [
+                      // Profile Image
+                      Container(
+                        padding: EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.whiteOverlay90,
+                              AppColors.whiteOverlay70,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundImage: (imageUrl.isNotEmpty &&
+                                  !imageUrl.contains("null"))
                               ? NetworkImage(imageUrl)
                               : const AssetImage(
                                       'assets/images/default_profile.png')
                                   as ImageProvider,
-                      onBackgroundImageError: (_, __) {
-                        debugPrint("Error loading image: $imageUrl");
-                      },
-                    ),
-                    SizedBox(height: 5),
-                    Text('${userdata.profileModel!.user!.username}',
-                        style: AppTextStyle.subscriptionTitleText),
-                    Text('${userdata.profileModel!.user!.email}',
-                        style: AppTextStyle.subscriptionDetailText),
-                  ],
+                          onBackgroundImageError: (_, __) {
+                            debugPrint("Error loading image: $imageUrl");
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 16),
+
+                      // Username
+                      Text(
+                        '${userdata.profileModel!.user!.username}',
+                        style: AppTextStyle.heading2.copyWith(
+                          color: AppColors.whiteColor,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+
+                      // Email
+                      Text(
+                        '${userdata.profileModel!.user!.email}',
+                        style: AppTextStyle.bodyText2.copyWith(
+                          color: AppColors.whiteOverlay90,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              drawerItems('Profile', () {
-                Navigator.pushNamed(context, RoutesName.profile);
-              }, Icons.account_circle),
-              drawerItems('Create Mock Test', () {
-                Navigator.pushNamed(context, RoutesName.createMockTest);
-              }, Icons.create_new_folder_outlined),
-              drawerItems('Previous Tests', () {
-                Navigator.pushNamed(context, RoutesName.previousTestScreen);
-              }, Icons.history_outlined),
-              drawerItems('Notes', () {
-                Navigator.pushNamed(context, RoutesName.noteScreen);
-              }, Icons.notes_outlined),
-              drawerItems('My Notebook', () {
-                Navigator.pushNamed(context, RoutesName.myNoteBookScreen);
-              }, Icons.book_outlined),
-              drawerItems('Help', () {}, Icons.help_outline_outlined),
-              drawerItems('Log Out', () {
-                final questionProvider =
-                    Provider.of<QuestionsProvider>(context, listen: false);
-                // questionProvider.clearSubmittedQuestions();
-                logOut(context);
-              }, Icons.logout),
-            ]);
+                SizedBox(height: 20),
+
+                // Menu Items
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      drawerItems('Profile', () {
+                        Navigator.pushNamed(context, RoutesName.profile);
+                      }, Icons.person_outline_rounded),
+                      drawerItems('Create Mock Test', () {
+                        Navigator.pushNamed(context, RoutesName.createMockTest);
+                      }, Icons.add_circle_outline_rounded),
+                      drawerItems('Previous Tests', () {
+                        Navigator.pushNamed(
+                            context, RoutesName.previousTestScreen);
+                      }, Icons.history_rounded),
+                      drawerItems('Notes', () {
+                        Navigator.pushNamed(context, RoutesName.noteScreen);
+                      }, Icons.note_alt_outlined),
+                      drawerItems('My Notebook', () {
+                        Navigator.pushNamed(
+                            context, RoutesName.myNoteBookScreen);
+                      }, Icons.book_outlined),
+                      drawerItems('Help', () {}, Icons.help_outline_rounded),
+                      drawerItems('Terms & Conditions', () {
+                        Navigator.pushNamed(context, RoutesName.terms);
+                      }, Icons.description_outlined),
+                      SizedBox(height: 8),
+                      Divider(
+                        color: AppColors.whiteOverlay20,
+                        height: 1,
+                      ),
+                      SizedBox(height: 8),
+                      drawerItems('Log Out', () {
+                        final questionProvider = Provider.of<QuestionsProvider>(
+                            context,
+                            listen: false);
+                        logOut(context);
+                      }, Icons.logout_rounded),
+                    ],
+                  ),
+                ),
+              ],
+            );
           },
+        ),
+      ),
+    );
+
+Widget drawerItems(String title, VoidCallback onTap, IconData icon) => InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 4),
+        child: ListTile(
+          leading: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.whiteOverlay15,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.whiteColor,
+              size: 22,
+            ),
+          ),
+          title: Text(
+            title,
+            style: AppTextStyle.bodyText1.copyWith(
+              color: AppColors.whiteColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          trailing: Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.whiteOverlay70,
+          ),
         ),
       ),
     );
@@ -81,54 +176,126 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
 void logOut(BuildContext context) {
   showDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      title: Text(
-        'Do you want to Logged out?',
-        style: AppTextStyle.questionText,
+    builder: (context) => Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextButton(
-              onPressed: () {
-                try {
-                  final provider =
-                      Provider.of<AuthProvider>(context, listen: false);
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.whiteColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.blackOverlay10,
+              blurRadius: 10,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icon
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.redColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                color: AppColors.redColor,
+                size: 40,
+              ),
+            ),
+            SizedBox(height: 20),
 
-                  provider.logout();
-                  Navigator.pushReplacementNamed(context, RoutesName.login);
-                } catch (e) {
-                  rethrow;
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Logged out successfully!'),
+            // Title
+            Text(
+              'Logout',
+              style: AppTextStyle.heading2.copyWith(
+                color: AppColors.darkText,
+              ),
+            ),
+            SizedBox(height: 8),
+
+            // Message
+            Text(
+              'Are you sure you want to logout?',
+              textAlign: TextAlign.center,
+              style: AppTextStyle.bodyText1.copyWith(
+                color: AppColors.darkText.withOpacity(0.6),
+              ),
+            ),
+            SizedBox(height: 24),
+
+            // Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Cancel Button
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: AppColors.deepPurple),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: AppTextStyle.button.copyWith(
+                        color: AppColors.deepPurple,
+                      ),
+                    ),
                   ),
-                );
-              },
-              child: Text('Logout')),
-          SizedBox(width: 20),
-          TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel')),
-        ],
+                ),
+                SizedBox(width: 16),
+
+                // Logout Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      try {
+                        final provider =
+                            Provider.of<AuthProvider>(context, listen: false);
+                        provider.logout();
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          RoutesName.login,
+                          (route) => false,
+                        );
+                      } catch (e) {
+                        rethrow;
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      backgroundColor: AppColors.redColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     ),
   );
 }
-
-Widget drawerItems(String title, VoidCallback onTap, IconData icon) => InkWell(
-      onTap: onTap,
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: AppColors.textColor,
-        ),
-        title: Text(
-          title,
-          style: AppTextStyle.drawerText,
-        ),
-      ),
-    );

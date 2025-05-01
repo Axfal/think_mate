@@ -9,6 +9,7 @@ class UploadPaymentScreen extends StatefulWidget {
   final price;
   final month;
   final subscriptionId;
+
   const UploadPaymentScreen(
       {super.key,
       required this.price,
@@ -47,8 +48,8 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
 
   void submitPayment() async {
     if (_image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please upload a screenshot")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Please upload a screenshot")));
       return;
     }
 
@@ -67,7 +68,7 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
     DateTime now = DateTime.now();
 
     final subscriptionProvider =
-    Provider.of<SubscriptionProvider>(context, listen: false);
+        Provider.of<SubscriptionProvider>(context, listen: false);
 
     try {
       await subscriptionProvider.postSubscription(
@@ -117,11 +118,14 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Payment", style: AppTextStyle.appBarText),
+        title: Text("Payment",
+            style: AppTextStyle.heading3.copyWith(
+              color: AppColors.whiteColor,
+            )),
         centerTitle: true,
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.deepPurple,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -136,30 +140,43 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
-                color: AppColors.primaryColor.withValues(alpha: 0.9),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Premium Plan",
-                          style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                      SizedBox(height: 8),
-                      Text(
-                        "• Access to all quizzes\n• No ads\n• Progress tracking",
-                        style: GoogleFonts.poppins(
-                            color: Colors.white70, fontSize: 14),
-                      ),
-                      SizedBox(height: 10),
-                      Text("Rs. ${widget.price} / ${widget.month} Months",
-                          style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600)),
-                    ],
+                color: AppColors.deepPurple,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.deepPurple,
+                        AppColors.lightPurple,
+                      ],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Premium Plan",
+                            style: AppTextStyle.heading2.copyWith(
+                              color: AppColors.whiteColor,
+                            )),
+                        SizedBox(height: 8),
+                        Text(
+                          "• Access to all quizzes\n• No ads\n• Progress tracking",
+                          style: AppTextStyle.bodyText1.copyWith(
+                            color: AppColors.whiteOverlay90,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text("Rs. ${widget.price} / ${widget.month} Months",
+                            style: AppTextStyle.bodyText1.copyWith(
+                              color: AppColors.whiteColor,
+                              fontWeight: FontWeight.w600,
+                            )),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -168,8 +185,9 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
               // Upload Screenshot
               Text(
                 "Upload Payment Screenshot",
-                style: GoogleFonts.poppins(
-                    fontSize: 16, fontWeight: FontWeight.w600),
+                style: AppTextStyle.heading3.copyWith(
+                  color: AppColors.darkText,
+                ),
               ),
               SizedBox(height: 12),
               GestureDetector(
@@ -179,8 +197,8 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                    color: Colors.grey[100],
+                    border: Border.all(color: AppColors.borderColor),
+                    color: AppColors.backgroundColor,
                   ),
                   child: _image == null
                       ? Center(
@@ -206,9 +224,8 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
 
               // Amount Field
               Text("Enter Paid Amount (Rs)",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  style: AppTextStyle.heading3.copyWith(
+                    color: AppColors.darkText,
                   )),
               SizedBox(height: 10),
               TextField(
@@ -217,7 +234,14 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
                 decoration: InputDecoration(
                   hintText: "e.g. 499",
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.borderColor)),
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.borderColor)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.deepPurple)),
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
@@ -267,29 +291,27 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
 
               // Submit Button
               SizedBox(
-                width: double.infinity,
-                child: Consumer<SubscriptionProvider>(
-                  builder: (context, provider, child) {
-                    return ElevatedButton(
-                      onPressed: provider.isLoading ? null : submitPayment,
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: AppColors.primaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: provider.isLoading
-                          ? CupertinoActivityIndicator()
-                          : Text("Submit",
-                          style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                    );
-                  },
-                )
-
-              ),
+                  width: double.infinity,
+                  child: Consumer<SubscriptionProvider>(
+                    builder: (context, provider, child) {
+                      return ElevatedButton(
+                        onPressed: provider.isLoading ? null : submitPayment,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: AppColors.deepPurple,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: provider.isLoading
+                            ? CupertinoActivityIndicator()
+                            : Text("Submit",
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white)),
+                      );
+                    },
+                  )),
             ],
           ),
         ),

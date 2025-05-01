@@ -20,6 +20,7 @@ void main() async {
   await Hive.openBox<PreviousTestReportModel>('previousTests');
   await Hive.openBox<NotesModel>('notes');
   await Hive.openBox<UserSessionModel>('userBox');
+
   runApp(const MyApp());
 }
 
@@ -56,15 +57,100 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp(
         scaffoldMessengerKey: GlobalVariables.scaffoldMessengerKey,
-        title: 'Education App',
+        // title: 'Education App',
         debugShowCheckedModeBanner: false,
         initialRoute: RoutesName.splash,
         onGenerateRoute: Routes.generateRoute,
         theme: ThemeData(
-          appBarTheme: const AppBarTheme(
+          primaryColor: AppColors.primaryColor,
+          scaffoldBackgroundColor: AppColors.backgroundColor,
+          colorScheme: ColorScheme.light(
+            primary: AppColors.primaryColor,
+            secondary: AppColors.secondaryColor,
+            surface: AppColors.surfaceColor,
+            background: AppColors.backgroundColor,
+            error: AppColors.errorColor,
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: AppColors.deepPurple,
+            elevation: 0,
+            centerTitle: true,
             iconTheme: IconThemeData(
-              color: Colors.white,
+              color: AppColors.whiteColor,
             ),
+            titleTextStyle: AppTextStyle.appBarText,
+          ),
+          textTheme: TextTheme(
+            headlineLarge: AppTextStyle.heading1,
+            headlineMedium: AppTextStyle.heading2,
+            headlineSmall: AppTextStyle.heading3,
+            bodyLarge: AppTextStyle.bodyText1,
+            bodyMedium: AppTextStyle.bodyText2,
+            bodySmall: AppTextStyle.caption,
+            labelLarge: AppTextStyle.button,
+            labelMedium: AppTextStyle.label,
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: AppColors.whiteColor,
+              textStyle: AppTextStyle.button,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primaryColor,
+              textStyle: AppTextStyle.button,
+              side: BorderSide(color: AppColors.primaryColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryColor,
+              textStyle: AppTextStyle.button,
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            fillColor: AppColors.inputFillColor,
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.borderColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.borderColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.primaryColor),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.errorColor),
+            ),
+            labelStyle: AppTextStyle.label,
+            hintStyle: AppTextStyle.caption,
+          ),
+          cardTheme: CardTheme(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            color: AppColors.surfaceColor,
+          ),
+          dividerTheme: DividerThemeData(
+            color: AppColors.dividerColor,
+            thickness: 1,
+            space: 16,
           ),
         ),
       ),

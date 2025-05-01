@@ -10,8 +10,9 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _bookController;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
   late Future<void> _sessionLoader;
-
 
   @override
   void initState() {
@@ -21,6 +22,20 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 2),
     )..repeat();
 
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _fadeController.forward();
+
     // Load user session before checking it
     _sessionLoader =
         Provider.of<AuthProvider>(context, listen: false).loadUserSession();
@@ -29,6 +44,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _bookController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -47,55 +63,145 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-            color: AppColors.primaryColor
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.deepPurple,
+              AppColors.lightPurple,
+            ],
+          ),
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Lottie.asset(
-                Icons8.book,
-                width: 100,
-                height: 100,
-                controller: _bookController,
-                onLoaded: (composition) {
-                  _bookController.duration = composition.duration;
-                },
+        child: Stack(
+          children: [
+            // Background pattern
+            Positioned.fill(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: CustomPaint(
+                  painter: BackgroundPatternPainter(),
+                ),
               ),
-              const SizedBox(height: 20.0),
-              SizedBox(
-                width: 300.0,
-                child: DefaultTextStyle(
-                  style: const TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                  child: Center(
-                    child: FutureBuilder(
-                      future: _sessionLoader,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return AnimatedTextKit(
-                            animatedTexts: [
-                              TyperAnimatedText('Learn Anytime, Anywhere'),
-                              TyperAnimatedText('Learning unlocks potential'),
-                              TyperAnimatedText('Learning fuels progress'),
-                              TyperAnimatedText('Let\'s Start...'),
-                            ],
-                            totalRepeatCount: 1,
-                            onFinished: () => navigateToNextScreen(context),
-                          );
-                        }
-                        return CircularProgressIndicator(color: Colors.white);
+            ),
+            // Main content
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // App logo/icon with shadow
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purpleShadow.withOpacity(0.5),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Lottie.asset(
+                      Icons8.book,
+                      width: 120,
+                      height: 120,
+                      controller: _bookController,
+                      onLoaded: (composition) {
+                        _bookController.duration = composition.duration;
                       },
                     ),
                   ),
-                ),
+                  const SizedBox(height: 40.0),
+                  // App name with gradient text
+                  ShaderMask(
+                    shaderCallback: (bounds) => LinearGradient(
+                      colors: [
+                        AppColors.whiteColor,
+                        AppColors.whiteColor.withOpacity(0.8),
+                      ],
+                    ).createShader(bounds),
+                    child: Text(
+                      'ThinkMatte',
+                      style: GoogleFonts.poppins(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  // Animated text
+                  SizedBox(
+                    width: 300.0,
+                    child: DefaultTextStyle(
+                      style: GoogleFonts.poppins(
+                        fontSize: 16.0,
+                        color: AppColors.whiteOverlay90,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      child: Center(
+                        child: FutureBuilder(
+                          future: _sessionLoader,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              return AnimatedTextKit(
+                                animatedTexts: [
+                                  FadeAnimatedText(
+                                    'Learn Anytime, Anywhere',
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                  FadeAnimatedText(
+                                    'Unlock Your Potential',
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                  FadeAnimatedText(
+                                    'Let\'s Begin Your Journey',
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                ],
+                                totalRepeatCount: 1,
+                                onFinished: () => navigateToNextScreen(context),
+                              );
+                            }
+                            return CircularProgressIndicator(
+                              color: AppColors.whiteColor,
+                              strokeWidth: 3,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+// Custom painter for background pattern
+class BackgroundPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+
+    // Create a pattern of circles and shapes
+    for (var i = 0; i < size.width; i += 100) {
+      for (var j = 0; j < size.height; j += 100) {
+        canvas.drawCircle(Offset(i.toDouble(), j.toDouble()), 20, paint);
+      }
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

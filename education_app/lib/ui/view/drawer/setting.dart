@@ -15,16 +15,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text(
+          'Settings',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.whiteColor,
+              ),
+        ),
         automaticallyImplyLeading: false,
         leading: IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, RoutesName.home);
-            },
-            icon: Icon(
-              Icons.arrow_back,
-              color: Colors.black,
-            )),
+          onPressed: () {
+            Navigator.pushNamed(context, RoutesName.home);
+          },
+          icon: Icon(
+            Icons.arrow_back,
+            color: AppColors.whiteColor,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -32,10 +38,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             // Notifications ListTile
             ListTile(
-              leading: Icon(Icons.notifications, color: AppColors.primaryColor),
-              title: Text('Notifications'),
+              leading: Icon(Icons.notifications,
+                  color: Theme.of(context).primaryColor),
+              title: Text(
+                'Notifications',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               trailing: Switch(
-                activeColor: AppColors.primaryColor,
+                activeColor: Theme.of(context).primaryColor,
                 value: _notificationsEnabled,
                 onChanged: (value) {
                   setState(() {
@@ -48,10 +58,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Dark Mode ListTile
             ListTile(
-              leading: Icon(Icons.brightness_6, color: AppColors.primaryColor),
-              title: Text('Dark Mode'),
+              leading: Icon(Icons.brightness_6,
+                  color: Theme.of(context).primaryColor),
+              title: Text(
+                'Dark Mode',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               trailing: Switch(
-                activeColor: AppColors.primaryColor,
+                activeColor: Theme.of(context).primaryColor,
                 value: _darkModeEnabled,
                 onChanged: (value) {
                   setState(() {
@@ -75,31 +89,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Rate App ListTile
             ListTile(
-              leading: Icon(Icons.star_half, color: AppColors.primaryColor),
-              title: Text('Rate App'),
+              leading:
+                  Icon(Icons.star_half, color: Theme.of(context).primaryColor),
+              title: Text(
+                'Rate App',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
             Divider(),
 
             // Share App Tile
             ListTile(
-              leading: Icon(Icons.share, color: AppColors.primaryColor),
-              title: Text('Share App'),
+              leading: Icon(Icons.share, color: Theme.of(context).primaryColor),
+              title: Text(
+                'Share App',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
             Divider(),
 
             // Privacy Policy ListTile
             ListTile(
               leading: Icon(Icons.privacy_tip_outlined,
-                  color: AppColors.primaryColor),
-              title: Text('Privacy Policy'),
+                  color: Theme.of(context).primaryColor),
+              title: Text(
+                'Privacy Policy',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
             Divider(),
 
             // Terms & Conditions ListTile
             ListTile(
-              leading:
-                  Icon(Icons.contact_support, color: AppColors.primaryColor),
-              title: Text('Terms & Conditions'),
+              leading: Icon(Icons.contact_support,
+                  color: Theme.of(context).primaryColor),
+              title: Text(
+                'Terms & Conditions',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
             ),
             Divider(),
 

@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:education_app/resources/exports.dart';
-
+import 'package:education_app/ui/view/auth_screen/reset_password_screen.dart';
+import 'package:education_app/ui/view/auth_screen/enter_otp_and_reset_password_screen.dart';
+import 'package:education_app/ui/view/auth_screen/terms_view.dart';
 
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -14,6 +16,16 @@ class Routes {
 
       case RoutesName.signup:
         return MaterialPageRoute(builder: (context) => SignupScreen());
+
+      case RoutesName.resetPassword:
+        return MaterialPageRoute(builder: (context) => ResetPasswordScreen());
+
+      case RoutesName.enterOtpAndResetPassword:
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final email = args['email'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (context) => EnterOtpAndResetPasswordScreen(email: email),
+        );
 
       case RoutesName.home:
         return MaterialPageRoute(builder: (context) => HomeScreen());
@@ -71,13 +83,13 @@ class Routes {
                   correctAns: correctAnswer,
                   incorrectAns: incorrectAnswer,
                   totalQues: totalQuestion,
-              questions: questions,
+                  questions: questions,
                 ));
 
       case RoutesName.chapterScreen:
         return MaterialPageRoute(builder: (context) => ChaptersScreen());
 
-     case RoutesName.myNoteBookScreen:
+      case RoutesName.myNoteBookScreen:
         return MaterialPageRoute(builder: (context) => MyNoteBook());
 
       case RoutesName.questionScreen:
@@ -108,6 +120,9 @@ class Routes {
             questionMode: questionMode,
           ),
         );
+
+      case '/terms':
+        return MaterialPageRoute(builder: (context) => const TermsView());
 
       default:
         return MaterialPageRoute(builder: (_) {

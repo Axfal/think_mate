@@ -2,6 +2,7 @@
 
 import 'package:education_app/resources/exports.dart';
 import '../../model/hive_database_model/user_session_model.dart';
+import '../../utils/toast_helper.dart';
 
 class AuthProvider with ChangeNotifier {
   final _authRepository = AuthRepository();
@@ -84,37 +85,22 @@ class AuthProvider with ChangeNotifier {
           await userBox.put('session', _userSession!);
 
           // Navigate to home
-          Navigator.pushReplacementNamed(context, RoutesName.home);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('SignIn Successfully'),
-                backgroundColor: AppColors.primaryColor),
-          );
+          if (context.mounted) {
+            Navigator.pushReplacementNamed(context, RoutesName.home);
+          }
         } else {
           if (kDebugMode) {
             print(response);
           }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    'SignIn Failed: ${response['message'] ?? "$response"}'),
-                backgroundColor: Colors.red),
-          );
+          ToastHelper.showError(response['message'] ??
+              response['error'] ??
+              response.values.toString());
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Invalid API response'),
-              backgroundColor: Colors.red),
-        );
+        ToastHelper.showError('Invalid API response');
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error: ${error.toString()}'),
-            backgroundColor: Colors.red),
-      );
+      ToastHelper.showError(error.toString());
     } finally {
       _loading = false;
       notifyListeners();
@@ -142,6 +128,26 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  void setUserType(String subscriptionName, String userType) {
+    if (_userSession != null) {
+      _userSession = UserSessionModel(
+        userId: _userSession!.userId,
+        userType: userType,
+        testId: _userSession!.testId,
+        subscriptionName: subscriptionName,
+      );
+
+      Hive.openBox<UserSessionModel>('userBox').then((box) {
+        box.put('session', _userSession!);
+      });
+
+      notifyListeners();
+    } else {
+      if (kDebugMode) {
+        print("User session is null, cannot set userType.");
+      }
+    }
+  }
 
   Future<void> loadUserSession() async {
     var userBox = await Hive.openBox<UserSessionModel>('userBox');
@@ -160,35 +166,151 @@ class AuthProvider with ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
+      if (kDebugMode) {
+        print("Signing up with data: $data");
+      }
       final response = await _authRepository.signUpApi(data);
+      if (kDebugMode) {
+        print("Signup API response: $response");
+      }
       if (response != null && response is Map<String, dynamic>) {
-        if (response.containsKey('success') && response['success'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('SignUp Successfully'),
-                backgroundColor: AppColors.primaryColor),
-          );
+        if (response['success'] != null) {
+          ToastHelper.showSuccess(response['success']);
+          if (context.mounted) {
+            if (kDebugMode) {
+              print("Signup successful, navigating to login screen");
+            }
+            // Clear all previous screens and navigate to login
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              RoutesName.login,
+              (route) => false,
+            );
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(response.values
-                    .toString()), //'Signup Failed: ${response['error']}'),
-                backgroundColor: AppColors.primaryColor),
-          );
+          if (kDebugMode) {
+            print(
+                "API error: ${response['message'] ?? response['error'] ?? response}");
+          }
+          ToastHelper.showError(response['message'] ??
+              response['error'] ??
+              response.values.toString());
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Invalid API Response Format'),
-              backgroundColor: Colors.red),
-        );
+        if (kDebugMode) {
+          print("Invalid API response format: $response");
+        }
+        ToastHelper.showError('Invalid API Response Format');
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Error: ${error.toString()}'),
-            backgroundColor: Colors.red),
-      );
+      if (kDebugMode) {
+        print("Error in signUp: $error");
+      }
+      ToastHelper.showError(error.toString());
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> requestResetPassword(context, dynamic data) async {
+    _loading = true;
+    notifyListeners();
+    try {
+      if (kDebugMode) {
+        print("Requesting password reset for email: ${data['email']}");
+      }
+      final response = await _authRepository.requestResetPasswordApi(data);
+      if (kDebugMode) {
+        print("Password reset API response: $response");
+      }
+      if (response != null && response is Map<String, dynamic>) {
+        // Check if the response contains a success message
+        if (response['success'] != null) {
+          ToastHelper.showSuccess(response['success']);
+          if (context.mounted) {
+            if (kDebugMode) {
+              print(
+                  "Navigating to EnterOtpAndResetPasswordScreen with email: ${data['email']}");
+            }
+            // Clear the current screen and navigate to OTP screen
+            Navigator.pushReplacementNamed(
+              context,
+              RoutesName.enterOtpAndResetPassword,
+              arguments: {'email': data['email']},
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            print(
+                "API error: ${response['message'] ?? response['error'] ?? response}");
+          }
+          ToastHelper.showError(response['message'] ??
+              response['error'] ??
+              response.values.toString());
+        }
+      } else {
+        if (kDebugMode) {
+          print("Invalid API response format: $response");
+        }
+        ToastHelper.showError('Invalid API Response Format');
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        print("Error in requestResetPassword: $error");
+      }
+      ToastHelper.showError(error.toString());
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetPassword(context, dynamic data) async {
+    _loading = true;
+    notifyListeners();
+    try {
+      if (kDebugMode) {
+        print("Resetting password with data: $data");
+      }
+      final response = await _authRepository.resetPasswordApi(data);
+      if (kDebugMode) {
+        print("Reset password API response: $response");
+      }
+      if (response != null && response is Map<String, dynamic>) {
+        if (response['success'] != null) {
+          ToastHelper.showSuccess(response['success']);
+          if (context.mounted) {
+            if (kDebugMode) {
+              print("Password reset successful, navigating to login screen");
+            }
+            // Clear all previous screens and navigate to login
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              RoutesName.login,
+              (route) => false,
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            print(
+                "API error: ${response['message'] ?? response['error'] ?? response}");
+          }
+          ToastHelper.showError(response['message'] ??
+              response['error'] ??
+              response.values.toString());
+        }
+      } else {
+        if (kDebugMode) {
+          print("Invalid API response format: $response");
+        }
+        ToastHelper.showError('Invalid API Response Format');
+      }
+    } catch (error) {
+      if (kDebugMode) {
+        print("Error in resetPassword: $error");
+      }
+      ToastHelper.showError(error.toString());
     } finally {
       _loading = false;
       notifyListeners();

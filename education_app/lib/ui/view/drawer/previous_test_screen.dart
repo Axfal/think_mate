@@ -67,56 +67,112 @@ class _PreviousTestScreenState extends State<PreviousTestScreen> {
       appBar: AppBar(
         title: Text(
           "Previous Tests Report",
-          style: AppTextStyle.appBarText,
+          style: AppTextStyle.heading3.copyWith(
+            color: AppColors.whiteColor,
+          ),
         ),
-        backgroundColor: AppColors.primaryColor,
+        centerTitle: true,
+        backgroundColor: AppColors.deepPurple,
+        elevation: 0,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
         ),
       ),
-      body: provider.isLoading
-          ? Center(
-              child: CupertinoActivityIndicator(),
-            )
-          : testData.isEmpty
-              ? Center(child: Text("No test data available"))
-              : Column(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.deepPurple.withOpacity(0.1),
+              AppColors.lightPurple.withOpacity(0.05),
+            ],
+          ),
+        ),
+        child: provider.isLoading
+            ? Center(child: CupertinoActivityIndicator())
+            : testData.isEmpty
+                ? Center(
+                    child: Text(
+                      "No previous test data available",
+                      style: AppTextStyle.bodyText1.copyWith(
+                        color: AppColors.darkText,
+                      ),
+                    ),
+                  )
+                : SingleChildScrollView(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
+                            scrollDirection: Axis.horizontal,
                             child: DataTable(
-                              headingRowColor:
-                                  MaterialStateProperty.resolveWith(
-                                      (states) => AppColors.primaryColor),
-                              border: TableBorder.all(
-                                  color: Colors.grey.shade300, width: 1),
+                              headingRowColor: MaterialStateProperty.all(
+                                AppColors.deepPurple.withOpacity(0.1),
+                              ),
                               columns: [
                                 DataColumn(
-                                    label: Text("Date",
-                                        style: AppTextStyle.drawerText)),
+                                  label: Text("Date",
+                                      style: AppTextStyle.bodyText1.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                ),
                                 DataColumn(
-                                    label: Text("Subject",
-                                        style: AppTextStyle.drawerText)),
+                                  label: Text("Subject",
+                                      style: AppTextStyle.bodyText1.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                ),
                                 DataColumn(
-                                    label: Text("Correct",
-                                        style: AppTextStyle.drawerText)),
+                                  label: Text("Correct",
+                                      style: AppTextStyle.bodyText1.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                ),
                                 DataColumn(
-                                    label: Text("Incorrect",
-                                        style: AppTextStyle.drawerText)),
+                                  label: Text("Incorrect",
+                                      style: AppTextStyle.bodyText1.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                ),
                                 DataColumn(
-                                    label: Text("Percentage",
-                                        style: AppTextStyle.drawerText)),
+                                  label: Text("Percentage",
+                                      style: AppTextStyle.bodyText1.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                ),
                                 DataColumn(
-                                    label: Text("Status",
-                                        style: AppTextStyle.drawerText)),
+                                  label: Text("Status",
+                                      style: AppTextStyle.bodyText1.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                ),
                               ],
                               rows: testData
                                   .map((data) => _buildRow(data))
@@ -124,26 +180,42 @@ class _PreviousTestScreenState extends State<PreviousTestScreen> {
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+      ),
     );
   }
 
   DataRow _buildRow(List<String> data) {
     return DataRow(
       cells: [
-        DataCell(Text(data[0])),
-        DataCell(Text(data[1])),
-        DataCell(Text(data[2])),
-        DataCell(Text(data[3])),
-        DataCell(Text(data[4])),
+        DataCell(Text(data[0],
+            style: AppTextStyle.bodyText2.copyWith(
+              color: AppColors.darkText,
+            ))),
+        DataCell(Text(data[1],
+            style: AppTextStyle.bodyText2.copyWith(
+              color: AppColors.darkText,
+            ))),
+        DataCell(Text(data[2],
+            style: AppTextStyle.bodyText2.copyWith(
+              color: AppColors.darkText,
+            ))),
+        DataCell(Text(data[3],
+            style: AppTextStyle.bodyText2.copyWith(
+              color: AppColors.darkText,
+            ))),
+        DataCell(Text(data[4],
+            style: AppTextStyle.bodyText2.copyWith(
+              color: AppColors.darkText,
+            ))),
         DataCell(Text(
           data[5],
-          style: TextStyle(
-            color: data[5] == "Pass" ? Colors.green : Colors.red,
-            fontWeight: FontWeight.bold,
+          style: AppTextStyle.bodyText2.copyWith(
+            color:
+                data[5] == "Pass" ? AppColors.successColor : AppColors.redColor,
+            fontWeight: FontWeight.w600,
           ),
         )),
       ],

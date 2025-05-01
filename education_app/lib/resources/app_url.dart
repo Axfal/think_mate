@@ -8,7 +8,8 @@ class AppUrl {
   static var fetchQuestions = '$baseUrl/user_test_data.php';
   static var feedback = '$baseUrl/feedback.php';
   static var createMockTest = '$baseUrl/MockTestGenerator.php';
-  static var getMockTestQuestionCount = '$baseUrl/MockTestGeneratorQuestionCount.php';
+  static var getMockTestQuestionCount =
+      '$baseUrl/MockTestGeneratorQuestionCount.php';
   static var mockTestFeedback = '$baseUrl/user_test_feedback.php';
   static var postTestResult = '$baseUrl/submit_result.php';
   static var getTestResult = '$baseUrl/get_test_result.php?user_id=';
@@ -30,5 +31,7 @@ class AppUrl {
   static var getSubscriptionHistory = "$baseUrl/payments_history.php?user_id=";
   //https://nomore.com.pk/MDCAT_ECAT_Education/API/payments_history.php?user_id=11
   static var validateUserForMockTest = "$baseUrl/free_user_test_validate.php";
-
+  static var requestResetPassword = '$baseUrl/request_reset_password.php';
+  static var resetPassword = '$baseUrl/reset_password.php';
+  static var checkSubscriptionPlan = '$baseUrl/get_user_subscription_info.php';
 }

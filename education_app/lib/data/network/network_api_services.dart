@@ -41,9 +41,9 @@ class NetworkApiServices extends BaseApiServices {
       // Separate MultipartFile(s) from fields
       data.forEach((key, value) {
         if (value is http.MultipartFile) {
-          request.files.add(value); // ✅ Correct way to add file
+          request.files.add(value);
         } else {
-          request.fields[key] = value.toString(); // ✅ Add other fields
+          request.fields[key] = value.toString();
         }
       });
 
@@ -88,7 +88,7 @@ class NetworkApiServices extends BaseApiServices {
             },
             body: jsonEncode(data),
           )
-          .timeout(const Duration(seconds: 20)); // Increased timeout
+          .timeout(const Duration(seconds: 20));
 
       if (kDebugMode) {
         print("Response Status: ${response.statusCode}");

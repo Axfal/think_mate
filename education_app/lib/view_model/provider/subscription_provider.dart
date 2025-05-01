@@ -1,5 +1,8 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
+import 'package:education_app/model/check_user_subscription_plan_model.dart';
 import 'package:education_app/model/post_subscription_model.dart';
 import 'package:education_app/model/subscription_histroy_model.dart';
 import 'package:education_app/resources/exports.dart';
@@ -17,10 +20,39 @@ class SubscriptionProvider with ChangeNotifier {
   SubscriptionHistoryModel? get subscriptionHistoryModel =>
       _subscriptionHistoryModel;
 
+  CheckUserSubscriptionPlanModel? _checkUserSubscriptionPlanModel;
+  CheckUserSubscriptionPlanModel? get checkUserSubscriptionPlanModel =>
+      _checkUserSubscriptionPlanModel;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   bool get hasSubscription => _getSubscriptionModel != null;
+
+  Future<void> getUserSubscriptionPlan(context) async{
+    final provider = Provider.of<AuthProvider>(context, listen: false);
+    await provider.loadUserSession();
+    final userId = provider.userSession?.userId;
+    if (userId == null) {
+      print("User ID is null. Cannot fetch subscription plan.");
+      return;
+    }
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await _subscription.checkSubscriptionPlan(userId: userId);
+      if(response != null && response["success"] == true){
+        _checkUserSubscriptionPlanModel = CheckUserSubscriptionPlanModel.fromJson(response);
+      }
+
+    }catch(e){
+      print("the error occur while fetching user subscription plan: $e");
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
 
   Future<void> getSubscription() async {
     _isLoading = true;
@@ -44,13 +76,15 @@ class SubscriptionProvider with ChangeNotifier {
     final provider = Provider.of<AuthProvider>(context, listen: false);
     await provider.loadUserSession();
     final userId = provider.userSession!.userId;
+    print("asjdlka ===?> $userId");
     _isLoading = true;
     notifyListeners();
     try {
       final response = await _subscription.getSubscriptionHistory(userId);
       if (response.success == true && response.paymentHistory != null) {
         _subscriptionHistoryModel = response;
-        if(_subscriptionHistoryModel!.paymentHistory!.last.status == "approved"){
+        if (_subscriptionHistoryModel!.paymentHistory!.last.status ==
+            "approved") {
           provider.setUserTypeToPremium();
         }
         notifyListeners();

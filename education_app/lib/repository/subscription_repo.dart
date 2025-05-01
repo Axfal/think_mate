@@ -29,8 +29,9 @@ class SubscriptionRepo {
   /// Fetch subscription plans (GET)
   Future<SubscriptionHistoryModel> getSubscriptionHistory(int userId) async {
     try {
-      final response =
-      await _apiServices.getGetApiResponse("${AppUrl.getSubscriptionHistory}$userId");
+      print("the user id in repo: $userId");
+      final response = await _apiServices
+          .getGetApiResponse("${AppUrl.getSubscriptionHistory}$userId");
 
       if (kDebugMode) {
         print("GET Subscription Response: $response");
@@ -45,7 +46,7 @@ class SubscriptionRepo {
     }
   }
 
-    /// Post subscription data (multipart/form-data)
+  /// Post subscription data (multipart/form-data)
   Future<PostSubscriptionModel> postSubscription({
     required String userId,
     required String testId,
@@ -76,6 +77,31 @@ class SubscriptionRepo {
       }
 
       return PostSubscriptionModel.fromJson(response);
+    } catch (error) {
+      if (kDebugMode) {
+        print("POST Subscription Error: $error");
+      }
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> checkSubscriptionPlan({
+    required int userId,
+  }) async {
+    try {
+      final data = <String, dynamic>{'user_id': userId};
+
+      // Send the user ID to check the user subscription plan
+      final response = await _apiServices.getPostApiResponse(
+        AppUrl.checkSubscriptionPlan,
+        data,
+      );
+
+      if (kDebugMode) {
+        print("POST Subscription Raw Response: $response");
+      }
+
+      return response;
     } catch (error) {
       if (kDebugMode) {
         print("POST Subscription Error: $error");

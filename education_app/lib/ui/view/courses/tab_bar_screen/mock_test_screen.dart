@@ -42,7 +42,7 @@ class MockTestScreenState extends State<MockTestScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                'You’ve completed the demo test. Buy a subscription to continue.',
+                'You have completed the demo test. Buy a subscription to continue.',
               ),
             ),
           );
@@ -163,248 +163,271 @@ class MockTestScreenState extends State<MockTestScreen> {
                               child: Card(
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: ListView(
-                                    children: [
-                                      Text(
-                                        "${provider.currentIndex + 1}) ${provider.questions!.questions[provider.currentIndex].question}",
-                                        style: AppTextStyle.questionText,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        AppColors.whiteColor,
+                                        AppColors.backgroundColor.withOpacity(0.5),
+                                      ],
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.purpleShadow,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
                                       ),
-                                      SizedBox(height: 10),
-                                      ListTile(
-                                          title: Text(
-                                              removeHtmlTags(currentQuestion.option1)
-                                                  .replaceAll(RegExp(r'[a-d]\)'), '')
-                                                  .trim(),
-                                              style: AppTextStyle.answerText),
-                                          leading: Radio<int>(
-                                            value: 0,
-                                            groupValue: provider.isTestStarted?
-                                            provider.selectedOptions[provider.currentIndex]
-                                                : null,
-                                            onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
-                                                ? (value) {
-                                              if (value != null) {
-                                                provider.onChangeRadio(provider.currentIndex, value);
-                                              }
-                                            }
-                                                : null
-                                          ),
-
-                                          trailing: provider.isSubmitted[provider.currentIndex] == false
-                                              ? null : provider.isTrue![provider.currentIndex]
-                                              && 0 == provider.selectedOptions[provider.currentIndex]?
-                                          Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.correctAnswerOptionIndex![provider.currentIndex] == 0? Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.selectedOptions[provider.currentIndex] != 0? null: Icon(Icons.close, color: Colors.red, weight: 100)
-                                      ),
-                                      ListTile(
-                                          title: Text(
-                                              removeHtmlTags(currentQuestion.option2)
-                                                  .replaceAll(RegExp(r'[a-d]\)'), '')
-                                                  .trim(),
-                                              style: AppTextStyle.answerText),
-                                          leading: Radio<int>(
-                                            value: 1,
-                                              groupValue: provider.isTestStarted
-                                                  ? provider.selectedOptions[provider.currentIndex]
-                                                  : null,
-                                              onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
-                                                  ? (value) {
-                                                if (value != null) {
-                                                  provider.onChangeRadio(provider.currentIndex, value);
-                                                }
-                                              }
-                                                  : null
-                                          ),
-                                          trailing: provider.isSubmitted[provider.currentIndex] == false
-                                              ? null : provider.isTrue![provider.currentIndex]
-                                              && 1 == provider.selectedOptions[provider.currentIndex]?
-                                          Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.correctAnswerOptionIndex![provider.currentIndex] == 1? Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.selectedOptions[provider.currentIndex] != 1? null: Icon(Icons.close, color: Colors.red, weight: 100)
-                                      ),
-                                      ListTile(
-                                          title: Text(
-                                              removeHtmlTags(currentQuestion.option3)
-                                                  .replaceAll(RegExp(r'[a-d]\)'), '')
-                                                  .trim(),
-                                              style: AppTextStyle.answerText),
-                                          leading: Radio<int>(
-                                            value: 2, // Current option value
-                                              groupValue: provider.isTestStarted
-                                                  ? provider.selectedOptions[provider.currentIndex]
-                                                  : null,
-                                              onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
-                                                  ? (value) {
-                                                if (value != null) {
-                                                  provider.onChangeRadio(provider.currentIndex, value);
-                                                }
-                                              }
-                                                  : null
-                                          ),
-                                          trailing: provider.isSubmitted[provider.currentIndex] == false
-                                              ? null : provider.isTrue![provider.currentIndex]
-                                              && 2 == provider.selectedOptions[provider.currentIndex]?
-                                          Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.correctAnswerOptionIndex![provider.currentIndex] == 2? Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.selectedOptions[provider.currentIndex] != 2? null: Icon(Icons.close, color: Colors.red, weight: 100)
-                                      ),
-                                      ListTile(
-                                          title: Text(
-                                              removeHtmlTags(currentQuestion.option4)
-                                                  .replaceAll(RegExp(r'[a-d]\)'), '')
-                                                  .trim(),
-                                              style: AppTextStyle.answerText),
-                                          leading: Radio<int>(
-                                            value: 3,
-                                              groupValue: provider.isTestStarted
-                                                  ? provider.selectedOptions[provider.currentIndex]
-                                                  : null,
-                                              onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
-                                                  ? (value) {
-                                                if (value != null) {
-                                                  provider.onChangeRadio(provider.currentIndex, value);
-                                                }
-                                              }
-                                                  : null
-                                          ),
-                                          trailing: provider.isSubmitted[provider.currentIndex] == false
-                                              ? null : provider.isTrue![provider.currentIndex]
-                                              && 3 == provider.selectedOptions[provider.currentIndex]?
-                                          Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.correctAnswerOptionIndex![provider.currentIndex] == 3? Icon(Icons.check, color: Colors.green, weight: 100):
-                                          provider.selectedOptions[provider.currentIndex] != 3? null: Icon(Icons.close, color: Colors.red, weight: 100)
-                                      ),
-                                      SizedBox(height: 10),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: provider.isPrevEnabled
-                                                ? provider.goToPrevious
-                                                : null,
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              backgroundColor:
-                                                  provider.isPrevEnabled
-                                                      ? AppColors.primaryColor
-                                                      : Colors.grey,
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 20, vertical: 15),
-                                              textStyle:
-                                                  TextStyle(fontSize: 18),
-                                            ),
-                                            child: Icon(Icons.arrow_back_ios,
-                                                color: provider.isPrevEnabled
-                                                    ? Colors.white
-                                                    : Colors.black38),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: provider.isTestStarted ==
-                                                        false ||
-                                                    provider.isSubmitted[
-                                                        provider.currentIndex]
-                                                ? null
-                                                : () => provider.submitAnswer(
-                                                    context,
-                                                    provider.currentIndex),
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              backgroundColor:
-                                                  AppColors.primaryColor,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 15),
-                                              textStyle:
-                                                  const TextStyle(fontSize: 18),
-                                            ),
-                                            child: const Text(
-                                              'Submit',
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: provider.isNxtEnabled
-                                                ? provider.goToNext
-                                                : null,
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              backgroundColor:
-                                                  provider.isNxtEnabled
-                                                      ? AppColors.primaryColor
-                                                      : Colors.grey,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 15),
-                                              textStyle:
-                                                  const TextStyle(fontSize: 18),
-                                            ),
-                                            child: Icon(Icons.arrow_forward_ios,
-                                                color: provider.isNxtEnabled
-                                                    ? Colors.white
-                                                    : Colors.black38),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 20),
-                                      ElevatedButton(
-                                        onPressed: () => showFeedbackDialog(
-                                            context,
-                                            authProvider.userSession!.userId,
-                                            authProvider.userSession!.testId,
-                                            provider
-                                                .questionList[
-                                                    provider.currentIndex]
-                                                .id),
-                                        style: ElevatedButton.styleFrom(
-                                          foregroundColor: Colors.white,
-                                          backgroundColor:
-                                              AppColors.primaryColor,
-                                          padding: EdgeInsets.symmetric(
-                                              // horizontal: 50,
-                                              vertical: 15),
-                                          textStyle: TextStyle(fontSize: 18),
-                                        ),
-                                        child: Text('Feedback'),
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text('Show Explanation',
-                                              style: AppTextStyle.questionText),
-                                          Switch(
-                                            activeColor: AppColors.primaryColor,
-                                              value: provider.showExplanation[
-                                                  provider.currentIndex],
-                                              onChanged: (value) => provider
-                                                  .toggleExplanationSwitch(
-                                                      value)),
-                                        ],
-                                      ),
-                                      if (provider.showExplanation[
-                                              provider.currentIndex] &&
-                                          provider.isSubmitted[
-                                              provider.currentIndex])
-                                        Text(
-                                          provider
-                                              .questions!
-                                              .questions[provider.currentIndex]
-                                              .detail,
-                                          style: AppTextStyle.answerText,
-                                        ),
                                     ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: ListView(
+                                      children: [
+                                        Text(
+                                          "${provider.currentIndex + 1}) ${provider.questions!.questions[provider.currentIndex].question}",
+                                          style: AppTextStyle.questionText.copyWith(
+                                            color: AppColors.darkText,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        ListTile(
+                                            title: Text(
+                                                removeHtmlTags(currentQuestion.option1)
+                                                    .replaceAll(RegExp(r'[a-d]\)'), '')
+                                                    .trim(),
+                                                style: AppTextStyle.answerText),
+                                            leading: Radio<int>(
+                                              value: 0,
+                                              groupValue: provider.isTestStarted?
+                                              provider.selectedOptions[provider.currentIndex]
+                                                  : null,
+                                              onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
+                                                  ? (value) {
+                                                if (value != null) {
+                                                  provider.onChangeRadio(provider.currentIndex, value);
+                                                }
+                                              }
+                                                  : null
+                                            ),
+
+                                            trailing: provider.isSubmitted[provider.currentIndex] == false
+                                                ? null : provider.isTrue![provider.currentIndex]
+                                                && 0 == provider.selectedOptions[provider.currentIndex]?
+                                            Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.correctAnswerOptionIndex![provider.currentIndex] == 0? Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.selectedOptions[provider.currentIndex] != 0? null: Icon(Icons.close, color: Colors.red, weight: 100)
+                                        ),
+                                        ListTile(
+                                            title: Text(
+                                                removeHtmlTags(currentQuestion.option2)
+                                                    .replaceAll(RegExp(r'[a-d]\)'), '')
+                                                    .trim(),
+                                                style: AppTextStyle.answerText),
+                                            leading: Radio<int>(
+                                              value: 1,
+                                                groupValue: provider.isTestStarted
+                                                    ? provider.selectedOptions[provider.currentIndex]
+                                                    : null,
+                                                onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
+                                                    ? (value) {
+                                                  if (value != null) {
+                                                    provider.onChangeRadio(provider.currentIndex, value);
+                                                  }
+                                                }
+                                                    : null
+                                            ),
+                                            trailing: provider.isSubmitted[provider.currentIndex] == false
+                                                ? null : provider.isTrue![provider.currentIndex]
+                                                && 1 == provider.selectedOptions[provider.currentIndex]?
+                                            Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.correctAnswerOptionIndex![provider.currentIndex] == 1? Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.selectedOptions[provider.currentIndex] != 1? null: Icon(Icons.close, color: Colors.red, weight: 100)
+                                        ),
+                                        ListTile(
+                                            title: Text(
+                                                removeHtmlTags(currentQuestion.option3)
+                                                    .replaceAll(RegExp(r'[a-d]\)'), '')
+                                                    .trim(),
+                                                style: AppTextStyle.answerText),
+                                            leading: Radio<int>(
+                                              value: 2, // Current option value
+                                                groupValue: provider.isTestStarted
+                                                    ? provider.selectedOptions[provider.currentIndex]
+                                                    : null,
+                                                onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
+                                                    ? (value) {
+                                                  if (value != null) {
+                                                    provider.onChangeRadio(provider.currentIndex, value);
+                                                  }
+                                                }
+                                                    : null
+                                            ),
+                                            trailing: provider.isSubmitted[provider.currentIndex] == false
+                                                ? null : provider.isTrue![provider.currentIndex]
+                                                && 2 == provider.selectedOptions[provider.currentIndex]?
+                                            Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.correctAnswerOptionIndex![provider.currentIndex] == 2? Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.selectedOptions[provider.currentIndex] != 2? null: Icon(Icons.close, color: Colors.red, weight: 100)
+                                        ),
+                                        ListTile(
+                                            title: Text(
+                                                removeHtmlTags(currentQuestion.option4)
+                                                    .replaceAll(RegExp(r'[a-d]\)'), '')
+                                                    .trim(),
+                                                style: AppTextStyle.answerText),
+                                            leading: Radio<int>(
+                                              value: 3,
+                                                groupValue: provider.isTestStarted
+                                                    ? provider.selectedOptions[provider.currentIndex]
+                                                    : null,
+                                                onChanged: (provider.isTestStarted && !provider.isSubmitted[provider.currentIndex])
+                                                    ? (value) {
+                                                  if (value != null) {
+                                                    provider.onChangeRadio(provider.currentIndex, value);
+                                                  }
+                                                }
+                                                    : null
+                                            ),
+                                            trailing: provider.isSubmitted[provider.currentIndex] == false
+                                                ? null : provider.isTrue![provider.currentIndex]
+                                                && 3 == provider.selectedOptions[provider.currentIndex]?
+                                            Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.correctAnswerOptionIndex![provider.currentIndex] == 3? Icon(Icons.check, color: Colors.green, weight: 100):
+                                            provider.selectedOptions[provider.currentIndex] != 3? null: Icon(Icons.close, color: Colors.red, weight: 100)
+                                        ),
+                                        SizedBox(height: 10),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: provider.isPrevEnabled
+                                                  ? provider.goToPrevious
+                                                  : null,
+                                              style: ElevatedButton.styleFrom(
+                                                foregroundColor: Colors.white,
+                                                backgroundColor: provider.isPrevEnabled
+                                                    ? AppColors.deepPurple
+                                                    : AppColors.lightPurple.withOpacity(0.3),
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 20, vertical: 15),
+                                                elevation: provider.isPrevEnabled ? 4 : 0,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                              ),
+                                              child: Icon(Icons.arrow_back_ios,
+                                                  color: provider.isPrevEnabled
+                                                      ? Colors.white
+                                                      : AppColors.darkText.withOpacity(0.3)),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: provider.isTestStarted == false ||
+                                                      provider.isSubmitted[
+                                                          provider.currentIndex]
+                                                  ? null
+                                                  : () => provider.submitAnswer(
+                                                      context, provider.currentIndex),
+                                              style: ElevatedButton.styleFrom(
+                                                foregroundColor: Colors.white,
+                                                backgroundColor: AppColors.deepPurple,
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 20, vertical: 15),
+                                                elevation: 4,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Submit',
+                                                style: AppTextStyle.bodyText1.copyWith(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: provider.isNxtEnabled
+                                                  ? provider.goToNext
+                                                  : null,
+                                              style: ElevatedButton.styleFrom(
+                                                foregroundColor: Colors.white,
+                                                backgroundColor: provider.isNxtEnabled
+                                                    ? AppColors.deepPurple
+                                                    : AppColors.lightPurple.withOpacity(0.3),
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 20, vertical: 15),
+                                                elevation: provider.isNxtEnabled ? 4 : 0,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                              ),
+                                              child: Icon(Icons.arrow_forward_ios,
+                                                  color: provider.isNxtEnabled
+                                                      ? Colors.white
+                                                      : AppColors.darkText.withOpacity(0.3)),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 20),
+                                        ElevatedButton(
+                                          onPressed: () => showFeedbackDialog(
+                                              context,
+                                              authProvider.userSession!.userId,
+                                              authProvider.userSession!.testId,
+                                              provider
+                                                  .questionList[
+                                                      provider.currentIndex]
+                                                  .id),
+                                          style: ElevatedButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            backgroundColor:
+                                                AppColors.primaryColor,
+                                            padding: EdgeInsets.symmetric(
+                                                // horizontal: 50,
+                                                vertical: 15),
+                                            textStyle: TextStyle(fontSize: 18),
+                                          ),
+                                          child: Text('Feedback'),
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text('Show Explanation',
+                                                style: AppTextStyle.questionText),
+                                            Switch(
+                                              activeColor: AppColors.primaryColor,
+                                                value: provider.showExplanation[
+                                                    provider.currentIndex],
+                                                onChanged: (value) => provider
+                                                    .toggleExplanationSwitch(
+                                                        value)),
+                                          ],
+                                        ),
+                                        if (provider.showExplanation[
+                                                provider.currentIndex] &&
+                                            provider.isSubmitted[
+                                                provider.currentIndex])
+                                          Text(
+                                            provider
+                                                .questions!
+                                                .questions[provider.currentIndex]
+                                                .detail,
+                                            style: AppTextStyle.answerText,
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

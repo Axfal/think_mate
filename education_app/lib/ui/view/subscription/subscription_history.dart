@@ -1,8 +1,13 @@
 import 'package:education_app/resources/exports.dart';
+import 'package:education_app/ui/widgets/payment_history_card.dart';
+import 'package:education_app/ui/widgets/payment_history_shimmer.dart';
 import 'package:education_app/view_model/provider/subscription_provider.dart';
-import 'package:shimmer/shimmer.dart';
-import '../../../model/subscription_histroy_model.dart';
+import 'package:education_app/model/subscription_histroy_model.dart';
 
+/// A screen that displays the user's subscription payment history.
+///
+/// This screen shows a list of all payments made by the user for subscriptions,
+/// including payment details, status, and the ability to view payment receipts.
 class PaymentHistoryScreen extends StatefulWidget {
   const PaymentHistoryScreen({super.key});
 
@@ -14,235 +19,96 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    getData();
+    _loadPaymentHistory();
   }
 
-  void getData() async {
+  void _loadPaymentHistory() async {
     final provider = Provider.of<SubscriptionProvider>(context, listen: false);
     await provider.getSubscriptionHistory(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<SubscriptionProvider>(context);
-    final isLoading = provider.isLoading;
-    final paymentHistory =
-        provider.subscriptionHistoryModel?.paymentHistory ?? [];
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Subscription History", style: AppTextStyle.appBarText),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
-        centerTitle: true,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-        ),
-      ),
-      body: isLoading
-          ? _buildShimmerList()
-          : paymentHistory.isEmpty
-              ? const Center(child: Text("No payment history found"))
-              : ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: paymentHistory.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final history = paymentHistory[index];
-                    return _buildHistoryCard(context, history);
-                  },
-                ),
+      appBar: _buildAppBar(),
+      body: _buildBody(),
     );
   }
 
-  Widget _buildHistoryCard(BuildContext context, PaymentHistory history) {
-    final status = history.status ?? 'pending';
-    final isApproved = status.toLowerCase() == 'approved';
-    final imageUrl =
-        "https://nomore.com.pk/MDCAT_ECAT_Education/API/${history.paymentImage}";
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text(
+        "Subscription History",
+        style: AppTextStyle.heading3.copyWith(
+          color: AppColors.whiteColor,
+        ),
+      ),
+      backgroundColor: AppColors.deepPurple,
+      foregroundColor: AppColors.whiteColor,
+      centerTitle: true,
+      elevation: 0,
+      leading: IconButton(
+        onPressed: () => Navigator.pop(context),
+        icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
+      ),
+    );
+  }
 
-    return GestureDetector(
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (_) => Dialog(
-            insetPadding: const EdgeInsets.all(16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.75,
-                maxWidth: MediaQuery.of(context).size.width * 0.95,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Payment Image',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: InteractiveViewer(
-                      panEnabled: true,
-                      minScale: 0.5,
-                      maxScale: 5,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder: (context, _, __) =>
-                              const Icon(Icons.image_not_supported, size: 80),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: AppColors.primaryColor,
-                    ),
-                    child: const Text("Close"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+  Widget _buildBody() {
+    return Consumer<SubscriptionProvider>(
+      builder: (context, provider, _) {
+        if (provider.isLoading) {
+          return const PaymentHistoryShimmer();
+        }
+
+        final paymentHistory =
+            provider.subscriptionHistoryModel?.paymentHistory ?? [];
+
+        if (paymentHistory.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return _buildPaymentList(paymentHistory);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(16),
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              imageUrl,
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (context, _, __) =>
-                  const Icon(Icons.image_not_supported, size: 60),
-            ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.history,
+            size: 64,
+            color: AppColors.greyText,
           ),
-          title: Text(
-            "${history.subscriptionName ?? "Subscription"} - ${history.testName ?? "Test"}",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          const SizedBox(height: 16),
+          Text(
+            "No payment history found",
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.greyText,
+                ),
           ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text("Date: ${history.paymentDate ?? "--"}"),
-              const SizedBox(height: 4),
-              Text("Amount: Rs. ${history.amount ?? "0"}"),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            "Your subscription payments will appear here",
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.greyText,
+                ),
           ),
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color:
-                  isApproved ? Colors.green.shade100 : Colors.orange.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              status.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isApproved ? Colors.green : Colors.orange,
-              ),
-            ),
-          ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildShimmerList() {
+  Widget _buildPaymentList(List<PaymentHistory> paymentHistory) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemCount: 6,
+      itemCount: paymentHistory.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: ShimmerWidget.rectangular(
-                width: 60, height: 60, borderRadius: 8),
-            title: ShimmerWidget.rectangular(height: 16, width: 200),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                SizedBox(height: 8),
-                ShimmerWidget.rectangular(height: 14, width: 120),
-                SizedBox(height: 4),
-                ShimmerWidget.rectangular(height: 14, width: 100),
-              ],
-            ),
-            trailing: ShimmerWidget.rectangular(
-                width: 60, height: 20, borderRadius: 12),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class ShimmerWidget extends StatelessWidget {
-  final double width;
-  final double height;
-  final double borderRadius;
-
-  const ShimmerWidget.rectangular({
-    super.key,
-    required this.width,
-    required this.height,
-    this.borderRadius = 8,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
+      itemBuilder: (_, index) => PaymentHistoryCard(
+        history: paymentHistory[index],
       ),
     );
   }

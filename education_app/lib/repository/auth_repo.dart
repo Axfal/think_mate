@@ -2,7 +2,6 @@
 
 import 'package:education_app/resources/exports.dart';
 
-
 class AuthRepository {
   final BaseApiServices _apiServices = NetworkApiServices();
 
@@ -54,5 +53,32 @@ class AuthRepository {
     }
   }
 
+  Future<dynamic> requestResetPasswordApi(dynamic data) async {
+    try {
+      if (kDebugMode) {
+        print("Requesting OTP for email: ${data['email']}");
+      }
+      dynamic response = await _apiServices.getPostApiResponse(
+          AppUrl.requestResetPassword, data);
+      if (kDebugMode) {
+        print("OTP Request Response: $response");
+      }
+      return response;
+    } catch (error) {
+      if (kDebugMode) {
+        print("Error in requestResetPasswordApi: $error");
+      }
+      rethrow;
+    }
+  }
 
+  Future<dynamic> resetPasswordApi(dynamic data) async {
+    try {
+      dynamic response = await _apiServices.getPostApiResponse(
+          '${AppUrl.baseUrl}/reset_password.php', data);
+      return response;
+    } catch (error) {
+      rethrow;
+    }
+  }
 }

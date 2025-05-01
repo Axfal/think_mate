@@ -12,10 +12,46 @@ class _MyNoteBookState extends State<MyNoteBook> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Note Book',style: AppTextStyle.appBarText),
+        title: Text('My Note Book',
+            style: AppTextStyle.heading3.copyWith(
+              color: AppColors.whiteColor,
+            )),
         automaticallyImplyLeading: true,
         centerTitle: true,
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.deepPurple,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.deepPurple.withOpacity(0.1),
+              AppColors.lightPurple.withOpacity(0.05),
+            ],
+          ),
+        ),
+        child: Center(
+          child: Text(
+            'Coming Soon!',
+            style: AppTextStyle.heading2.copyWith(
+              color: AppColors.darkText,
+            ),
+          ),
+        ),
       ),
     );
   }
