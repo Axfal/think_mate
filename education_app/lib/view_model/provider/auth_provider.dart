@@ -2,10 +2,10 @@
 
 import 'package:education_app/resources/exports.dart';
 import '../../model/hive_database_model/user_session_model.dart';
-import '../../utils/toast_helper.dart';
 
 class AuthProvider with ChangeNotifier {
   final _authRepository = AuthRepository();
+
   bool _loading = false;
   bool get loading => _loading;
 
@@ -128,12 +128,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  void setUserType(String subscriptionName, String userType) {
+  void setUserType(String subscriptionName, String userType, int testId) {
     if (_userSession != null) {
       _userSession = UserSessionModel(
         userId: _userSession!.userId,
         userType: userType,
-        testId: _userSession!.testId,
+        testId: testId,
         subscriptionName: subscriptionName,
       );
 
@@ -273,10 +273,23 @@ class AuthProvider with ChangeNotifier {
       if (kDebugMode) {
         print("Resetting password with data: $data");
       }
+
+      // Validate data before making API call
+      if (data['email'] == null || data['email'].toString().isEmpty) {
+        throw Exception('Email is required');
+      }
+      if (data['otp'] == null || data['otp'].toString().isEmpty) {
+        throw Exception('OTP is required');
+      }
+      if (data['password'] == null || data['password'].toString().isEmpty) {
+        throw Exception('Password is required');
+      }
+
       final response = await _authRepository.resetPasswordApi(data);
       if (kDebugMode) {
         print("Reset password API response: $response");
       }
+
       if (response != null && response is Map<String, dynamic>) {
         if (response['success'] != null) {
           ToastHelper.showSuccess(response['success']);
@@ -292,13 +305,13 @@ class AuthProvider with ChangeNotifier {
             );
           }
         } else {
-          if (kDebugMode) {
-            print(
-                "API error: ${response['message'] ?? response['error'] ?? response}");
-          }
-          ToastHelper.showError(response['message'] ??
+          String errorMessage = response['message'] ??
               response['error'] ??
-              response.values.toString());
+              'Failed to reset password. Please try again.';
+          if (kDebugMode) {
+            print("API error: $errorMessage");
+          }
+          ToastHelper.showError(errorMessage);
         }
       } else {
         if (kDebugMode) {

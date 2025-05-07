@@ -27,6 +27,7 @@ class BookMarkProvider with ChangeNotifier {
 
   Future<void> bookMarking(BuildContext context, int questionId) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.loadUserSession();
     final userId = authProvider.userSession?.userId;
     final testId = authProvider.userSession?.testId;
     final questionProvider =
@@ -121,6 +122,7 @@ class BookMarkProvider with ChangeNotifier {
 
   Future<void> deleteBookMarking(BuildContext context, int questionId) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.loadUserSession();
     final userId = authProvider.userSession?.userId;
     final testId = authProvider.userSession?.testId;
 
@@ -145,6 +147,9 @@ class BookMarkProvider with ChangeNotifier {
         _isMarked = false;
         _bookmarkedQuestions.remove(questionId);
         removeNoteByKey(questionId);
+        ToastHelper.showSuccess("BookMarks deleted successfully");
+      } else {
+        ToastHelper.showError("BookMark not found.");
       }
     } catch (e) {
       debugPrint("Delete Bookmark failed: $e");

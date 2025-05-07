@@ -3,6 +3,7 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:no_screenshot/no_screenshot.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:education_app/utils/screenshot_protector.dart';
 
 class ChaptersScreen extends StatefulWidget {
   const ChaptersScreen({super.key});
@@ -12,12 +13,10 @@ class ChaptersScreen extends StatefulWidget {
 }
 
 class _ChaptersScreenState extends State<ChaptersScreen> {
-  final NoScreenshot _noScreenshot = NoScreenshot.instance;
-
   @override
   void initState() {
     super.initState();
-    _noScreenshot.screenshotOn();
+    ScreenshotProtector.enableProtection();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final chapterProvider =
           Provider.of<ChapterProvider>(context, listen: false);
@@ -38,6 +37,12 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
   }
 
   @override
+  void dispose() {
+    ScreenshotProtector.disableProtection();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ChapterProvider>(context);
 
@@ -51,7 +56,6 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: AppColors.deepPurple,
         elevation: 0,
         leading: IconButton(
           onPressed: () {

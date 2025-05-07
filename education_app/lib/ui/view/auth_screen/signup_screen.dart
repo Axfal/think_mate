@@ -15,7 +15,10 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool _obscureText = true;
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String? selectedTestId;
   bool isTermsAccepted = false;
 
@@ -70,7 +73,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     controller: usernameController,
                     decoration: InputDecoration(
                       labelText: 'Username',
-                      prefixIcon: Icon(Icons.person),
+                      prefixIcon: Icon(Icons.person, color: AppColors.lightIndigo),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -85,7 +88,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: Icon(Icons.email, color: AppColors.lightIndigo),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -100,7 +103,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       labelText: 'Phone',
-                      prefixIcon: Icon(Icons.phone),
+                      prefixIcon: Icon(Icons.phone, color: AppColors.lightIndigo),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -114,7 +117,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     controller: addressController,
                     decoration: InputDecoration(
                       labelText: 'Address',
-                      prefixIcon: Icon(Icons.location_on),
+                      prefixIcon: Icon(Icons.location_on, color: AppColors.lightIndigo),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -126,10 +129,22 @@ class _SignupScreenState extends State<SignupScreen> {
                   SizedBox(height: 20),
                   TextFormField(
                     controller: passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: Icon(Icons.lock, color: AppColors.lightIndigo),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility, color: AppColors.lightIndigo
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -140,11 +155,23 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   SizedBox(height: 20),
                   TextFormField(
-                    controller: passwordController,
-                    obscureText: true,
+                    controller: confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
                       labelText: 'Confirm Password',
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: Icon(Icons.lock, color: AppColors.lightIndigo),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility, color: AppColors.lightIndigo,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                      ),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -250,8 +277,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppColors.deepPurple,
-                          AppColors.lightPurple,
+                          AppColors.indigo,
+                          AppColors.lightIndigo,
                         ],
                       ),
                       borderRadius: BorderRadius.circular(12),
@@ -264,8 +291,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       ],
                     ),
                     child: ElevatedButton(
-                      onPressed: isTermsAccepted
-                          ? () {
+                      onPressed: !isTermsAccepted
+                          ? null : () {
                               if (_formKey.currentState!.validate()) {
                                 final data = {
                                   "username": usernameController.text.trim(),
@@ -277,8 +304,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 };
                                 authProvider.signUp(context, data);
                               }
-                            }
-                          : null,
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
@@ -327,23 +353,11 @@ class _SignupScreenState extends State<SignupScreen> {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      obscureText: isPassword ? _obscureText : false,
+      obscureText: isPassword,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: AppColors.primaryColor),
         prefixIcon: Icon(icon, color: AppColors.primaryColor),
-        suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                    _obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              )
-            : null,
         focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: AppColors.primaryColor, width: 2)),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),

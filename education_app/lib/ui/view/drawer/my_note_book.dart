@@ -16,10 +16,15 @@ class _MyNoteBookState extends State<MyNoteBook> {
             style: AppTextStyle.heading3.copyWith(
               color: AppColors.whiteColor,
             )),
-        automaticallyImplyLeading: true,
         centerTitle: true,
         backgroundColor: AppColors.deepPurple,
         elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

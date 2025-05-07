@@ -6,10 +6,7 @@ class ToastHelper {
   // Constants for consistent styling
   static const double _margin = 8.0;
   static const double _borderRadius = 8.0;
-  static const double _fontSize = 16.0;
-  static const FontWeight _fontWeight = FontWeight.bold;
-  static final Color _textColor = AppColors.blackColor;
-  static const Color _infoTextColor = Colors.white;
+  static final Color _infoTextColor = AppColors.textColor;
 
   static void hideCurrentSnackBar() {
     GlobalVariables.scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
@@ -23,18 +20,16 @@ class ToastHelper {
     Color? textColor,
   }) {
     return SnackBar(
-      content: Center(
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: Theme.of(GlobalVariables.scaffoldMessengerKey.currentContext!)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(
-                color: textColor ?? AppColors.whiteColor,
-                fontWeight: FontWeight.w600,
-              ),
-        ),
+      content: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: Theme.of(GlobalVariables.scaffoldMessengerKey.currentContext!)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(
+              color: textColor ?? AppColors.whiteColor,
+              fontWeight: FontWeight.w500,
+            ),
       ),
       backgroundColor: backgroundColor,
       behavior: SnackBarBehavior.floating,
@@ -59,7 +54,7 @@ class ToastHelper {
       GlobalVariables.scaffoldMessengerKey.currentState!.showSnackBar(
         _buildSnackBar(
           message: message,
-          backgroundColor: Colors.green.shade200,
+          backgroundColor: AppColors.successColor,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -86,7 +81,7 @@ class ToastHelper {
       GlobalVariables.scaffoldMessengerKey.currentState!.showSnackBar(
         _buildSnackBar(
           message: message,
-          backgroundColor: AppColors.primaryColor,
+          backgroundColor: AppColors.indigo,
           duration: const Duration(seconds: 4),
           textColor: _infoTextColor,
         ),

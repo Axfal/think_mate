@@ -4,4 +4,6 @@ abstract class BaseApiServices {
   Future<dynamic> getPostApiResponse(String url, dynamic data);
 
   Future<dynamic> getPostMultipartRequestApiResponse(String url, dynamic data);
+
+  Future<dynamic> getDeleteRequestApiResponse(String url, dynamic data);
 }

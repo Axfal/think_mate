@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:education_app/resources/exports.dart';
-import 'package:education_app/ui/view/auth_screen/login_screen.dart';
-import 'package:education_app/ui/view/auth_screen/signup_screen.dart';
-import 'package:education_app/ui/view/splash_screen.dart';
 import 'package:education_app/ui/view/auth_screen/terms_view.dart';
 
 class Routes {

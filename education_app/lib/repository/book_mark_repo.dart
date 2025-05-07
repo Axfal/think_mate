@@ -26,8 +26,7 @@ class BookMarkRepository {
     }
   }
 
-  Future<DeleteBookMarkModel> deleteBookMarking(
-      Map<String, dynamic> data) async {
+  Future<DeleteBookMarkModel> deleteBookMarking(Map<String, dynamic> data) async {
     try {
       final response =
           await _apiServices.getPostApiResponse(AppUrl.deleteBookMark, data);

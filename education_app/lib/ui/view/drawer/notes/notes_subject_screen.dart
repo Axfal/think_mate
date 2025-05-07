@@ -1,32 +1,40 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, avoid_print
 
 import 'package:education_app/resources/exports.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:education_app/ui/view/drawer/notes/notes_screen.dart';
+import 'package:education_app/utils/screenshot_protector.dart';
 
-class SubjectScreen extends StatefulWidget {
-  final courseId;
-  const SubjectScreen({super.key, required this.courseId});
+class NotesSubjectScreen extends StatefulWidget {
+  const NotesSubjectScreen({super.key});
 
   @override
-  State<SubjectScreen> createState() => _SubjectScreenState();
+  State<NotesSubjectScreen> createState() => _NotesSubjectScreenState();
 }
 
-class _SubjectScreenState extends State<SubjectScreen> {
+class _NotesSubjectScreenState extends State<NotesSubjectScreen> {
   @override
   void initState() {
     super.initState();
-    if (kDebugMode) {
-      print(widget.courseId);
-    }
+    ScreenshotProtector.enableProtection();
     getSubjects();
   }
 
+  @override
+  void dispose() {
+    ScreenshotProtector.disableProtection();
+    super.dispose();
+  }
+
+
   void getSubjects() async {
     try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.loadUserSession();
+      final testId = authProvider.userSession!.testId;
       final subjectProvider =
           Provider.of<SubjectProvider>(context, listen: false);
-      await subjectProvider.setSubjects(widget.courseId);
-      subjectProvider.setTestId(widget.courseId);
+      await subjectProvider.setSubjects(testId);
+      subjectProvider.setTestId(testId);
     } catch (e) {
       rethrow;
     }
@@ -37,12 +45,39 @@ class _SubjectScreenState extends State<SubjectScreen> {
     final provider = Provider.of<SubjectProvider>(context);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.indigo.withValues(alpha: 0.3),
+        title: Text('Subjects',
+            style: AppTextStyle.heading3.copyWith(
+              color: AppColors.whiteColor,
+            )),
+        centerTitle: true,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
+        ),
+      ),
       body: provider.subjectId.isEmpty
           ? Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8),
               child: GridView.builder(
-                itemCount: 6, // You can adjust count for shimmer placeholders
+                itemCount: 6,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
@@ -52,7 +87,8 @@ class _SubjectScreenState extends State<SubjectScreen> {
                 itemBuilder: (context, index) {
                   return Shimmer.fromColors(
                     baseColor: AppColors.indigo.withValues(alpha: 0.3),
-                    highlightColor: AppColors.lightIndigo.withValues(alpha: 0.2),
+                    highlightColor:
+                        AppColors.lightIndigo.withValues(alpha: 0.2),
                     child: Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -65,8 +101,8 @@ class _SubjectScreenState extends State<SubjectScreen> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              AppColors.indigo.withOpacity(0.5),
-                              AppColors.lightIndigo.withOpacity(0.3),
+                              AppColors.indigo.withValues(alpha: 0.5),
+                              AppColors.lightIndigo.withValues(alpha: 0.3),
                             ],
                           ),
                         ),
@@ -78,7 +114,8 @@ class _SubjectScreenState extends State<SubjectScreen> {
                               Container(
                                 padding: EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.whiteColor.withOpacity(0.15),
+                                  color: AppColors.whiteColor
+                                      .withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -87,7 +124,8 @@ class _SubjectScreenState extends State<SubjectScreen> {
                                 height: 20,
                                 width: double.infinity,
                                 decoration: BoxDecoration(
-                                  color: AppColors.whiteColor.withOpacity(0.15),
+                                  color: AppColors.whiteColor
+                                      .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
@@ -142,22 +180,14 @@ class _SubjectScreenState extends State<SubjectScreen> {
                         child: InkWell(
                           onTap: () async {
                             try {
-                              final subjectProvider =
-                                  Provider.of<SubjectProvider>(context,
-                                      listen: false);
-                              final chapterProvider =
-                                  Provider.of<ChapterProvider>(context,
-                                      listen: false);
-
-                              int subjectId = subjectProvider.subjectId[index];
-                              subjectProvider.setSelectedSubjectId(subjectId);
-                              int testId = subjectProvider.testId;
-                              String subjectName = provider.subjects[index];
-                              subjectProvider.setSelectedSubjectId(subjectId);
-                              Navigator.pushNamed(
-                                  context, RoutesName.chapterScreen);
-                              await chapterProvider.setData(
-                                  testId, subjectId, subjectName);
+                              int subjectId = provider.subjectId[index];
+                              print("subject id: $subjectId");
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => NotesScreen(
+                                            subjectId: subjectId,
+                                          )));
                             } catch (e) {
                               if (kDebugMode) {
                                 print("Navigation error: $e");
@@ -175,14 +205,14 @@ class _SubjectScreenState extends State<SubjectScreen> {
                                 Container(
                                   padding: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color:
-                                        AppColors.whiteColor.withValues(alpha: 0.15),
+                                    color: AppColors.whiteColor
+                                        .withValues(alpha: 0.15),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     Icons.school,
                                     color: AppColors.whiteColor,
-                                    size: 24,
+                                    size: 26,
                                   ),
                                 ),
                                 SizedBox(height: 12),

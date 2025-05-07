@@ -1,9 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:education_app/resources/exports.dart';
-import 'package:education_app/ui/view/auth_screen/reset_password_screen.dart';
-import 'package:education_app/ui/view/auth_screen/enter_otp_and_reset_password_screen.dart';
-import 'package:education_app/ui/view/auth_screen/terms_view.dart';
 
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -36,9 +33,6 @@ class Routes {
         return MaterialPageRoute(
             builder: (context) => CourseScreen(courseId: courseId));
 
-      case RoutesName.setting:
-        return MaterialPageRoute(builder: (context) => SettingsScreen());
-
       case RoutesName.subscriptionScreen:
         return MaterialPageRoute(builder: (context) => SubscriptionScreen());
 
@@ -56,7 +50,7 @@ class Routes {
         return MaterialPageRoute(builder: (context) => ProfilePage());
 
       case RoutesName.noteScreen:
-        return MaterialPageRoute(builder: (context) => NoteScreen());
+        return MaterialPageRoute(builder: (context) => NotesSubjectScreen());
 
       case RoutesName.createMockTest:
         return MaterialPageRoute(builder: (context) => CreateMockTest());

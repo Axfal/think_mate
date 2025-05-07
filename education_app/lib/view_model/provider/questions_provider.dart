@@ -6,6 +6,7 @@ import 'package:education_app/model/check_model.dart';
 import 'package:education_app/model/get_checked_question_model.dart';
 import 'package:education_app/repository/check_question_repo.dart';
 import 'package:education_app/resources/exports.dart';
+import 'package:education_app/utils/toast_helper.dart';
 
 import '../../model/incorrect_questions_model.dart';
 import '../../model/hive_database_model/submitted_questions_model.dart';
@@ -161,12 +162,7 @@ class QuestionsProvider with ChangeNotifier {
     final chapterId = chapterProvider.chapterId;
 
     if (userId == null || testId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('User or test information is missing'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      ToastHelper.showError('User or test information is missing');
       return;
     }
 
@@ -186,22 +182,12 @@ class QuestionsProvider with ChangeNotifier {
         _checkMap[questionId] = true;
         notifyListeners();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_checkModel!.message!),
-            backgroundColor: Colors.green,
-          ),
-        );
+        ToastHelper.showSuccess(_checkModel!.message!);
       }
     } catch (e) {
       debugPrint('Error checking question: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('Failed to check the question. Please try again later.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      ToastHelper.showError(
+          'Failed to check the question. Please try again later.');
       rethrow;
     }
   }
@@ -223,10 +209,7 @@ class QuestionsProvider with ChangeNotifier {
       if (_checkModel?.success == true &&
           _checkModel?.message?.isNotEmpty == true) {
         _checkMap.remove(questionId);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(_checkModel!.message!),
-          backgroundColor: Colors.red,
-        ));
+        ToastHelper.showSuccess(_checkModel!.message!);
       }
     } catch (e) {
       print('Error unchecking question: $e');
@@ -506,11 +489,7 @@ class QuestionsProvider with ChangeNotifier {
         }
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please select an option before submitting!"),
-        ),
-      );
+      ToastHelper.showError("Please select an option before submitting!");
     }
 
     notifyListeners();

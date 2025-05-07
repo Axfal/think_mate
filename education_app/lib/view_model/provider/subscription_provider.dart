@@ -1,10 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-
-import 'package:education_app/model/check_user_subscription_plan_model.dart';
-import 'package:education_app/model/post_subscription_model.dart';
-import 'package:education_app/model/subscription_histroy_model.dart';
+import 'package:education_app/model/verify_promo_model.dart';
 import 'package:education_app/resources/exports.dart';
 
 class SubscriptionProvider with ChangeNotifier {
@@ -27,9 +23,15 @@ class SubscriptionProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  String? _error;
+  String? get error => _error;
+
   bool get hasSubscription => _getSubscriptionModel != null;
 
-  Future<void> getUserSubscriptionPlan(context) async{
+  VerifyPromoModel? _verifyPromoCodeModel;
+  VerifyPromoModel? get verifyPromoCodeModel => _verifyPromoCodeModel;
+
+  Future<void> getUserSubscriptionPlan(context) async {
     final provider = Provider.of<AuthProvider>(context, listen: false);
     await provider.loadUserSession();
     final userId = provider.userSession?.userId;
@@ -40,18 +42,18 @@ class SubscriptionProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      final response = await _subscription.checkSubscriptionPlan(userId: userId);
-      if(response != null && response["success"] == true){
-        _checkUserSubscriptionPlanModel = CheckUserSubscriptionPlanModel.fromJson(response);
+      final response =
+          await _subscription.checkSubscriptionPlan(userId: userId);
+      if (response != null && response["success"] == true) {
+        _checkUserSubscriptionPlanModel =
+            CheckUserSubscriptionPlanModel.fromJson(response);
       }
-
-    }catch(e){
+    } catch (e) {
       print("the error occur while fetching user subscription plan: $e");
-    }finally{
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
-
   }
 
   Future<void> getSubscription() async {
@@ -76,8 +78,8 @@ class SubscriptionProvider with ChangeNotifier {
     final provider = Provider.of<AuthProvider>(context, listen: false);
     await provider.loadUserSession();
     final userId = provider.userSession!.userId;
-    print("asjdlka ===?> $userId");
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       final response = await _subscription.getSubscriptionHistory(userId);
@@ -87,10 +89,55 @@ class SubscriptionProvider with ChangeNotifier {
             "approved") {
           provider.setUserTypeToPremium();
         }
-        notifyListeners();
+      } else {
+        _error = 'Failed to load payment history';
       }
     } catch (e, stackTrace) {
       debugPrint('Error fetching subscription history: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      _error = 'Failed to load payment history. Please try again.';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> postSubscription(
+      context,
+      String testId,
+      String subscriptionId,
+      String amount,
+      String date,
+      File screenshotImage,
+      String promoCode) async {
+    final provider = Provider.of<AuthProvider>(context, listen: false);
+    await provider.loadUserSession();
+    final userId = provider.userSession!.userId.toString();
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await _subscription.postSubscription(
+          userId: userId,
+          testId: testId,
+          subscriptionId: subscriptionId,
+          amount: amount,
+          date: date,
+          screenshotImage: screenshotImage,
+          promoCode: promoCode);
+      if (response.success == true && response.message != null) {
+        // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        //   content: Text("${response.message}"),
+        //   backgroundColor: Colors.red,
+        // ));
+        _postSubscriptionModel = response;
+        _verifyPromoCodeModel = null;
+      }
+    } catch (e, stackTrace) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("error: $e"),
+        backgroundColor: Colors.red,
+      ));
+      debugPrint('Error posting subscription: $e');
       debugPrintStack(stackTrace: stackTrace);
       rethrow;
     } finally {
@@ -99,35 +146,24 @@ class SubscriptionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> postSubscription(
-    context,
-    String testId,
-    String subscriptionId,
-    String amount,
-    String date,
-    File screenshotImage,
-  ) async {
-    final provider = Provider.of<AuthProvider>(context, listen: false);
-    await provider.loadUserSession();
-    final userId = provider.userSession!.userId.toString();
-    _isLoading = true;
-    notifyListeners();
+  Future<void> verifyPromoCode(context, String promoCode) async {
+    Map<String, dynamic> data = {"promo_code": promoCode};
+
+    // _isLoading = true;
+    // notifyListeners();
+
     try {
-      final response = await _subscription.postSubscription(
-        userId: userId,
-        testId: testId,
-        subscriptionId: subscriptionId,
-        amount: amount,
-        date: date,
-        screenshotImage: screenshotImage,
-      );
-      if (response.success == true && response.message != null) {
-        _postSubscriptionModel = response;
+      final response = await _subscription.verifyPromoCode(data);
+
+      if (response != null && response["success"] == true) {
+        _verifyPromoCodeModel = VerifyPromoModel.fromJson(response);
+        ToastHelper.showSuccess(
+            "You got a discount of Rs. ${response["data"]["discount"]}");
+      } else {
+        ToastHelper.showError(response?["error"] ?? "Promo Code is not valid");
       }
-    } catch (e, stackTrace) {
-      debugPrint('Error posting subscription: $e');
-      debugPrintStack(stackTrace: stackTrace);
-      rethrow;
+    } catch (e) {
+      print("Error verifying promo code: $e");
     } finally {
       _isLoading = false;
       notifyListeners();

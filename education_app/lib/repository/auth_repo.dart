@@ -1,6 +1,8 @@
 // import 'dart:convert';
 
 import 'package:education_app/resources/exports.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AuthRepository {
   final BaseApiServices _apiServices = NetworkApiServices();
@@ -74,10 +76,38 @@ class AuthRepository {
 
   Future<dynamic> resetPasswordApi(dynamic data) async {
     try {
-      dynamic response = await _apiServices.getPostApiResponse(
-          '${AppUrl.baseUrl}/reset_password.php', data);
-      return response;
+      if (kDebugMode) {
+        print("Requesting API...");
+        print("URL: ${AppUrl.resetPassword}");
+        print("Request Data: $data");
+      }
+
+      // Prepare the correct JSON body and headers
+      final body = jsonEncode({
+        'email': data['email'],
+        'otp': data['otp'],
+        'new_password': data['password'], // Use 'new_password' as key!
+      });
+
+      final response = await http.post(
+        Uri.parse(AppUrl.resetPassword),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: body,
+      );
+
+      if (kDebugMode) {
+        print("Response Status: [32m${response.statusCode}[0m");
+        print("Response Body: ${response.body}");
+      }
+
+      return jsonDecode(response.body);
     } catch (error) {
+      if (kDebugMode) {
+        print("Error in resetPasswordApi: $error");
+      }
       rethrow;
     }
   }

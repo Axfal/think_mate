@@ -99,8 +99,8 @@ class _PreviousTestScreenState extends State<PreviousTestScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.deepPurple.withOpacity(0.1),
-              AppColors.lightPurple.withOpacity(0.05),
+              AppColors.deepPurple.withValues(alpha: 0.1),
+              AppColors.lightPurple.withValues(alpha: 0.05),
             ],
           ),
         ),
@@ -108,75 +108,105 @@ class _PreviousTestScreenState extends State<PreviousTestScreen> {
             ? Center(child: CupertinoActivityIndicator())
             : testData.isEmpty
                 ? Center(
-                    child: Text(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.history_edu,
+                          size: 64,
+                          color: AppColors.deepPurple.withValues(alpha: 0.5),
+                        ),
+                        SizedBox(height: 16),
+                        Text(
                       "No previous test data available",
                       style: AppTextStyle.bodyText1.copyWith(
                         color: AppColors.darkText,
+                            fontSize: 18,
+                          ),
                       ),
+                      ],
                     ),
                   )
                 : SingleChildScrollView(
                     padding: EdgeInsets.all(16),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          "Your Test History",
+                          style: AppTextStyle.heading3.copyWith(
+                            color: AppColors.darkText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          "View your past test performances and track your progress",
+                          style: AppTextStyle.bodyText2.copyWith(
+                            color: AppColors.darkText.withValues(alpha: 0.7),
+                          ),
+                        ),
+                        SizedBox(height: 24),
                         Card(
-                          elevation: 2,
+                          elevation: 4,
+                          shadowColor: AppColors.deepPurple.withValues(alpha: 0.2),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.deepPurple.withValues(alpha: 0.1),
+                                width: 1,
+                              ),
                           ),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: DataTable(
                               headingRowColor: MaterialStateProperty.all(
-                                AppColors.deepPurple.withOpacity(0.1),
-                              ),
-                              columns: [
-                                DataColumn(
-                                  label: Text("Date",
-                                      style: AppTextStyle.bodyText1.copyWith(
+                                  AppColors.deepPurple.withValues(alpha: 0.05),
+                                ),
+                                headingTextStyle:
+                                    AppTextStyle.bodyText1.copyWith(
                                         color: AppColors.darkText,
                                         fontWeight: FontWeight.w600,
-                                      )),
+                                ),
+                                dataRowColor:
+                                    MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                    if (states
+                                        .contains(MaterialState.selected)) {
+                                      return AppColors.deepPurple
+                                          .withValues(alpha: 0.1);
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                columns: [
+                                  DataColumn(
+                                    label: _buildHeaderCell("Date"),
+                                  ),
+                                  DataColumn(
+                                    label: _buildHeaderCell("Subject"),
+                                  ),
+                                  DataColumn(
+                                    label: _buildHeaderCell("Correct"),
                                 ),
                                 DataColumn(
-                                  label: Text("Subject",
-                                      style: AppTextStyle.bodyText1.copyWith(
-                                        color: AppColors.darkText,
-                                        fontWeight: FontWeight.w600,
-                                      )),
+                                    label: _buildHeaderCell("Incorrect"),
                                 ),
                                 DataColumn(
-                                  label: Text("Correct",
-                                      style: AppTextStyle.bodyText1.copyWith(
-                                        color: AppColors.darkText,
-                                        fontWeight: FontWeight.w600,
-                                      )),
+                                    label: _buildHeaderCell("Percentage"),
                                 ),
                                 DataColumn(
-                                  label: Text("Incorrect",
-                                      style: AppTextStyle.bodyText1.copyWith(
-                                        color: AppColors.darkText,
-                                        fontWeight: FontWeight.w600,
-                                      )),
-                                ),
-                                DataColumn(
-                                  label: Text("Percentage",
-                                      style: AppTextStyle.bodyText1.copyWith(
-                                        color: AppColors.darkText,
-                                        fontWeight: FontWeight.w600,
-                                      )),
-                                ),
-                                DataColumn(
-                                  label: Text("Status",
-                                      style: AppTextStyle.bodyText1.copyWith(
-                                        color: AppColors.darkText,
-                                        fontWeight: FontWeight.w600,
-                                      )),
+                                    label: _buildHeaderCell("Status"),
                                 ),
                               ],
                               rows: testData
                                   .map((data) => _buildRow(data))
                                   .toList(),
+                              ),
                             ),
                           ),
                         ),
@@ -187,38 +217,101 @@ class _PreviousTestScreenState extends State<PreviousTestScreen> {
     );
   }
 
+  Widget _buildHeaderCell(String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: Text(
+        text,
+        style: AppTextStyle.bodyText1.copyWith(
+          color: AppColors.darkText,
+          fontWeight: FontWeight.w600,
+                  ),
+      ),
+    );
+  }
+
   DataRow _buildRow(List<String> data) {
     return DataRow(
       cells: [
-        DataCell(Text(data[0],
-            style: AppTextStyle.bodyText2.copyWith(
-              color: AppColors.darkText,
-            ))),
-        DataCell(Text(data[1],
-            style: AppTextStyle.bodyText2.copyWith(
-              color: AppColors.darkText,
-            ))),
-        DataCell(Text(data[2],
-            style: AppTextStyle.bodyText2.copyWith(
-              color: AppColors.darkText,
-            ))),
-        DataCell(Text(data[3],
-            style: AppTextStyle.bodyText2.copyWith(
-              color: AppColors.darkText,
-            ))),
-        DataCell(Text(data[4],
-            style: AppTextStyle.bodyText2.copyWith(
-              color: AppColors.darkText,
-            ))),
-        DataCell(Text(
-          data[5],
-          style: AppTextStyle.bodyText2.copyWith(
-            color:
-                data[5] == "Pass" ? AppColors.successColor : AppColors.redColor,
-            fontWeight: FontWeight.w600,
-          ),
-        )),
+        DataCell(_buildCell(data[0])),
+        DataCell(_buildCell(data[1])),
+        DataCell(_buildCell(data[2], isNumber: true)),
+        DataCell(_buildCell(data[3], isNumber: true)),
+        DataCell(_buildPercentageCell(data[4])),
+        DataCell(_buildStatusCell(data[5])),
       ],
     );
+  }
+
+  Widget _buildCell(String text, {bool isNumber = false}) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: Text(
+        text,
+            style: AppTextStyle.bodyText2.copyWith(
+              color: AppColors.darkText,
+          fontWeight: isNumber ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPercentageCell(String percentage) {
+    final value = double.tryParse(percentage.replaceAll('%', '')) ?? 0;
+    Color color;
+    if (value >= 80) {
+      color = AppColors.successColor;
+    } else if (value >= 60) {
+      color = AppColors.warningColor;
+    } else {
+      color = AppColors.errorColor;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: Text(
+        percentage,
+            style: AppTextStyle.bodyText2.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusCell(String status) {
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'pass':
+        color = AppColors.successColor;
+        break;
+      case 'fail':
+        color = AppColors.errorColor;
+        break;
+      default:
+        color = AppColors.warningColor;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          status,
+          textAlign: TextAlign.center,
+          style: AppTextStyle.bodyText2.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    )
+    ;
   }
 }

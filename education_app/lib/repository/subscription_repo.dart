@@ -47,14 +47,14 @@ class SubscriptionRepo {
   }
 
   /// Post subscription data (multipart/form-data)
-  Future<PostSubscriptionModel> postSubscription({
-    required String userId,
-    required String testId,
-    required String subscriptionId,
-    required String amount,
-    required String date,
-    required File screenshotImage,
-  }) async {
+  Future<PostSubscriptionModel> postSubscription(
+      {required String userId,
+      required String testId,
+      required String subscriptionId,
+      required String amount,
+      required String date,
+      required File screenshotImage,
+      required String promoCode}) async {
     try {
       final data = <String, dynamic>{
         'user_id': userId,
@@ -62,6 +62,7 @@ class SubscriptionRepo {
         'subscription_id': subscriptionId,
         'amount': amount,
         'payment_date': date,
+        "promo_code": promoCode,
         'payment_image': await http.MultipartFile.fromPath(
             'payment_image', screenshotImage.path),
       };
@@ -106,6 +107,23 @@ class SubscriptionRepo {
       if (kDebugMode) {
         print("POST Subscription Error: $error");
       }
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> verifyPromoCode(dynamic data) async {
+    try {
+      final response =
+          await _apiServices.getPostApiResponse(AppUrl.verifyPromoCode, data);
+
+      if (response != null && response["success"] == true) {
+        return response;
+      } else {
+        return {
+          "success": false,
+        };
+      }
+    } catch (e) {
       rethrow;
     }
   }

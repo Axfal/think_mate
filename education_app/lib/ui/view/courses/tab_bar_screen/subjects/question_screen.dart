@@ -4,6 +4,8 @@ import 'package:education_app/resources/exports.dart';
 import 'package:education_app/view_model/provider/reset_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:no_screenshot/no_screenshot.dart';
+import 'package:education_app/utils/toast_helper.dart';
+import 'package:education_app/utils/screenshot_protector.dart';
 
 class QuestionScreen extends StatefulWidget {
   final int subjectId;
@@ -16,14 +18,19 @@ class QuestionScreen extends StatefulWidget {
 }
 
 class _QuestionScreenState extends State<QuestionScreen> {
-  final NoScreenshot _noScreenshot = NoScreenshot.instance;
   @override
   void initState() {
     super.initState();
-    _noScreenshot.screenshotOn();
+    ScreenshotProtector.enableProtection();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getData();
     });
+  }
+
+  @override
+  void dispose() {
+    ScreenshotProtector.disableProtection();
+    super.dispose();
   }
 
   Future<void> getData() async {
@@ -42,9 +49,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       debugPrint("Stack trace: $stackTrace");
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error fetching questions: $e")),
-        );
+        ToastHelper.showError("Error fetching questions: $e");
       }
     }
   }
@@ -75,18 +80,42 @@ class _QuestionScreenState extends State<QuestionScreen> {
           onPressed: () => provider.goBack(context),
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
         ),
-        backgroundColor: AppColors.primaryColor,
+        title: Text(
+          chapterProvider.chapterName.isNotEmpty &&
+                  chapterProvider.chapterId > 0
+              ? chapterProvider.chapterName[chapterProvider.chapterData
+                  .indexWhere((c) => c.id == chapterProvider.chapterId)]
+              : 'Chapter',
+          style: AppTextStyle.heading3.copyWith(
+            color: AppColors.whiteColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
+        ),
         actions: [
           TextButton(
-            onPressed: () async {
-              final resetProvider =
-                  Provider.of<ResetProvider>(context, listen: false);
-              final chapterId = chapterProvider.chapterId;
-              await resetProvider.resetQuestions(context, chapterId);
-              if (resetProvider.resetModel?.success == true) {
-                provider.restartTest();
-                await provider.removeAllDataByChapterId(chapterId);
-              }
+            onPressed: () {
+              _showResetConfirmationDialog(context, () async {
+                final resetProvider =
+                    Provider.of<ResetProvider>(context, listen: false);
+                final chapterId = chapterProvider.chapterId;
+                await resetProvider.resetQuestions(context, chapterId);
+                if (resetProvider.resetModel?.success == true) {
+                  provider.restartTest();
+                  await provider.removeAllDataByChapterId(chapterId);
+                }
+              });
             },
             child: Text('Reset', style: AppTextStyle.subscriptionDetailText),
           ),
@@ -111,69 +140,113 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   child: Text('No questions available.',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))
-              : ListView.builder(
-                  itemCount: provider.filteredQuestions.length,
-                  itemBuilder: (context, index) {
-                    final question = provider.filteredQuestions[index];
-                    Widget buildOption(int optionIndex, String optionText) {
-                      return ListTile(
-                        title: Text(
-                            removeHtmlTags(optionText)
-                                .replaceAll(RegExp(r'[a-d]\)'), '')
-                                .trim(),
-                            style: AppTextStyle.answerText),
-                            leading: Radio<int>(
-                      activeColor: AppColors.primaryColor,
-                      value: optionIndex,
-                      groupValue: provider.selectedOptions[question.id] ?? -1,
-                      onChanged: (provider.isSubmitted.containsKey(question.id) && provider.isSubmitted[question.id] == true) ||
-                      provider.isQuestionAlreadySubmitted(question.id)
-                      ? null
-                          : (value) => provider.onChangeRadio(question.id, value!),),
-                        trailing:
-                            _buildTrailingIcon(provider, question, optionIndex),
-                      );
-                    }
-
-                    return Padding(
+              : Column(
+                  children: [
+                    Container(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 5),
-                      child: Card(
-                        child: Column(
-                          children: [
-                            ListTile(
-                              leading: Text('${index + 1}',
-                                  style: AppTextStyle.questionText),
-                              title: Text(removeHtmlTags(question.question),
-                                  style: AppTextStyle.questionText),
-                              trailing: Checkbox(
-                                activeColor: AppColors.primaryColor,
-                                value: provider.isQuestionChecked(question.id),
-                                onChanged: (value) {
-                                  provider.checkTheQuestion(
-                                      context, question.id);
-                                },
+                          vertical: 12, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.indigo.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      margin: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total Questions: ${provider.filteredQuestions.length}',
+                            style: AppTextStyle.heading3.copyWith(
+                              color: AppColors.darkText,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            'Answered: ${provider.isSubmitted.entries.where((entry) => provider.filteredQuestions.any((q) => q.id == entry.key)).length}',
+                            style: AppTextStyle.bodyText1.copyWith(
+                              color: AppColors.darkText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: provider.filteredQuestions.length,
+                        itemBuilder: (context, index) {
+                          final question = provider.filteredQuestions[index];
+                          Widget buildOption(
+                              int optionIndex, String optionText) {
+                            return ListTile(
+                              title: Text(
+                                  removeHtmlTags(optionText)
+                                      .replaceAll(RegExp(r'[a-d]\)'), '')
+                                      .trim(),
+                                  style: AppTextStyle.answerText),
+                              leading: Radio<int>(
+                                activeColor: AppColors.indigo,
+                                value: optionIndex,
+                                groupValue:
+                                    provider.selectedOptions[question.id] ?? -1,
+                                onChanged: (provider.isSubmitted
+                                                .containsKey(question.id) &&
+                                            provider.isSubmitted[question.id] ==
+                                                true) ||
+                                        provider.isQuestionAlreadySubmitted(
+                                            question.id)
+                                    ? null
+                                    : (value) => provider.onChangeRadio(
+                                        question.id, value!),
+                              ),
+                              trailing: _buildTrailingIcon(
+                                  provider, question, optionIndex),
+                            );
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 10.0),
+                            child: Card(
+                              elevation: 2,
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    leading: Text('${index + 1}',
+                                        style: AppTextStyle.questionText),
+                                    title: Text(
+                                        removeHtmlTags(question.question),
+                                        style: AppTextStyle.questionText),
+                                    trailing: Checkbox(
+                                      activeColor: AppColors.lightIndigo,
+                                      value: provider
+                                          .isQuestionChecked(question.id),
+                                      onChanged: (value) {
+                                        provider.checkTheQuestion(
+                                            context, question.id);
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  buildOption(0, question.option1),
+                                  buildOption(1, question.option2),
+                                  buildOption(2, question.option3),
+                                  buildOption(3, question.option4),
+                                  _buildActionButtons(
+                                      context,
+                                      provider,
+                                      authProvider,
+                                      subjectProvider,
+                                      chapterProvider,
+                                      bookMarkProvider,
+                                      index),
+                                  _buildExplanation(provider, index)
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            buildOption(0, question.option1),
-                            buildOption(1, question.option2),
-                            buildOption(2, question.option3),
-                            buildOption(3, question.option4),
-                            _buildActionButtons(
-                                context,
-                                provider,
-                                authProvider,
-                                subjectProvider,
-                                chapterProvider,
-                                bookMarkProvider,
-                                index),
-                            _buildExplanation(provider, index)
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
     );
   }
@@ -186,15 +259,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 5),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Text('Show Explanation', style: AppTextStyle.questionText),
               Switch(
-                activeColor: AppColors.primaryColor,
+                activeColor: AppColors.successColor,
+                inactiveThumbColor: AppColors.lightIndigo,
+                inactiveTrackColor: AppColors.dividerColor,
+                activeTrackColor: AppColors.dividerColor,
+                trackOutlineColor:
+                    WidgetStatePropertyAll(WidgetStateColor.transparent),
                 value: provider.showExplanation[index],
                 onChanged: (value) {
                   if (provider.isQuestionAlreadySubmitted(
@@ -209,7 +286,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ),
         if (provider.showExplanation[index])
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15.0),
             child: Text(
               removeHtmlTags(provider.filteredQuestions[index].detail),
               style: AppTextStyle.answerText,
@@ -221,49 +298,51 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   Icon? _buildTrailingIcon(
       QuestionsProvider provider, Question question, int optionIndex) {
-
-    if ((!provider.isSubmitted.containsKey(question.id) || provider.isSubmitted[question.id] == false) &&
+    if ((!provider.isSubmitted.containsKey(question.id) ||
+            provider.isSubmitted[question.id] == false) &&
         !provider.isQuestionAlreadySubmitted(question.id)) {
       return null;
     }
 
     String correctAnswerKey = question.correctAnswer.toLowerCase();
-    int correctAnswerIndex = provider.correctOptionMapping[correctAnswerKey] ?? -1;
+    int correctAnswerIndex =
+        provider.correctOptionMapping[correctAnswerKey] ?? -1;
     if (provider.selectedOptions[question.id] == optionIndex &&
-        provider.isTrue.containsKey(question.id) && provider.isTrue[question.id] == true) {
-      return const Icon(Icons.check, color: Colors.green);
+        provider.isTrue.containsKey(question.id) &&
+        provider.isTrue[question.id] == true) {
+      return Icon(Icons.check, color: AppColors.successColor);
     } else if (correctAnswerIndex == optionIndex) {
-      return const Icon(Icons.check, color: Colors.green);
+      return Icon(Icons.check, color: AppColors.successColor);
     } else if (provider.selectedOptions[question.id] == optionIndex) {
-      return const Icon(Icons.close, color: Colors.red);
+      return Icon(Icons.close, color: AppColors.errorColor);
     }
 
     return null;
   }
 
-
   Widget _buildActionButtons(
-      BuildContext context,
-      QuestionsProvider provider,
-      AuthProvider authProvider,
-      SubjectProvider subjectProvider,
-      ChapterProvider chapterProvider,
-      BookMarkProvider bookMarkProvider,
-      int index,
-      ) {
+    BuildContext context,
+    QuestionsProvider provider,
+    AuthProvider authProvider,
+    SubjectProvider subjectProvider,
+    ChapterProvider chapterProvider,
+    BookMarkProvider bookMarkProvider,
+    int index,
+  ) {
     final question = provider.filteredQuestions[index];
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              textStyle: const TextStyle(fontSize: 18),
+              backgroundColor: AppColors.indigo,
+              foregroundColor: AppColors.textColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => showFeedbackDialog(
               context,
@@ -273,19 +352,20 @@ class _QuestionScreenState extends State<QuestionScreen> {
               chapterProvider.chapterId,
               provider.questions!.questions[index].id,
             ),
-            child: const Icon(Icons.feedback_outlined, size: 25, color: Colors.white),
+            child: Icon(Icons.feedback, size: 22, color: AppColors.whiteColor),
           ),
           const SizedBox(width: 10),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              textStyle: const TextStyle(fontSize: 18),
+              backgroundColor: AppColors.indigo,
+              foregroundColor: AppColors.textColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: (provider.isSubmitted.containsKey(question.id) &&
-                provider.isSubmitted[question.id] == true) ||
-                provider.isQuestionAlreadySubmitted(question.id)
+                        provider.isSubmitted[question.id] == true) ||
+                    provider.isQuestionAlreadySubmitted(question.id)
                 ? null
                 : () => provider.submitAnswer(context, question.id),
             child: const Text('Submit'),
@@ -297,7 +377,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
     );
   }
 
-
   Widget _buildBookmarkButton(BuildContext context, QuestionsProvider provider,
       BookMarkProvider bookMarkProvider, int index) {
     final question = provider.filteredQuestions[index];
@@ -308,34 +387,32 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
-        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-        textStyle: TextStyle(fontSize: 18),
+        backgroundColor: AppColors.indigo,
+        foregroundColor: AppColors.textColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
       onPressed: !canBookmark
-          ? () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Submit question before bookmarking')))
+          ? () => ToastHelper.showError('Submit question before bookmarking')
           : () async {
-        if (isBookmarked) {
-          await bookMarkProvider.deleteBookMarking(context, questionId);
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('Bookmark removed')));
-        } else {
-          await bookMarkProvider.bookMarking(context, questionId);
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('Bookmark added')));
-        }
-      },
+              if (isBookmarked) {
+                await bookMarkProvider.deleteBookMarking(context, questionId);
+                ToastHelper.showSuccess('Bookmark removed');
+              } else {
+                await bookMarkProvider.bookMarking(context, questionId);
+                ToastHelper.showSuccess('Bookmark added');
+              }
+            },
       child: bookMarkProvider.isLoading
           ? SizedBox(
-          height: 25,
-          width: 25,
-          child: const CupertinoActivityIndicator(color: Colors.white,))
+              child: CupertinoActivityIndicator(
+              color: AppColors.whiteColor,
+            ))
           : Icon(
-          isBookmarked ? Icons.bookmark : Icons.bookmark_outline_outlined,
-          size: 25,
-          color: Colors.white),
+              isBookmarked ? Icons.bookmark : Icons.bookmark_outline_outlined,
+              size: 22,
+              color: AppColors.whiteColor),
     );
   }
 
@@ -345,88 +422,218 @@ class _QuestionScreenState extends State<QuestionScreen> {
     TextEditingController feedbackController = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Center(
-          child: Text(
-            'Share Feedback',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.whiteColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Share Feedback',
+                    style: AppTextStyle.heading3.copyWith(
+                      color: AppColors.darkText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: feedbackController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your feedback',
+                      hintStyle: AppTextStyle.bodyText1.copyWith(
+                        color: AppColors.darkText.withValues(alpha: 0.5),
+                      ),
+                      filled: true,
+                      fillColor: AppColors.deepPurple.withValues(alpha: 0.05),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppColors.borderColor),
+                      ),
+                    ),
+                    maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your feedback';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          feedbackController.clear();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Cancel',
+                          style: AppTextStyle.bodyText1.copyWith(
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Consumer<FeedbackProvider>(
+                        builder: (context, feedbackProvider, child) {
+                          return ElevatedButton(
+                            onPressed: feedbackProvider.isLoading
+                                ? null
+                                : () async {
+                                    if (formKey.currentState?.validate() ??
+                                        false) {
+                                      Map<String, dynamic> data = {
+                                        "user_id": userId,
+                                        "test_id": testId,
+                                        "subject_id": subjectId,
+                                        "chapter_id": chapterId,
+                                        "question_id": questionId,
+                                        "detail": feedbackController.text
+                                      };
+                                      await feedbackProvider.giveFeedback(
+                                          context, data);
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.indigo,
+                              foregroundColor: AppColors.textColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: feedbackProvider.isLoading
+                                ? SizedBox(
+                                    child: CupertinoActivityIndicator(
+                                        color: AppColors.whiteColor),
+                                  )
+                                : Text(
+                                    'Submit',
+                                    style: AppTextStyle.bodyText1.copyWith(
+                                      color: AppColors.textColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        contentPadding: EdgeInsets.all(20),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: feedbackController,
-                  decoration: InputDecoration(
-                    labelText: 'Your Feedback',
-                    hintText: 'Enter any issues or suggestions',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                  ),
-                  maxLines: 5,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your feedback';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 25),
-                Consumer<FeedbackProvider>(
-                  builder: (context, feedbackProvider, child) {
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: feedbackProvider.isLoading
-                            ? null
-                            : () async {
-                                if (formKey.currentState?.validate() ?? false) {
-                                  Map<String, dynamic> data = {
-                                    "user_id": userId,
-                                    "test_id": testId,
-                                    "subject_id": subjectId,
-                                    "chapter_id": chapterId,
-                                    "question_id": questionId,
-                                    "detail": feedbackController.text
-                                  };
+        );
+      },
+    );
+  }
 
-                                  await feedbackProvider.giveFeedback(
-                                      context, data);
+  void _showResetConfirmationDialog(
+      BuildContext context, VoidCallback onConfirm) {
+    bool isLoading = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Center(
+                child: Text(
+                  'Reset Confirmation',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              contentPadding: EdgeInsets.all(20),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "You can only reset once in your entire lifetime. If you've already used your reset, please contact the admin to restore this option.",
+                    style: AppTextStyle.bodyText1.copyWith(
+                      color: AppColors.darkText.withOpacity(0.85),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                Navigator.pop(context);
+                              },
+                        child: Text(
+                          'Cancel',
+                          style: AppTextStyle.bodyText1.copyWith(
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                setState(() => isLoading = true);
+                                onConfirm();
+                                // Wait for a short delay to ensure the API call has time to complete
+                                Future.delayed(Duration(milliseconds: 500), () {
                                   if (context.mounted) {
                                     Navigator.pop(context);
                                   }
-                                }
+                                });
                               },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(
                               horizontal: 20, vertical: 16),
-                          backgroundColor: AppColors.primaryColor,
+                          backgroundColor: AppColors.redColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: feedbackProvider.isLoading
+                        child: isLoading
                             ? SizedBox(
                                 height: 22,
                                 width: 22,
-                                child: CupertinoActivityIndicator()
+                                child: CupertinoActivityIndicator(
+                                  color: AppColors.whiteColor,
+                                ),
                               )
                             : Text(
-                                'Submit Feedback',
+                                'Reset',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -434,14 +641,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                 ),
                               ),
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

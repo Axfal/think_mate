@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
                       labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: Icon(Icons.email,color: AppColors.lightIndigo,),
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
@@ -75,9 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: Icon(Icons.lock, color: AppColors.lightIndigo),
                       suffixIcon: IconButton(
                         icon: Icon(
+                          color: AppColors.lightIndigo,
                           _obscureText
                               ? Icons.visibility_off
                               : Icons.visibility,
@@ -105,8 +106,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          AppColors.deepPurple,
-                          AppColors.lightPurple,
+                          AppColors.indigo,
+                          AppColors.lightIndigo,
                         ],
                       ),
                       borderRadius: BorderRadius.circular(12),

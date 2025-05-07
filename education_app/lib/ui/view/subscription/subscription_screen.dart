@@ -6,12 +6,7 @@ import 'package:education_app/ui/view/subscription/payment_screen.dart';
 import 'package:education_app/ui/view/subscription/subscription_history.dart';
 import 'package:education_app/ui/widgets/subscription_card.dart';
 import 'package:education_app/ui/widgets/subscription_shimmer.dart';
-import 'package:education_app/view_model/provider/subscription_provider.dart';
 
-/// The main subscription screen that displays available subscription plans.
-///
-/// This screen shows a list of subscription plans with their features and pricing.
-/// It also provides navigation to subscription history and payment screens.
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
 
@@ -38,7 +33,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       currentSubscriptionName = userSession?.subscriptionName;
     });
   }
-
 
   void _loadSubscriptions() async {
     final provider = Provider.of<SubscriptionProvider>(context, listen: false);
@@ -72,8 +66,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.deepPurple.withOpacity(0.1),
-              AppColors.lightPurple.withOpacity(0.05),
+              AppColors.deepPurple.withValues(alpha: 0.1),
+              AppColors.lightPurple.withValues(alpha: 0.05),
             ],
           ),
         ),
@@ -104,8 +98,19 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         onPressed: () => Navigator.pop(context),
         icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
       ),
-      backgroundColor: AppColors.deepPurple,
       elevation: 0,
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.deepPurple,
+              AppColors.lightPurple,
+            ],
+          ),
+        ),
+      ),
       actions: [
         PopupMenuButton<String>(
           icon: Icon(Icons.more_vert, color: AppColors.whiteColor),
@@ -183,7 +188,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               title: subscription.subscriptionName!,
               price: "Rs. ${subscription.price}",
               duration: "${subscription.months} Month",
-              isRecommended: currentSubscriptionName == subscription.subscriptionName,
+              isRecommended:
+                  currentSubscriptionName == subscription.subscriptionName,
               features: const [
                 "Unlimited Quizzes",
                 "Ad-Free Experience",

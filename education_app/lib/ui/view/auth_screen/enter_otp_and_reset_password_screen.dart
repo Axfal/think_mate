@@ -62,8 +62,11 @@ class _EnterOtpAndResetPasswordScreenState
                       prefixIcon: Icon(Icons.lock_clock),
                     ),
                     validator: (value) {
-                      if (value!.isEmpty) {
+                      if (value == null || value.isEmpty) {
                         return 'Please enter OTP';
+                      }
+                      if (value.length != 6) {
+                        return 'OTP must be 6 digits';
                       }
                       return null;
                     },
@@ -89,8 +92,11 @@ class _EnterOtpAndResetPasswordScreenState
                       ),
                     ),
                     validator: (value) {
-                      if (value!.isEmpty) {
+                      if (value == null || value.isEmpty) {
                         return 'Please enter new password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
                       }
                       return null;
                     },

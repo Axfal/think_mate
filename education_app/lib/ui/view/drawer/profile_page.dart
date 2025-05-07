@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../resources/text_style.dart';
 import '../../../view_model/provider/profile_provider.dart';
 import '../../../view_model/provider/upload_image_provider.dart';
+import '../../../utils/toast_helper.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -25,9 +26,11 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController currentPasswordController =
       TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
@@ -35,7 +38,8 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with current values
+
+    /// Initialize controllers with current values
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userData = Provider.of<ProfileProvider>(context, listen: false);
       nameController.text = userData.profileModel?.user?.username ?? '';
@@ -69,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.deepPurple,
+        // backgroundColor: AppColors.deepPurple,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
@@ -82,301 +86,331 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Profile Picture Section
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 30),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.deepPurple,
-                    AppColors.lightPurple,
-                  ],
-                ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.purpleShadow,
-                    blurRadius: 20,
-                    offset: Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Column(
-                    children: [
-                      _buildProfilePicture(userData),
-                      SizedBox(height: 20),
-                      Text(
-                        '${userData.profileModel!.user!.username}',
-                        style: AppTextStyle.heading2.copyWith(
-                          color: AppColors.whiteColor,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        '${userData.profileModel!.user!.email}',
-                        style: AppTextStyle.bodyText1.copyWith(
-                          color: AppColors.whiteOverlay90,
-                        ),
-                      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              /// Profile Picture Section
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 30),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.indigo,
+                      AppColors.lightIndigo,
+                      // AppColors.indigo,
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            // Profile Information Section
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Personal Information Card
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.whiteColor,
-                            AppColors.backgroundColor,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppColors.deepPurple.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(
-                                    Icons.person_outline,
-                                    color: AppColors.deepPurple,
-                                    size: 24,
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Text(
-                                  'Personal Information',
-                                  style: AppTextStyle.heading3.copyWith(
-                                    color: AppColors.darkText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-                            _buildInfoField(
-                              'Name',
-                              userData.profileModel!.user!.username ??
-                                  'Not set',
-                              nameController,
-                              Icons.person,
-                            ),
-                            SizedBox(height: 15),
-                            _buildInfoField(
-                              'Phone',
-                              userData.profileModel!.user!.phone ?? 'Not set',
-                              phoneController,
-                              Icons.phone,
-                            ),
-                            SizedBox(height: 15),
-                            _buildInfoField(
-                              'Address',
-                              userData.profileModel!.user!.address ?? 'Not set',
-                              addressController,
-                              Icons.location_on,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
                   ),
-                  SizedBox(height: 20),
-
-                  // Change Password Card
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.purpleShadow,
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.whiteColor,
-                            AppColors.backgroundColor,
-                          ],
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        _buildProfilePicture(userData),
+                        SizedBox(height: 20),
+                        Text(
+                          '${userData.profileModel!.user!.username}',
+                          style: AppTextStyle.heading2.copyWith(
+                            color: AppColors.whiteColor,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppColors.deepPurple.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(
-                                    Icons.lock_outline,
-                                    color: AppColors.deepPurple,
-                                    size: 24,
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Text(
-                                  'Change Password',
-                                  style: AppTextStyle.heading3.copyWith(
-                                    color: AppColors.darkText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-                            _buildPasswordField(
-                              'Current Password',
-                              currentPasswordController,
-                              _obscureCurrentPassword,
-                              () {
-                    setState(() {
-                                  _obscureCurrentPassword =
-                                      !_obscureCurrentPassword;
-                    });
-                              },
-                            ),
-                            SizedBox(height: 15),
-                            _buildPasswordField(
-                              'New Password',
-                              newPasswordController,
-                              _obscureNewPassword,
-                              () {
-                    setState(() {
-                      _obscureNewPassword = !_obscureNewPassword;
-                    });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30),
-
-                  // Update Button
-                  Container(
-                    width: double.infinity,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.deepPurple,
-                          AppColors.lightPurple,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.purpleShadow,
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
+                        SizedBox(height: 8),
+                        Text(
+                          '${userData.profileModel!.user!.email}',
+                          style: AppTextStyle.bodyText1.copyWith(
+                            color: AppColors.whiteOverlay90,
+                          ),
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        // Only validate password fields if they are filled
-                        if (currentPasswordController.text.isNotEmpty ||
-                            newPasswordController.text.isNotEmpty) {
-                          if (currentPasswordController.text.isEmpty ||
-                              newPasswordController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content:
-                                    Text("Please fill in both password fields"),
-                                backgroundColor: AppColors.redColor,
+                  ],
+                ),
+              ),
+
+              // Profile Information Section
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Personal Information Card
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.whiteColor,
+                              AppColors.backgroundColor,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.indigo
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.person_outline,
+                                      color: AppColors.lightIndigo,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Personal Information',
+                                    style: AppTextStyle.heading3.copyWith(
+                                      color: AppColors.darkText,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            );
-                            return;
-                          }
-                        }
-
-                        final profileProvider = Provider.of<ProfileProvider>(
-                          context,
-                          listen: false,
-                        );
-
-                        await profileProvider.updateProfile(
-                          context,
-                          username: nameController.text,
-                          phone: phoneController.text,
-                          address: addressController.text,
-                          currentPassword: currentPasswordController.text,
-                          newPassword: newPasswordController.text,
-                        );
-
-                        // Clear password fields after update
-                        currentPasswordController.clear();
-                        newPasswordController.clear();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                              SizedBox(height: 20),
+                              _buildInfoField(
+                                'Name',
+                                userData.profileModel!.user!.username ??
+                                    'Not set',
+                                nameController,
+                                Icons.person,
+                              ),
+                              SizedBox(height: 15),
+                              _buildInfoField(
+                                'Phone',
+                                userData.profileModel!.user!.phone ?? 'Not set',
+                                phoneController,
+                                Icons.phone,
+                              ),
+                              SizedBox(height: 15),
+                              _buildInfoField(
+                                'Address',
+                                userData.profileModel!.user!.address ??
+                                    'Not set',
+                                addressController,
+                                Icons.location_on,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      child: userData.isLoading
-                          ? CupertinoActivityIndicator(color: Colors.white)
-                          : Text(
-                              "Update Profile",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 20),
+
+                    // Change Password Card
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.whiteColor,
+                              AppColors.backgroundColor,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.lightIndigo
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.lock_outline,
+                                      color: AppColors.lightIndigo,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Change Password',
+                                    style: AppTextStyle.heading3.copyWith(
+                                      color: AppColors.darkText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              _buildPasswordField(
+                                'Current Password',
+                                currentPasswordController,
+                                _obscureCurrentPassword,
+                                () {
+                                  setState(() {
+                                    _obscureCurrentPassword =
+                                        !_obscureCurrentPassword;
+                                  });
+                                },
+                              ),
+                              SizedBox(height: 15),
+                              _buildPasswordField(
+                                'New Password',
+                                newPasswordController,
+                                _obscureNewPassword,
+                                () {
+                                  setState(() {
+                                    _obscureNewPassword = !_obscureNewPassword;
+                                  });
+                                },
+                              ),
+                             SizedBox(height: 15),
+                              _buildPasswordField(
+                                'Confirm Password',
+                                confirmPasswordController,
+                                _obscureConfirmPassword,
+                                () {
+                                  setState(() {
+                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 30),
+
+                    // Update Button
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.indigo,
+                            AppColors.lightIndigo,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.purpleShadow,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // Only validate password fields if they are filled
+                          if (currentPasswordController.text.isNotEmpty ||
+                              newPasswordController.text.isNotEmpty || confirmPasswordController.text.isNotEmpty) {
+                            if (currentPasswordController.text.isEmpty ||
+                                newPasswordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+                              ToastHelper.showError(
+                                  "Please fill in all password fields");
+                              return;
+                            }
+                          }
+
+                          final profileProvider = Provider.of<ProfileProvider>(
+                            context,
+                            listen: false,
+                          );
+                          if (currentPasswordController.text.isNotEmpty &&
+                              newPasswordController.text.isNotEmpty && confirmPasswordController.text.isNotEmpty) {
+                            final oldPassword = currentPasswordController.text;
+                            final newPassword = newPasswordController.text;
+                            final confirmPassword = confirmPasswordController.text;
+                            await profileProvider.changingPassword(context,
+                                oldPassword, newPassword, confirmPassword);
+                          } else {
+                            await profileProvider.updateProfile(
+                              context,
+                              username: nameController.text,
+                              phone: phoneController.text,
+                              address: addressController.text,
+                              currentPassword: currentPasswordController.text,
+                              newPassword: newPasswordController.text,
+                            );
+                          }
+
+                          currentPasswordController.clear();
+                          newPasswordController.clear();
+                          confirmPasswordController.clear();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: userData.isLoading
+                            ? CupertinoActivityIndicator(color: Colors.white)
+                            : Text(
+                                "Update Profile",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -412,19 +446,19 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Colors.black.withOpacity(0.2),
                 blurRadius: 10,
                 offset: Offset(0, 5),
-          ),
+              ),
             ],
-        ),
+          ),
           child: CircleAvatar(
             radius: 60,
             backgroundColor: Colors.white,
             backgroundImage: (imageUrl.isNotEmpty && !imageUrl.contains("null"))
-                      ? NetworkImage(imageUrl)
-                      : const AssetImage('assets/images/default_profile.png')
-                          as ImageProvider,
-              onBackgroundImageError: (_, __) {
-                debugPrint("Error loading image: $imageUrl");
-              },
+                ? NetworkImage(imageUrl)
+                : const AssetImage('assets/images/default_profile.png')
+                    as ImageProvider,
+            onBackgroundImageError: (_, __) {
+              debugPrint("Error loading image: $imageUrl");
+            },
           ),
         ),
         Positioned(
@@ -435,7 +469,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.whiteColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -447,7 +481,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Icon(
                 Icons.camera_alt,
-                color: AppColors.deepPurple,
+                color: AppColors.indigo,
                 size: 24,
               ),
             ),
@@ -477,9 +511,9 @@ class _ProfilePageState extends State<ProfilePage> {
         SizedBox(height: 8),
         TextField(
           controller: controller..text = value,
-        decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: AppColors.deepPurple),
-          filled: true,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon, color: AppColors.indigo),
+            filled: true,
             fillColor: Colors.grey[50],
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -489,10 +523,10 @@ class _ProfilePageState extends State<ProfilePage> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: Colors.grey[200]!),
-        ),
+            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: AppColors.deepPurple),
+              borderSide: BorderSide(color: AppColors.dividerColor),
             ),
           ),
         ),
@@ -502,8 +536,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildPasswordField(
     String label,
-      TextEditingController controller,
-      bool obscureText,
+    TextEditingController controller,
+    bool obscureText,
     VoidCallback toggleVisibility,
   ) {
     return Column(
@@ -519,17 +553,17 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         SizedBox(height: 8),
         TextField(
-        controller: controller,
-        obscureText: obscureText,
-        decoration: InputDecoration(
-            prefixIcon: Icon(Icons.lock, color: AppColors.deepPurple),
-          suffixIcon: IconButton(
+          controller: controller,
+          obscureText: obscureText,
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.lock, color: AppColors.indigo),
+            suffixIcon: IconButton(
               icon: Icon(
                 obscureText ? Icons.visibility_off : Icons.visibility,
-                color: AppColors.deepPurple,
+                color: AppColors.lightIndigo,
               ),
-            onPressed: toggleVisibility,
-          ),
+              onPressed: toggleVisibility,
+            ),
             filled: true,
             fillColor: Colors.grey[50],
             border: OutlineInputBorder(
@@ -540,13 +574,13 @@ class _ProfilePageState extends State<ProfilePage> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: Colors.grey[200]!),
-              ),
+            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: AppColors.deepPurple),
             ),
           ),
-              ),
+        ),
       ],
     );
   }

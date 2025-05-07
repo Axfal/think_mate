@@ -18,11 +18,12 @@ class ProfileRepository {
   }
 
   Future<ChangePasswordModel> changePassword(
-      int userId, String oldPassword, String newPassword) async {
+      int userId, String oldPassword, String newPassword, String confirmPassword) async {
     Map<String, dynamic> data = {
       "user_id": userId,
+      "new_password": newPassword,
+      "confirm_password": confirmPassword,
       "old_password": oldPassword,
-      "new_password": newPassword
     };
 
     try {
@@ -42,7 +43,7 @@ class ProfileRepository {
     try {
       debugPrint("Updating profile with data: $data");
 
-      // Use the same endpoint and method as changePassword
+
       final response = await _apiServices.getPostMultipartRequestApiResponse(
         AppUrl.changePassword,
         data,

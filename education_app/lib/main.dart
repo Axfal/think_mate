@@ -1,9 +1,4 @@
 import 'package:education_app/resources/exports.dart';
-import 'package:education_app/view_model/provider/post_test_result_provider.dart';
-import 'package:education_app/view_model/provider/profile_provider.dart';
-import 'package:education_app/view_model/provider/reset_provider.dart';
-import 'package:education_app/view_model/provider/subscription_provider.dart';
-import 'package:education_app/view_model/provider/upload_image_provider.dart';
 import 'model/hive_database_model/previous_test_report_model.dart';
 import 'model/hive_database_model/submitted_questions_model.dart';
 import 'model/hive_database_model/user_session_model.dart';
@@ -50,6 +45,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => FeedbackProvider()),
         ChangeNotifierProvider(create: (_) => ResetProvider()),
         ChangeNotifierProvider(create: (_) => UploadImageProvider()),
+        ChangeNotifierProvider(create: (_) => NotesProvider()),
         ChangeNotifierProvider(create: (_) => PostTestResultProvider()),
         ChangeNotifierProvider(create: (_) => CreateMockTestProvider(),
           lazy: false,

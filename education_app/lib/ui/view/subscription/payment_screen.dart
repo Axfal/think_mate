@@ -1,9 +1,5 @@
 import 'package:education_app/resources/exports.dart';
-import 'package:education_app/view_model/provider/subscription_provider.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:shimmer/shimmer.dart';
 
 class UploadPaymentScreen extends StatefulWidget {
   final price;
@@ -22,7 +18,8 @@ class UploadPaymentScreen extends StatefulWidget {
 
 class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
   File? _image;
-  final _amountController = TextEditingController();
+  // final _amountController = TextEditingController();
+  final _promoCodeController = TextEditingController();
 
   String? selectedTestId;
 
@@ -30,6 +27,82 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
   void initState() {
     super.initState();
     callSubjectApi();
+
+    Future.delayed(Duration(milliseconds: 300), () {
+      showPromoCodeDialog();
+    });
+  }
+
+  void showPromoCodeDialog() async {
+    final provider = Provider.of<SubscriptionProvider>(context, listen: false);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Colors.white,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.local_offer_outlined,
+                  size: 40, color: AppColors.deepPurple),
+              SizedBox(height: 12),
+              Text(
+                "Do you have a Promo Code?",
+                style: AppTextStyle.heading3.copyWith(
+                  color: AppColors.darkText,
+                ),
+              ),
+            ],
+          ),
+          content: TextField(
+            controller: _promoCodeController,
+            decoration: InputDecoration(
+              hintText: "Enter Promo Code",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.deepPurple),
+              ),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Skip", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final promoCodeText = _promoCodeController.text.trim();
+                await provider.verifyPromoCode(context, promoCodeText);
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.deepPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: Text(
+                "Apply",
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void callSubjectApi() async {
@@ -48,20 +121,17 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
 
   void submitPayment() async {
     if (_image == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Please upload a screenshot")));
+      ToastHelper.showError("Please upload a screenshot");
       return;
     }
 
-    if (_amountController.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Please enter amount")));
-      return;
-    }
+    // if (_amountController.text.isEmpty) {
+    //   ToastHelper.showError("Please enter amount");
+    //   return;
+    // }
 
     if (selectedTestId == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Please select a subject")));
+      ToastHelper.showError("Please select a subject");
       return;
     }
 
@@ -72,36 +142,24 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
 
     try {
       await subscriptionProvider.postSubscription(
-        context,
-        selectedTestId!,
-        widget.subscriptionId.toString(),
-        _amountController.text.trim(),
-        now.toIso8601String(),
-        _image!,
-      );
+          context,
+          selectedTestId!,
+          widget.subscriptionId.toString(),
+          widget.price,
+          now.toIso8601String(),
+          _image!,
+          _promoCodeController.text.trim());
 
-      // Check if post was successful
       if (subscriptionProvider.postSubscriptionModel?.success == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Your request has been submitted successfully. Please wait for admin to set your account as premium.",
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
+        ToastHelper.showSuccess(
+            "Your request has been submitted successfully. Please wait for admin to set your account as premium.");
 
         Future.delayed(Duration(seconds: 2), () {
           Navigator.pop(context);
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Something went wrong. Please try again."),
-          backgroundColor: Colors.red,
-        ),
-      );
+      ToastHelper.showError("Something went wrong. Please try again.");
     }
   }
 
@@ -115,6 +173,12 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context);
+    double discount = double.tryParse(
+            "${subscriptionProvider.verifyPromoCodeModel?.data?.discount ?? 0}") ??
+        0.0;
+    double totalPrice = double.tryParse("${widget.price ?? 0} ") ?? 0.0;
+    double payableAmount = totalPrice - discount;
 
     return Scaffold(
       appBar: AppBar(
@@ -128,6 +192,18 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
           icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
           onPressed: () => Navigator.pop(context),
         ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -135,7 +211,6 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Subscription Plan Card
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -221,32 +296,6 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
                 ),
               ),
               SizedBox(height: 20),
-
-              // Amount Field
-              Text("Enter Paid Amount (Rs)",
-                  style: AppTextStyle.heading3.copyWith(
-                    color: AppColors.darkText,
-                  )),
-              SizedBox(height: 10),
-              TextField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: "e.g. 499",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.borderColor)),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.borderColor)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.deepPurple)),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-              ),
-              SizedBox(height: 20),
               authProvider.loading
                   ? Shimmer.fromColors(
                       baseColor: Colors.grey.shade300,
@@ -288,6 +337,121 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
                         ),
 
               SizedBox(height: 20),
+
+              // Amount Field
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Payable Amount (Rs)",
+                    style: AppTextStyle.heading3.copyWith(
+                      color: AppColors.darkText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.deepPurple.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        "Rs. $payableAmount",
+                        style: AppTextStyle.bodyText1.copyWith(
+                          color: AppColors.deepPurple,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )),
+                ],
+              ),
+
+              SizedBox(height: 10),
+              // TextField(
+              //   controller: _amountController,
+              //   keyboardType: TextInputType.number,
+              //   decoration: InputDecoration(
+              //     hintText: "e.g. 499",
+              //     border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: AppColors.borderColor)),
+              //     enabledBorder: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: AppColors.borderColor)),
+              //     focusedBorder: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: AppColors.deepPurple)),
+              //     contentPadding:
+              //         EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              //   ),
+              // ),
+
+              // Promo Field
+              // Text("Enter Promo (optional)",
+              //     style: AppTextStyle.heading3.copyWith(
+              //       color: AppColors.darkText,
+              //     )),
+              // SizedBox(height: 10),
+              // TextField(
+              //   controller: _promoCodeController,
+              //   keyboardType: TextInputType.text,
+              //   decoration: InputDecoration(
+              //     hintText: "e.g  Z9A2BE2E",
+              //     border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: AppColors.borderColor)),
+              //     enabledBorder: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: AppColors.borderColor)),
+              //     focusedBorder: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide(color: AppColors.deepPurple)),
+              //     contentPadding:
+              //         EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              //   ),
+              // ),
+              SizedBox(height: 20),
+              // authProvider.loading
+              //     ? Shimmer.fromColors(
+              //         baseColor: Colors.grey.shade300,
+              //         highlightColor: Colors.grey.shade100,
+              //         child: Container(
+              //           height: 50,
+              //           width: double.infinity,
+              //           decoration: BoxDecoration(
+              //             borderRadius: BorderRadius.circular(10),
+              //             color: Colors.white,
+              //           ),
+              //         ),
+              //       )
+              //     : (authProvider.courseList == null ||
+              //             authProvider.courseList!.data == null ||
+              //             authProvider.courseList!.data!.isEmpty)
+              //         ? Text("No subjects available",
+              //             style: TextStyle(color: Colors.red))
+              //         : DropdownButtonFormField<String>(
+              //             value: selectedTestId,
+              //             decoration: InputDecoration(
+              //               labelText: "Select Subject",
+              //               border: OutlineInputBorder(
+              //                   borderRadius: BorderRadius.circular(10)),
+              //             ),
+              //             items: authProvider.courseList!.data!.map((subject) {
+              //               return DropdownMenuItem(
+              //                 value: subject.id.toString(),
+              //                 child: Text(subject.testName ?? "Unknown"),
+              //               );
+              //             }).toList(),
+              //             onChanged: (value) {
+              //               setState(() {
+              //                 selectedTestId = value;
+              //               });
+              //             },
+              //             validator: (value) =>
+              //                 value == null ? "Please select a Subject" : null,
+              //           ),
+              //
+              // SizedBox(height: 20),
 
               // Submit Button
               SizedBox(

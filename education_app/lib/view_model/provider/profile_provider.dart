@@ -21,8 +21,8 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> changingPassword(
-      BuildContext context, String oldPassword, String newPassword) async {
+  Future<void> changingPassword(BuildContext context, String oldPassword,
+      String newPassword, String confirmPassword) async {
     final changePasswordRepo = ProfileRepository();
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userId = authProvider.userSession?.userId;
@@ -36,9 +36,12 @@ class ProfileProvider with ChangeNotifier {
       isLoading = true;
 
       _changePassword = await changePasswordRepo.changePassword(
-          userId, oldPassword, newPassword);
+          userId, oldPassword, newPassword, confirmPassword);
       if (_changePassword!.success == true) {
+        ToastHelper.showSuccess("${_changePassword!.message}");
         debugPrint("Password changed successfully");
+      }else{
+        ToastHelper.showError("${_changePassword!.error}");
       }
     } catch (error) {
       debugPrint("Error changing password: $error");
@@ -75,13 +78,14 @@ class ProfileProvider with ChangeNotifier {
   }
 
   // Add method to prepare update data
-  Map<String, dynamic> _prepareUpdateData({
-    String? username,
-    String? phone,
-    String? address,
-    String? currentPassword,
-    String? newPassword,
-  }) {
+  Map<String, dynamic> _prepareUpdateData(
+      {String? username,
+      String? phone,
+      String? address,
+      String? currentPassword,
+      String? newPassword,
+      String? confirmPassword
+      }) {
     final Map<String, dynamic> updateData = {};
 
     if (_hasFieldChanged(username, profileModel?.user?.username)) {
@@ -96,9 +100,12 @@ class ProfileProvider with ChangeNotifier {
     if (currentPassword != null &&
         currentPassword.isNotEmpty &&
         newPassword != null &&
-        newPassword.isNotEmpty) {
+        newPassword.isNotEmpty &&
+        confirmPassword != null &&
+        confirmPassword.isNotEmpty) {
       updateData['current_password'] = currentPassword;
       updateData['new_password'] = newPassword;
+      updateData['confirm_password'] = confirmPassword;
     }
 
     return updateData;
@@ -112,6 +119,7 @@ class ProfileProvider with ChangeNotifier {
     String? address,
     String? currentPassword,
     String? newPassword,
+
   }) async {
     try {
       isLoading = true;
@@ -130,6 +138,7 @@ class ProfileProvider with ChangeNotifier {
         address: address,
         currentPassword: currentPassword,
         newPassword: newPassword,
+        confirmPassword: newPassword
       );
 
       if (updateData.isEmpty) {
@@ -140,11 +149,11 @@ class ProfileProvider with ChangeNotifier {
       // Add user_id to the update data
       updateData['user_id'] = userId;
 
-      debugPrint("Sending update data: $updateData"); // Debug log
+      debugPrint("Sending update data: $updateData");
 
       final response = await profileRepo.updateProfileApi(updateData);
 
-      debugPrint("API Response: $response"); // Debug log
+      debugPrint("API Response: $response");
 
       if (response is Map<String, dynamic>) {
         if (response['error'] != null) {

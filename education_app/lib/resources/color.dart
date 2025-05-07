@@ -15,7 +15,7 @@ class AppColors {
   static Color lightGreyText = Colors.grey[700]!;
 
   // Status Colors
-  static Color redColor = const Color(0xDFE84545);
+  static Color redColor = const Color(0xDFEC4A4A);
   static Color errorLight = const Color(0xFFFFCDD2);
   static Color successColor = Colors.green.shade600;
   static Color errorColor = Colors.red.shade600;

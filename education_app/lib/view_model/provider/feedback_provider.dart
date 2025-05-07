@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../model/feedback_model.dart';
 import '../../repository/feedback_repo.dart';
+import '../../utils/toast_helper.dart';
 
 class FeedbackProvider with ChangeNotifier {
   final FeedbackRepository _feedbackRepository = FeedbackRepository();
@@ -11,21 +12,28 @@ class FeedbackProvider with ChangeNotifier {
 
   FeedbackModel? get feedback => _feedbackModel;
 
-  Future<void> giveFeedback(BuildContext context, Map<String, dynamic> data) async {
+  Future<void> giveFeedback(
+      BuildContext context, Map<String, dynamic> data) async {
     _isLoading = true;
-    notifyListeners(); // Notify UI about the loading state
+    notifyListeners();
 
     try {
       _feedbackModel = await _feedbackRepository.giveFeedback(data);
       if (!context.mounted) return;
 
-      String message = _feedbackModel?.message ?? 'Feedback submitted successfully';
-      Color color = _feedbackModel?.success == true ? Colors.green : Colors.green;
-
-      _showSnackBar(message, color);
+      String message =
+          _feedbackModel?.message ?? 'Feedback submitted successfully';
+      debugPrint(
+          'Feedback API response: \\_feedbackModel: \\${_feedbackModel?.toJson()}');
+      debugPrint('Feedback success value: \\${_feedbackModel?.success}');
+      if (_feedbackModel?.success == true) {
+        ToastHelper.showSuccess(message);
+      } else {
+        ToastHelper.showError(message);
+      }
     } catch (e) {
       if (!context.mounted) return;
-      _showSnackBar('An error occurred: $e', Colors.red);
+      ToastHelper.showError('An error occurred: $e');
     } finally {
       _isLoading = false;
       notifyListeners(); // Notify UI that loading is finished
@@ -44,26 +52,17 @@ class FeedbackProvider with ChangeNotifier {
 
       String message =
           _feedbackModel?.message ?? 'Feedback submitted successfully';
-      Color color = _feedbackModel?.success == true ? Colors.green : Colors.red;
-
-      _showSnackBar(message, color);
+      if (_feedbackModel?.success == true) {
+        ToastHelper.showSuccess(message);
+      } else {
+        ToastHelper.showError(message);
+      }
     } catch (e) {
       if (!context.mounted) return;
-      _showSnackBar('An error occurred: $e', Colors.red);
+      ToastHelper.showError('An error occurred: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
-    }
-  }
-
-  void _showSnackBar(String message, Color color) {
-    final scaffoldMessenger = GlobalVariables.scaffoldMessengerKey.currentState;
-    if (scaffoldMessenger != null) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: color),
-      );
-    } else {
-      debugPrint("ScaffoldMessenger not found!");
     }
   }
 }

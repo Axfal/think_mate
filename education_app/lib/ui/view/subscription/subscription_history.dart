@@ -1,13 +1,11 @@
 import 'package:education_app/resources/exports.dart';
-import 'package:education_app/ui/widgets/payment_history_card.dart';
-import 'package:education_app/ui/widgets/payment_history_shimmer.dart';
-import 'package:education_app/view_model/provider/subscription_provider.dart';
-import 'package:education_app/model/subscription_histroy_model.dart';
 
 /// A screen that displays the user's subscription payment history.
 ///
 /// This screen shows a list of all payments made by the user for subscriptions,
 /// including payment details, status, and the ability to view payment receipts.
+
+
 class PaymentHistoryScreen extends StatefulWidget {
   const PaymentHistoryScreen({super.key});
 
@@ -16,22 +14,40 @@ class PaymentHistoryScreen extends StatefulWidget {
 }
 
 class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
+  bool _hasLoadedOnce = false;
+
   @override
   void initState() {
     super.initState();
-    _loadPaymentHistory();
+    if (!_hasLoadedOnce) {
+      _loadPaymentHistory();
+      _hasLoadedOnce = true;
+    }
   }
 
-  void _loadPaymentHistory() async {
-    final provider = Provider.of<SubscriptionProvider>(context, listen: false);
-    await provider.getSubscriptionHistory(context);
+  Future<void> _loadPaymentHistory() async {
+    try {
+      final provider =
+          Provider.of<SubscriptionProvider>(context, listen: false);
+      await provider.getSubscriptionHistory(context);
+    } catch (e) {
+      if (mounted) {
+        ToastHelper.showError('Failed to load payment history');
+      }
+      debugPrint('Error loading payment history: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: RefreshIndicator(
+        onRefresh: _loadPaymentHistory,
+        color: AppColors.whiteColor,
+        backgroundColor: AppColors.indigo,
+        child: _buildBody(),
+      ),
     );
   }
 
@@ -43,13 +59,23 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           color: AppColors.whiteColor,
         ),
       ),
-      backgroundColor: AppColors.deepPurple,
-      foregroundColor: AppColors.whiteColor,
       centerTitle: true,
       elevation: 0,
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
+      ),
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.deepPurple,
+              AppColors.lightPurple,
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -58,18 +84,99 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     return Consumer<SubscriptionProvider>(
       builder: (context, provider, _) {
         if (provider.isLoading) {
-          return const PaymentHistoryShimmer();
+          return const SubscriptionHistoryShimmer();
+        }
+
+        if (provider.error != null) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildPullToRefreshHint(),
+              Expanded(child: _buildErrorState(provider.error!)),
+            ],
+          );
         }
 
         final paymentHistory =
             provider.subscriptionHistoryModel?.paymentHistory ?? [];
 
         if (paymentHistory.isEmpty) {
-          return _buildEmptyState();
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildPullToRefreshHint(),
+              Expanded(child: _buildEmptyState()),
+            ],
+          );
         }
 
-        return _buildPaymentList(paymentHistory);
+        return Column(
+          children: [
+            _buildPullToRefreshHint(),
+            Expanded(child: _buildPaymentList(paymentHistory)),
+          ],
+        );
       },
+    );
+  }
+
+  Widget _buildPullToRefreshHint() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.arrow_downward, size: 18, color: AppColors.greyText),
+          const SizedBox(width: 6),
+          Text(
+            'Pull down to refresh',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.greyText,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: AppColors.errorColor,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Something went wrong",
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.errorColor,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.greyText,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _loadPaymentHistory,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Try Again'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.deepPurple,
+              foregroundColor: AppColors.whiteColor,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -107,7 +214,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       padding: const EdgeInsets.all(16),
       itemCount: paymentHistory.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemBuilder: (_, index) => PaymentHistoryCard(
+      itemBuilder: (_, index) => SubscriptionHistoryCard(
         history: paymentHistory[index],
       ),
     );

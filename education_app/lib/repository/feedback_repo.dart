@@ -1,4 +1,3 @@
-
 import 'package:education_app/resources/exports.dart';
 
 class FeedbackRepository {
@@ -6,7 +5,7 @@ class FeedbackRepository {
   Future<FeedbackModel> giveFeedback(Map<String, dynamic> data) async {
     try {
       final response =
-          await _apiServices.getGetApiResponse(AppUrl.feedback);
+          await _apiServices.getPostApiResponse(AppUrl.feedback, data);
       if (kDebugMode) {
         print("Raw API Response: $response");
       }
@@ -19,10 +18,11 @@ class FeedbackRepository {
       rethrow;
     }
   }
+
   Future<FeedbackModel> giveMockTestFeedback(Map<String, dynamic> data) async {
     try {
       final response =
-      await _apiServices.getPostApiResponse(AppUrl.mockTestFeedback, data);
+          await _apiServices.getPostApiResponse(AppUrl.mockTestFeedback, data);
       if (kDebugMode) {
         print("Raw API Response: $response");
       }

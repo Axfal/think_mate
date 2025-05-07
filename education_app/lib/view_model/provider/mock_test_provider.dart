@@ -2,6 +2,7 @@
 
 import 'package:education_app/model/validate_user_model.dart';
 import 'package:education_app/resources/exports.dart';
+import 'package:education_app/utils/toast_helper.dart';
 
 import '../../model/hive_database_model/submitted_questions_model.dart';
 
@@ -131,29 +132,24 @@ class MockTestProvider with ChangeNotifier {
       }
 
       final response = await _mockTestRepo.fetchQuestions(data);
-
-      if (response.success == true && response.questions.isNotEmpty) {
+      if (response.success) {
         _questions = response;
-        _questionList = _questions!.questions;
+        _questionList = response.questions;
         _numberOfQuestions = _questionList.length;
-        _selectedOptions = List<int?>.filled(_questionList.length, null);
         _isSubmitted = List<bool>.filled(_questionList.length, false);
+        _selectedOptions = List<int?>.filled(_questionList.length, null);
         _isTrue = List<bool>.filled(_questionList.length, false);
-        _correctAnswerOptionIndex = List<int>.filled(_numberOfQuestions!, 0);
+        _correctAnswerOptionIndex = List<int>.filled(_questionList.length, 0);
         _showExplanation = List<bool>.filled(_questionList.length, false);
+      } else {
+        ToastHelper.showError("Failed to fetch questions");
       }
-    } catch (error) {
-      if (kDebugMode) {
-        print("Error fetching questions: $error");
-      }
-      _questions = null;
-      _questionList = [];
-      _numberOfQuestions = 0;
+    } catch (e) {
+      print("Error fetching questions: $e");
+      ToastHelper.showError("Failed to load questions");
     } finally {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loading = false;
-        notifyListeners();
-      });
+      _loading = false;
+      notifyListeners();
     }
   }
 
@@ -236,11 +232,7 @@ class MockTestProvider with ChangeNotifier {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please select an option before submitting!"),
-        ),
-      );
+      ToastHelper.showInfo("Please select an option before submitting!");
     }
 
     notifyListeners();
@@ -284,7 +276,6 @@ class MockTestProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   void restartTest() {
     resetProvider();

@@ -2,6 +2,8 @@
 
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:education_app/utils/screenshot_protector.dart';
+import 'package:education_app/utils/toast_helper.dart';
 
 class CreateMockTest extends StatefulWidget {
   const CreateMockTest({super.key});
@@ -19,7 +21,14 @@ class _CreateMockTestState extends State<CreateMockTest> {
   @override
   void initState() {
     super.initState();
+    ScreenshotProtector.enableProtection();
     fetchSubjects();
+  }
+
+  @override
+  void dispose() {
+    ScreenshotProtector.disableProtection();
+    super.dispose();
   }
 
   void fetchSubjects() async {
@@ -59,18 +68,29 @@ class _CreateMockTestState extends State<CreateMockTest> {
         appBar: AppBar(
           title: Text(
             'Create Mock Test',
-            style: AppTextStyle.heading2.copyWith(
+            style: AppTextStyle.heading3.copyWith(
               color: AppColors.whiteColor,
             ),
           ),
           centerTitle: true,
-          backgroundColor: AppColors.deepPurple,
           elevation: 0,
           leading: IconButton(
               onPressed: () {
                 Navigator.pop(context);
               },
               icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor)),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.deepPurple,
+                  AppColors.lightPurple,
+                ],
+              ),
+            ),
+          ),
         ),
         body: Container(
           decoration: BoxDecoration(
@@ -78,8 +98,8 @@ class _CreateMockTestState extends State<CreateMockTest> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppColors.deepPurple.withOpacity(0.1),
-                AppColors.lightPurple.withOpacity(0.05),
+                AppColors.deepPurple.withValues(alpha: 0.1),
+                AppColors.lightPurple.withValues(alpha: 0.05),
               ],
             ),
           ),
@@ -91,11 +111,11 @@ class _CreateMockTestState extends State<CreateMockTest> {
                   children: [
                     Center(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 10.0, bottom: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         child:
-                            Text('Please select options to generate mock test.',
+                            Text('Please select options to generate test.',
                                 style: AppTextStyle.bodyText1.copyWith(
-                                  color: AppColors.blackColor,
+                                  color: AppColors.redColor,
                                   fontWeight: FontWeight.bold,
                                 )),
                       ),
@@ -113,7 +133,7 @@ class _CreateMockTestState extends State<CreateMockTest> {
                           ),
                           child: ExpansionTile(
                             title: Text('Test Mode',
-                                style: AppTextStyle.heading3.copyWith(
+                                style: AppTextStyle.bodyText1.copyWith(
                                   color: AppColors.blackColor,
                                 )),
                             backgroundColor: Colors.transparent,
@@ -127,12 +147,21 @@ class _CreateMockTestState extends State<CreateMockTest> {
                                     ListTile(
                                       title: Text(
                                         'Tutor',
-                                        style: AppTextStyle.bodyText1.copyWith(
+                                        style: AppTextStyle.heading3.copyWith(
                                           color: AppColors.darkText,
                                         ),
                                       ),
                                       trailing: Switch(
-                                        activeColor: AppColors.deepPurple,
+                                        activeColor: AppColors.successColor,
+                                        inactiveThumbColor:
+                                            AppColors.lightIndigo,
+                                        inactiveTrackColor:
+                                            AppColors.dividerColor,
+                                        activeTrackColor:
+                                            AppColors.dividerColor,
+                                        trackOutlineColor:
+                                            WidgetStatePropertyAll(
+                                                WidgetStateColor.transparent),
                                         value: !enableTimer,
                                         onChanged: (value) {
                                           setState(() {
@@ -144,12 +173,21 @@ class _CreateMockTestState extends State<CreateMockTest> {
                                     ListTile(
                                       title: Text(
                                         'Timed',
-                                        style: AppTextStyle.bodyText1.copyWith(
+                                        style: AppTextStyle.heading3.copyWith(
                                           color: AppColors.darkText,
                                         ),
                                       ),
                                       trailing: Switch(
-                                        activeColor: AppColors.deepPurple,
+                                        activeColor: AppColors.successColor,
+                                        inactiveThumbColor:
+                                            AppColors.lightIndigo,
+                                        inactiveTrackColor:
+                                            AppColors.dividerColor,
+                                        activeTrackColor:
+                                            AppColors.dividerColor,
+                                        trackOutlineColor:
+                                            WidgetStatePropertyAll(
+                                                WidgetStateColor.transparent),
                                         value: enableTimer,
                                         onChanged: (value) {
                                           setState(() {
@@ -181,7 +219,7 @@ class _CreateMockTestState extends State<CreateMockTest> {
                               ),
                               child: ExpansionTile(
                                 title: Text('Subjects Mode',
-                                    style: AppTextStyle.heading3.copyWith(
+                                    style: AppTextStyle.bodyText1.copyWith(
                                       color: AppColors.blackColor,
                                     )),
                                 backgroundColor: Colors.transparent,
@@ -195,7 +233,7 @@ class _CreateMockTestState extends State<CreateMockTest> {
                                       String subjectName = entry.value;
                                       return ListTile(
                                         leading: Checkbox(
-                                          activeColor: AppColors.blackColor,
+                                          activeColor: AppColors.indigo,
                                           value: selectedSubjectIds
                                               .contains(subjectId),
                                           onChanged: (value) {
@@ -254,7 +292,7 @@ class _CreateMockTestState extends State<CreateMockTest> {
                           ),
                           child: ExpansionTile(
                             title: Text('Question Mode',
-                                style: AppTextStyle.heading3.copyWith(
+                                style: AppTextStyle.bodyText1.copyWith(
                                   color: AppColors.blackColor,
                                 )),
                             backgroundColor: Colors.transparent,
@@ -265,7 +303,7 @@ class _CreateMockTestState extends State<CreateMockTest> {
                                 children: [
                                   ..._questions.map((question) => ListTile(
                                         leading: Radio<String>(
-                                          activeColor: AppColors.primaryColor,
+                                          activeColor: AppColors.indigo,
                                           value: question,
                                           groupValue: selectedQuestion,
                                           onChanged: (value) {
@@ -332,7 +370,7 @@ class _CreateMockTestState extends State<CreateMockTest> {
                               ),
                               child: ExpansionTile(
                                 title: Text('Number of Questions',
-                                    style: AppTextStyle.heading3.copyWith(
+                                    style: AppTextStyle.bodyText1.copyWith(
                                       color: AppColors.blackColor,
                                     )),
                                 backgroundColor: Colors.transparent,
@@ -367,10 +405,9 @@ class _CreateMockTestState extends State<CreateMockTest> {
                                             ),
                                             Expanded(
                                               child: Slider(
-                                                activeColor:
-                                                    AppColors.deepPurple,
+                                                activeColor: AppColors.indigo,
                                                 inactiveColor: AppColors
-                                                    .lightPurple
+                                                    .lightIndigo
                                                     .withOpacity(0.3),
                                                 value: clampedValue,
                                                 min: minQuestions,
@@ -474,17 +511,14 @@ class _CreateMockTestState extends State<CreateMockTest> {
                                   }
                                 }
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          "Please select all options before submitting!")),
-                                );
+                                ToastHelper.showError(
+                                    "Please select all options before submitting!");
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 32, vertical: 16),
-                              elevation: 2,
+                              // padding: EdgeInsets.symmetric(
+                              //     horizontal: 32, vertical: 16),
+                              elevation: 1,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.0),
@@ -498,8 +532,8 @@ class _CreateMockTestState extends State<CreateMockTest> {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    AppColors.deepPurple,
-                                    AppColors.lightPurple,
+                                    AppColors.indigo,
+                                    AppColors.lightIndigo,
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(12.0),

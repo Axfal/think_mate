@@ -6,6 +6,7 @@ import '../../model/create_mock_test_model.dart';
 import '../../model/hive_database_model/submitted_questions_model.dart';
 import '../../model/mock_test_question_count_model.dart';
 import '../../repository/create_mock_test_repo.dart';
+import 'package:education_app/utils/toast_helper.dart';
 
 class CreateMockTestProvider with ChangeNotifier {
   CreateMockTestRepo createMockTestRepo = CreateMockTestRepo();
@@ -107,7 +108,7 @@ class CreateMockTestProvider with ChangeNotifier {
       };
 
       _mockTestQuestionCountModel =
-      await mockTestQuestionRepo.getMockTestQuestionCount(data);
+          await mockTestQuestionRepo.getMockTestQuestionCount(data);
 
       if (_mockTestQuestionCountModel?.success == true &&
           _mockTestQuestionCountModel?.totalAvailable != null) {
@@ -122,6 +123,7 @@ class CreateMockTestProvider with ChangeNotifier {
       notifyListeners(); // Notify listeners after the process is complete
     }
   }
+
   void setNumberOfQuestion(double value) {
     _numberOfQuestions = value.toInt();
     if (kDebugMode) {
@@ -172,63 +174,42 @@ class CreateMockTestProvider with ChangeNotifier {
   List<Map<String, dynamic>> get questionsToPost => _questionsToPost;
 
   void submitAnswer(BuildContext context, int index) {
-    if (_selectedOptions.isNotEmpty && index < _selectedOptions.length && _selectedOptions[index] != null) {
-      if (_isSubmitted.isNotEmpty && index >= 0 && index < _isSubmitted.length) {
-        _isSubmitted[index] = true;
+    if (_selectedOptions[index] != null) {
+      _isSubmitted[index] = true;
+
+      final correctAnswer = _questionList[index].correctAnswer?.toLowerCase();
+      final selectedOption = _selectedOptions[index];
+
+      if (correctAnswer != null && selectedOption != null) {
+        final correctOptionIndex = correctOptionMapping[correctAnswer];
+        _correctAnswerOptionIndex![index] = correctOptionIndex!;
+
+        if (selectedOption == correctOptionIndex) {
+          _isTrue![index] = true;
+          _correctAns++;
+        } else {
+          _isTrue![index] = false;
+          _incorrectAns++;
+        }
+
+        Map<String, dynamic> questionData = {
+          "question_id": _questionList[index].id,
+          "selected_option": selectedOption,
+          "is_correct": _isTrue![index],
+        };
+
+        _questionsToPost.add(questionData);
       }
 
-      if (_questionList.isNotEmpty && index < _questionList.length) {
-        final question = _questionList[index];
-        String correctAnswerKey = question.correctAnswer!.toLowerCase();
-        int? correctAnswerIndex = correctOptionMapping[correctAnswerKey];
-        _correctAnswerOptionIndex![index] = correctAnswerIndex!;
-        bool isCorrect = (_selectedOptions[index] == correctAnswerIndex);
-
-        if (isCorrect) {
-          _correctAns++;
-          _isTrue![index] = true;
-        } else {
-          _incorrectAns++;
-          _isTrue![index] = false;
-        }
-
-        // Add question data in the required format for API submission
-        _questionsToPost.add({
-          'question_id': question.id,
-          'question_result': isCorrect ? "correct" : "incorrect",
-          'question_status': "submitted",
-          'question_text': question.question,
-          'selected_option': _selectedOptions[index],
-          'correct_option': correctAnswerIndex,
-        });
-
-        // Check if all questions are submitted
-        bool allSubmitted = _isSubmitted.every((submitted) => submitted == true);
-        print("allSubmitted ===> $allSubmitted");
-
-        if (allSubmitted) {
-          Future.microtask(() {
-            Navigator.pushReplacementNamed(
-              context,
-              RoutesName.resultScreen,
-              arguments: {
-                'correctAns': _correctAns,
-                'incorrectAns': _incorrectAns,
-                'totalQuestions': _numberOfQuestions,
-                'questions': _questionsToPost, // Pass the full questions data
-              },
-            );
-          });
-        }
+      if (index < _questionList.length - 1) {
+        _isNxtEnabled = true;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Please select an option before submitting!"),
-          ),
-        );
+        _isNxtEnabled = false;
       }
 
       notifyListeners();
+    } else {
+      ToastHelper.showError("Please select an option before submitting!");
     }
   }
 

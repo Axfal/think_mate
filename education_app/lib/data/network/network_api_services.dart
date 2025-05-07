@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:education_app/resources/exports.dart';
 import 'package:http/http.dart' as http;
 
@@ -96,6 +95,44 @@ class NetworkApiServices extends BaseApiServices {
       }
 
       return returnResponse(response); // Use response handler
+    } on SocketException {
+      throw FetchDataException("No Internet Connection");
+    } on TimeoutException {
+      throw FetchDataException("API Timeout: The request took too long!");
+    } catch (error) {
+      if (kDebugMode) {
+        print("API Error: $error");
+      }
+      throw Exception("API error: ${error.toString()}");
+    }
+  }
+
+  @override
+  Future<dynamic> getDeleteRequestApiResponse(String url, dynamic data) async {
+    try {
+      if (kDebugMode) {
+        print("Sending DELETE request...");
+        print("URL: $url");
+        print("Request Data: ${jsonEncode(data)}");
+      }
+
+      final response = await http
+          .delete(
+            Uri.parse(url),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode(data),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      if (kDebugMode) {
+        print("Response Status: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+      }
+
+      return returnResponse(response);
     } on SocketException {
       throw FetchDataException("No Internet Connection");
     } on TimeoutException {

@@ -3,6 +3,8 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:no_screenshot/no_screenshot.dart';
+import 'package:education_app/utils/toast_helper.dart';
+import 'package:education_app/utils/screenshot_protector.dart';
 
 class CreatedMockTestScreen extends StatefulWidget {
   final bool testMode;
@@ -24,13 +26,58 @@ class CreatedMockTestScreen extends StatefulWidget {
 
 class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
   final NoScreenshot _noScreenshot = NoScreenshot.instance;
+
   @override
   void initState() {
     super.initState();
-    _noScreenshot.screenshotOn();
+    _initializeProtection();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getQuestions();
     });
+  }
+
+  Future<void> _initializeProtection() async {
+    try {
+      // Force reset protection to ensure clean state
+      await ScreenshotProtector.forceReset();
+      await _noScreenshot.screenshotOn();
+      debugPrint('Screenshot protection initialized for test screen');
+    } catch (e) {
+      debugPrint('Error initializing screenshot protection: $e');
+    }
+  }
+
+  void _enableScreenshotProtection() {
+    try {
+      ScreenshotProtector.enableProtection();
+      _noScreenshot.screenshotOn();
+      debugPrint('Screenshot protection enabled for test screen');
+    } catch (e) {
+      debugPrint('Error enabling screenshot protection: $e');
+    }
+  }
+
+  void _disableScreenshotProtection() {
+    try {
+      ScreenshotProtector.disableProtection();
+      _noScreenshot.screenshotOff();
+      debugPrint('Screenshot protection disabled on leaving test screen');
+    } catch (e) {
+      debugPrint('Error disabling screenshot protection: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _disableScreenshotProtection();
+    super.dispose();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    // Re-initialize protection on hot reload
+    _initializeProtection();
   }
 
   void getQuestions() async {
@@ -46,7 +93,7 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
     final testId = subjectProvider.testId;
 
     if (userId == null) {
-      print("ERROR: User ID is null! Cannot fetch questions.");
+      ToastHelper.showError("User ID is null! Cannot fetch questions.");
       return;
     }
 
@@ -65,6 +112,11 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
     };
 
     await provider.getQuestions(context, data);
+
+    // Re-enable protection after questions are fetched
+    if (mounted) {
+      await _initializeProtection();
+    }
   }
 
   String removeHtmlTags(String? htmlText) {
@@ -81,24 +133,37 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Re-enable protection on any rebuild just to be safe
+    _enableScreenshotProtection();
+
     final provider = Provider.of<CreateMockTestProvider>(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            onPressed: () {
-              provider.restartTest();
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor)),
+          onPressed: () {
+            provider.restartTest();
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
+        ),
         title: Text(
           'Mock Test',
-          style: AppTextStyle.heading2.copyWith(
-            color: AppColors.whiteColor,
-          ),
+          style: AppTextStyle.heading3.copyWith(color: AppColors.whiteColor),
         ),
         centerTitle: true,
-        backgroundColor: AppColors.deepPurple,
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -106,13 +171,13 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.deepPurple.withOpacity(0.1),
-              AppColors.lightPurple.withOpacity(0.05),
+              AppColors.deepPurple.withValues(alpha: 0.1),
+              AppColors.lightPurple.withValues(alpha: 0.05),
             ],
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15),
           child: Consumer<CreateMockTestProvider>(
             builder: (context, provider, child) {
               if (provider.loading) {
@@ -120,21 +185,25 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
               }
 
               if (provider.questionList.isEmpty) {
-                return const Center(
-                    child: Text("No questions available. Please try again."));
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    if (!provider.isTestStarted)
-                      _buildStartTestSection(provider),
-                    if (provider.isTestStarted) _buildTestControls(provider),
-                    const SizedBox(height: 10),
-                    _buildQuestionCard(provider),
-                  ],
+                return Center(
+                  child: Text(
+                    "No questions available. Please try again.",
+                    style: AppTextStyle.bodyText1
+                        .copyWith(color: AppColors.darkText),
+                  ),
                 );
               }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  if (!provider.isTestStarted) _buildStartTestSection(provider),
+                  if (provider.isTestStarted) _buildTestControls(provider),
+                  const SizedBox(height: 10),
+                  _buildQuestionCard(provider),
+                ],
+              );
             },
           ),
         ),
@@ -149,28 +218,46 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
         'Total Time: ${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} min';
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ElevatedButton(
-          onPressed: provider.startTest,
-          style: ElevatedButton.styleFrom(
-            foregroundColor: AppColors.whiteColor,
-            backgroundColor: AppColors.deepPurple,
-            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-            textStyle: AppTextStyle.button.copyWith(
-              color: AppColors.whiteColor,
+        Container(
+          height: 50,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.indigo, AppColors.lightIndigo],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.purpleShadow,
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: provider.startTest,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Start Test',
+              style: AppTextStyle.button.copyWith(color: AppColors.whiteColor),
             ),
           ),
-          child: Text('Start Test', style: AppTextStyle.button),
         ),
-        const SizedBox(height: 20),
         if (widget.testMode)
           Text(
             formattedTime,
-            style: AppTextStyle.heading3.copyWith(
-              color: AppColors.deepPurple,
-            ),
+            style:
+                AppTextStyle.heading3.copyWith(color: AppColors.primaryColor),
           ),
       ],
     );
@@ -178,7 +265,7 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
 
   Widget _buildTestControls(CreateMockTestProvider provider) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         if (widget.testMode)
           CountdownTimer(
@@ -186,10 +273,11 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
             onEnd: () => provider.navigate(context),
             widgetBuilder: (_, time) {
               if (time == null) {
-                return Text('Time\'s up!',
-                    style: AppTextStyle.heading3.copyWith(
-                      color: AppColors.deepPurple,
-                    ));
+                return Text(
+                  'Time\'s up!',
+                  style:
+                      AppTextStyle.bodyText1.copyWith(color: AppColors.indigo),
+                );
               }
 
               String minutes = (time.min ?? 0).toString();
@@ -197,29 +285,65 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
 
               return Text(
                 'Time Left: $minutes:$seconds minutes',
-                style: AppTextStyle.heading3.copyWith(
-                  color: AppColors.deepPurple,
-                ),
+                style: AppTextStyle.bodyText1.copyWith(color: AppColors.indigo),
               );
             },
           ),
+        Container(
+          height: 50,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.redColor, AppColors.redColor],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.darkShadow,
+                blurRadius: 1,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: () => provider.navigate(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'End Test',
+              style: AppTextStyle.button.copyWith(color: AppColors.whiteColor),
+            ),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildQuestionCard(CreateMockTestProvider provider) {
     if (provider.questionList.isEmpty) {
-      return const Expanded(
+      return Expanded(
         child: Center(
-          child: Text('No questions available'),
+          child: Text(
+            'No questions available',
+            style: AppTextStyle.bodyText1.copyWith(color: AppColors.darkText),
+          ),
         ),
       );
     }
 
     if (provider.currentIndex >= provider.questionList.length) {
-      return const Expanded(
+      return Expanded(
         child: Center(
-          child: Text('Invalid question index'),
+          child: Text(
+            'Invalid question index',
+            style: AppTextStyle.bodyText1.copyWith(color: AppColors.darkText),
+          ),
         ),
       );
     }
@@ -228,32 +352,68 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
 
     return Expanded(
       child: Card(
-        elevation: 4,
+        elevation: 1,
+        color: AppColors.whiteColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: [
-              Text(
-                "${provider.currentIndex + 1}) ${removeHtmlTags(currentQuestion.question)}",
-                style: AppTextStyle.heading3.copyWith(
-                  color: AppColors.darkText,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "${provider.currentIndex + 1}) ",
+                    style: AppTextStyle.questionText.copyWith(
+                      color: AppColors.darkText,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      removeHtmlTags(currentQuestion.question),
+                      style: AppTextStyle.questionText.copyWith(
+                        color: AppColors.darkText,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 10),
-              ListTile(
+              ...List.generate(4, (index) {
+                String? optionText;
+                switch (index) {
+                  case 0:
+                    optionText = currentQuestion.option1;
+                    break;
+                  case 1:
+                    optionText = currentQuestion.option2;
+                    break;
+                  case 2:
+                    optionText = currentQuestion.option3;
+                    break;
+                  case 3:
+                    optionText = currentQuestion.option4;
+                    break;
+                }
+                return ListTile(
                   title: Text(
-                      removeHtmlTags(currentQuestion.option1)
-                          .replaceAll(RegExp(r'[a-d]\)'), '')
-                          .trim(),
-                      style: AppTextStyle.bodyText1.copyWith(
-                        color: AppColors.darkText,
-                      )),
+                    removeHtmlTags(optionText)
+                        .replaceAll(RegExp(r'[a-d]\)'), '')
+                        .trim(),
+                    style: AppTextStyle.bodyText1
+                        .copyWith(color: AppColors.darkText),
+                  ),
                   leading: Radio<int>(
-                    value: 0,
+                    activeColor: AppColors.indigo,
+                    value: index,
                     groupValue: provider.selectedOptions[provider.currentIndex],
                     onChanged: !provider.isSubmitted[provider.currentIndex]
                         ? (value) {
@@ -266,145 +426,31 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
                   ),
                   trailing: provider.isSubmitted[provider.currentIndex] == false
                       ? null
-                      : provider.isTrue![provider.currentIndex] &&
-                              0 ==
-                                  provider
-                                      .selectedOptions[provider.currentIndex]
-                          ? Icon(Icons.check, color: Colors.green, weight: 100)
-                          : provider.correctAnswerOptionIndex![
-                                      provider.currentIndex] ==
-                                  0
-                              ? Icon(Icons.check,
-                                  color: Colors.green, weight: 100)
-                              : provider.selectedOptions[
-                                          provider.currentIndex] !=
-                                      0
-                                  ? null
-                                  : Icon(Icons.close,
-                                      color: Colors.red, weight: 100)),
-              ListTile(
-                  title: Text(
-                      removeHtmlTags(currentQuestion.option2)
-                          .replaceAll(RegExp(r'[a-d]\)'), '')
-                          .trim(),
-                      style: AppTextStyle.bodyText1.copyWith(
-                        color: AppColors.darkText,
-                      )),
-                  leading: Radio<int>(
-                    value: 1, // Current option value
-                    groupValue: provider.selectedOptions[provider.currentIndex],
-                    onChanged: provider.isSubmitted[provider.currentIndex]
-                        ? null
-                        : (value) {
-                            if (value != null) {
-                              provider.onChangeRadio(
-                                  provider.currentIndex, value);
-                            }
-                          },
-                  ),
-                  trailing: provider.isSubmitted[provider.currentIndex] == false
-                      ? null
-                      : provider.isTrue![provider.currentIndex] &&
-                              1 ==
-                                  provider
-                                      .selectedOptions[provider.currentIndex]
-                          ? Icon(Icons.check, color: Colors.green, weight: 100)
-                          : provider.correctAnswerOptionIndex![
-                                      provider.currentIndex] ==
-                                  1
-                              ? Icon(Icons.check,
-                                  color: Colors.green, weight: 100)
-                              : provider.selectedOptions[
-                                          provider.currentIndex] !=
-                                      1
-                                  ? null
-                                  : Icon(Icons.close,
-                                      color: Colors.red, weight: 100)),
-              ListTile(
-                  title: Text(
-                      removeHtmlTags(currentQuestion.option3)
-                          .replaceAll(RegExp(r'[a-d]\)'), '')
-                          .trim(),
-                      style: AppTextStyle.bodyText1.copyWith(
-                        color: AppColors.darkText,
-                      )),
-                  leading: Radio<int>(
-                    value: 2, // Current option value
-                    groupValue: provider.selectedOptions[provider.currentIndex],
-                    onChanged: provider.isSubmitted[provider.currentIndex]
-                        ? null
-                        : (value) {
-                            if (value != null) {
-                              provider.onChangeRadio(
-                                  provider.currentIndex, value);
-                            }
-                          },
-                  ),
-                  trailing: provider.isSubmitted[provider.currentIndex] == false
-                      ? null
-                      : provider.isTrue![provider.currentIndex] &&
-                              2 ==
-                                  provider
-                                      .selectedOptions[provider.currentIndex]
-                          ? Icon(Icons.check, color: Colors.green, weight: 100)
-                          : provider.correctAnswerOptionIndex![
-                                      provider.currentIndex] ==
-                                  2
-                              ? Icon(Icons.check,
-                                  color: Colors.green, weight: 100)
-                              : provider.selectedOptions[
-                                          provider.currentIndex] !=
-                                      2
-                                  ? null
-                                  : Icon(Icons.close,
-                                      color: Colors.red, weight: 100)),
-              ListTile(
-                  title: Text(
-                      removeHtmlTags(currentQuestion.option4)
-                          .replaceAll(RegExp(r'[a-d]\)'), '')
-                          .trim(),
-                      style: AppTextStyle.bodyText1.copyWith(
-                        color: AppColors.darkText,
-                      )),
-                  leading: Radio<int>(
-                    value: 3,
-                    groupValue: provider.selectedOptions[provider.currentIndex],
-                    onChanged: !provider.isSubmitted[provider.currentIndex]
-                        ? (value) {
-                            if (value != null) {
-                              provider.onChangeRadio(
-                                  provider.currentIndex, value);
-                            }
-                          }
-                        : null,
-                  ),
-                  trailing: provider.isSubmitted[provider.currentIndex] == false
-                      ? null
-                      : provider.isTrue![provider.currentIndex] &&
-                              3 ==
-                                  provider
-                                      .selectedOptions[provider.currentIndex]
-                          ? Icon(Icons.check, color: Colors.green, weight: 100)
-                          : provider.correctAnswerOptionIndex![
-                                      provider.currentIndex] ==
-                                  3
-                              ? Icon(Icons.check,
-                                  color: Colors.green, weight: 100)
-                              : provider.selectedOptions[
-                                          provider.currentIndex] !=
-                                      3
-                                  ? null
-                                  : Icon(Icons.close,
-                                      color: Colors.red, weight: 100)),
-              const SizedBox(height: 10),
+                      : _buildAnswerIcon(provider, index),
+                );
+              }),
+              SizedBox(height: 16),
               _buildNavigationButtons(provider),
-              const SizedBox(height: 10),
+              SizedBox(height: 16),
               _buildExplanation(provider),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget? _buildAnswerIcon(CreateMockTestProvider provider, int optionIndex) {
+    if (provider.isTrue![provider.currentIndex] &&
+        optionIndex == provider.selectedOptions[provider.currentIndex]) {
+      return Icon(Icons.check, color: AppColors.successColor);
+    } else if (provider.correctAnswerOptionIndex![provider.currentIndex] ==
+        optionIndex) {
+      return Icon(Icons.check, color: AppColors.successColor);
+    } else if (provider.selectedOptions[provider.currentIndex] == optionIndex) {
+      return Icon(Icons.close, color: AppColors.errorColor);
+    }
+    return null;
   }
 
   Widget _buildNavigationButtons(CreateMockTestProvider provider) {
@@ -414,15 +460,20 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
         ElevatedButton(
           onPressed: provider.isPrevEnabled ? provider.goToPrevious : null,
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor:
-                provider.isPrevEnabled ? AppColors.primaryColor : Colors.grey,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            textStyle: const TextStyle(fontSize: 18),
+            foregroundColor: AppColors.whiteColor,
+            backgroundColor: provider.isPrevEnabled
+                ? AppColors.indigo
+                : AppColors.lightIndigo,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
+          child: Icon(
+            Icons.arrow_back,
+            color: provider.isPrevEnabled
+                ? AppColors.whiteColor
+                : AppColors.darkText,
           ),
         ),
         ElevatedButton(
@@ -431,26 +482,40 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
               ? null
               : () => provider.submitAnswer(context, provider.currentIndex),
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: AppColors.primaryColor,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            textStyle: const TextStyle(fontSize: 18),
+            foregroundColor: AppColors.whiteColor,
+            backgroundColor: AppColors.indigo,
+            padding: EdgeInsets.symmetric(horizontal: 35),
+            elevation: 0.5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: const Text(
+          child: Text(
             'Submit',
-            style: TextStyle(color: Colors.white),
+            style: AppTextStyle.button.copyWith(
+              color: AppColors.whiteColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         ElevatedButton(
           onPressed: provider.isNxtEnabled ? provider.goToNext : null,
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor:
-                provider.isNxtEnabled ? AppColors.primaryColor : Colors.grey,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            textStyle: const TextStyle(fontSize: 18),
+            foregroundColor: AppColors.whiteColor,
+            backgroundColor: provider.isNxtEnabled
+                ? AppColors.indigo
+                : AppColors.lightIndigo,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          child: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+          child: Icon(
+            Icons.arrow_forward,
+            color: provider.isNxtEnabled
+                ? AppColors.whiteColor
+                : AppColors.darkText,
+          ),
         ),
       ],
     );
@@ -461,36 +526,66 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            if (provider.questionList.isNotEmpty &&
-                provider.currentIndex < provider.questionList.length) {
-              showFeedbackDialog(
-                context,
-                authProvider.userSession!.userId,
-                authProvider.userSession!.testId,
-                provider.questionList[provider.currentIndex].id!,
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: AppColors.primaryColor,
-            padding: EdgeInsets.symmetric(horizontal: 90, vertical: 15),
-            textStyle: TextStyle(fontSize: 18),
+        Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.indigo, AppColors.lightIndigo],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.darkShadow,
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
-          child: Text('Feedback'),
+          child: ElevatedButton(
+            onPressed: () {
+              if (provider.questionList.isNotEmpty &&
+                  provider.currentIndex < provider.questionList.length) {
+                showFeedbackDialog(
+                  context,
+                  authProvider.userSession!.userId,
+                  authProvider.userSession!.testId,
+                  provider.questionList[provider.currentIndex].id!,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Feedback',
+              style: AppTextStyle.button.copyWith(color: AppColors.whiteColor),
+            ),
+          ),
         ),
-        SizedBox(
-          height: 5,
-        ),
+        SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Show Explanation', style: AppTextStyle.questionText),
+            Text(
+              'Show Explanation',
+              style: AppTextStyle.bodyText1.copyWith(
+                color: AppColors.darkText,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             Switch(
-              activeColor: AppColors.primaryColor,
+              activeColor: AppColors.successColor,
+              inactiveThumbColor: AppColors.lightIndigo,
+              inactiveTrackColor: AppColors.dividerColor,
+              activeTrackColor: AppColors.dividerColor,
+              trackOutlineColor: MaterialStateProperty.all(Colors.transparent),
               value: provider.showExplanation[provider.currentIndex],
               onChanged: (value) => provider.toggleExplanationSwitch(value),
             ),
@@ -498,9 +593,16 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
         ),
         if (provider.showExplanation[provider.currentIndex] &&
             provider.isSubmitted[provider.currentIndex])
-          Text(
-            removeHtmlTags(provider.questionList[provider.currentIndex].detail),
-            style: AppTextStyle.answerText,
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: Text(
+              removeHtmlTags(
+                  provider.questionList[provider.currentIndex].detail),
+              style: AppTextStyle.bodyText1.copyWith(
+                color: AppColors.darkText,
+                height: 1.5,
+              ),
+            ),
           ),
       ],
     );
@@ -510,90 +612,136 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
       BuildContext context, int userId, int testId, int questionId) {
     final formKey = GlobalKey<FormState>();
     TextEditingController feedbackController = TextEditingController();
+    final provider =
+        Provider.of<CreateMockTestProvider>(context, listen: false);
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20), // Rounded corners
-        ),
-        title: Center(
-          child: Text(
-            'Share Feedback',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        ),
-        contentPadding: EdgeInsets.all(20),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: feedbackController,
-                  decoration: InputDecoration(
-                    labelText: 'Your Feedback',
-                    hintText: 'Enter any issues or suggestions',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.whiteColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Share Feedback',
+                    style: AppTextStyle.heading3.copyWith(
+                      color: AppColors.darkText,
+                      fontWeight: FontWeight.w600,
                     ),
-                    filled: true,
-                    fillColor: Colors.grey[100], // Soft background inside input
                   ),
-                  maxLines: 5,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your feedback';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 25),
-                SizedBox(
-                    width: double.infinity,
-                    child: Consumer<FeedbackProvider>(
-                      builder: (context, feedbackProvider, _) {
-                        return ElevatedButton(
-                          onPressed: feedbackProvider.isLoading
-                              ? null
-                              : () {
-                                  Map<String, dynamic> feedbackData = {
-                                    "user_id": "123",
-                                    "feedback": "Great app!"
-                                  };
-                                  feedbackProvider.giveFeedback(
-                                      context, feedbackData);
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: feedbackController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your feedback',
+                      hintStyle: AppTextStyle.bodyText1.copyWith(
+                        color: AppColors.darkText.withValues(alpha: 0.5),
+                      ),
+                      filled: true,
+                      fillColor: AppColors.deepPurple.withValues(alpha: 0.05),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppColors.greyOverlay70),
+                      ),
+                    ),
+                    maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your feedback';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          feedbackController.clear();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Cancel',
+                          style: AppTextStyle.bodyText1.copyWith(
+                            color: AppColors.darkText,
                           ),
-                          child: feedbackProvider.isLoading
-                              ? CupertinoActivityIndicator(color: Colors.white)
-                              : Text(
-                                  'Submit Feedback',
-                                  style: TextStyle(
-                                      fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Consumer<FeedbackProvider>(
+                        builder: (context, feedbackProvider, child) {
+                          return ElevatedButton(
+                            onPressed: feedbackProvider.isLoading
+                                ? null
+                                : () async {
+                                    if (formKey.currentState?.validate() ??
+                                        false) {
+                                      Map<String, dynamic> data = {
+                                        "user_id": userId,
+                                        "test_id": testId,
+                                        "question_id": questionId,
+                                        "detail": feedbackController.text,
+                                        "subject_id": widget.subjectMode.first,
+                                        "chapter_id": 0
+                                      };
+                                      await feedbackProvider.giveFeedback(
+                                          context, data);
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.indigo,
+                              foregroundColor: AppColors.textColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: feedbackProvider.isLoading
+                                ? SizedBox(
+                                    child: CupertinoActivityIndicator(
+                                        color: AppColors.whiteColor),
+                                  )
+                                : Text(
+                                    'Submit',
+                                    style: AppTextStyle.bodyText1.copyWith(
+                                      color: AppColors.textColor,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white),
-                                ),
-                        );
-                      },
-                    )),
-              ],
+                                    ),
+                                  ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

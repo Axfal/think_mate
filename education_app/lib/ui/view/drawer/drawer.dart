@@ -11,8 +11,8 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.deepPurple,
-              AppColors.lightPurple,
+              AppColors.indigo,
+              AppColors.lightIndigo,
             ],
           ),
         ),
@@ -62,8 +62,7 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                           backgroundImage: (imageUrl.isNotEmpty &&
                                   !imageUrl.contains("null"))
                               ? NetworkImage(imageUrl)
-                              : const AssetImage(
-                                      'assets/images/default_profile.png')
+                              : const AssetImage('assets/images/login.png')
                                   as ImageProvider,
                           onBackgroundImageError: (_, __) {
                             debugPrint("Error loading image: $imageUrl");
@@ -93,7 +92,7 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                 ),
                 SizedBox(height: 20),
 
-                // Menu Items
+                /// Menu Items
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -109,7 +108,15 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                             context, RoutesName.previousTestScreen);
                       }, Icons.history_rounded),
                       drawerItems('Notes', () {
-                        Navigator.pushNamed(context, RoutesName.noteScreen);
+                        final authProvider =
+                            Provider.of<AuthProvider>(context, listen: false);
+                        authProvider.loadUserSession();
+
+                        if (authProvider.userSession!.userType == "free") {
+                          _showPremiumAccessDialog(context);
+                        } else {
+                          Navigator.pushNamed(context, RoutesName.noteScreen);
+                        }
                       }, Icons.note_alt_outlined),
                       drawerItems('My Notebook', () {
                         Navigator.pushNamed(
@@ -130,6 +137,7 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                             context,
                             listen: false);
                         logOut(context);
+                        // questionProvider.clearSubmittedQuestions();
                       }, Icons.logout_rounded),
                     ],
                   ),
@@ -140,6 +148,41 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
         ),
       ),
     );
+
+void _showPremiumAccessDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text("Premium Access Required"),
+      content: Text(
+        "This feature is available only for premium users. Upgrade now to unlock exclusive content and enhance your learning experience!",
+        textAlign: TextAlign.center,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      actions: [
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushReplacementNamed(
+                  context, RoutesName.subscriptionScreen);
+            },
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              backgroundColor: AppColors.primaryColor,
+            ),
+            child:
+                Text('Get Subscription', style: TextStyle(color: Colors.white)),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
 Widget drawerItems(String title, VoidCallback onTap, IconData icon) => InkWell(
       onTap: onTap,
@@ -206,7 +249,7 @@ void logOut(BuildContext context) {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.logout_rounded,
+                Icons.logout,
                 color: AppColors.redColor,
                 size: 40,
               ),
@@ -222,7 +265,7 @@ void logOut(BuildContext context) {
             ),
             SizedBox(height: 8),
 
-            // Message
+            /// Message
             Text(
               'Are you sure you want to logout?',
               textAlign: TextAlign.center,
@@ -232,7 +275,7 @@ void logOut(BuildContext context) {
             ),
             SizedBox(height: 24),
 
-            // Buttons
+            /// Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -242,7 +285,7 @@ void logOut(BuildContext context) {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.deepPurple),
+                      side: BorderSide(color: AppColors.indigo),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -250,14 +293,14 @@ void logOut(BuildContext context) {
                     child: Text(
                       'Cancel',
                       style: AppTextStyle.button.copyWith(
-                        color: AppColors.deepPurple,
+                        color: AppColors.darkText,
                       ),
                     ),
                   ),
                 ),
                 SizedBox(width: 16),
 
-                // Logout Button
+                /// Logout Button
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -284,7 +327,7 @@ void logOut(BuildContext context) {
                     child: Text(
                       'Logout',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textColor,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),

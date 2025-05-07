@@ -39,13 +39,12 @@ class _ResultScreenState extends State<ResultScreen> {
     });
   }
 
-
   void postTestResult() async {
-    if (_hasPostedResult) return;  // Prevent duplicate posting
-    _hasPostedResult = true;       // Mark as posted
+    if (_hasPostedResult) return;
+    _hasPostedResult = true;
 
     final provider =
-    Provider.of<PostTestResultProvider>(context, listen: false);
+        Provider.of<PostTestResultProvider>(context, listen: false);
     print(widget.questions);
     if (widget.questions.isNotEmpty) {
       await provider.postTestResult(context, widget.questions);
@@ -54,20 +53,18 @@ class _ResultScreenState extends State<ResultScreen> {
     }
   }
 
-
   void setMapData() {
     dataMap = {
       'Correct': widget.correctAns.toDouble(),
       'Incorrect': widget.incorrectAns.toDouble(),
       'Unattempted': widget.totalQues > 0
-          ? widget.totalQues.toDouble() - (widget.correctAns + widget.incorrectAns)
-          : 0.0,  // Handle zero division safely
+          ? widget.totalQues.toDouble() -
+              (widget.correctAns + widget.incorrectAns)
+          : 0.0,
     };
   }
 
-
   void isPassed() {
-    // Avoid division by zero by checking if totalQues is greater than 0
     final percent = widget.totalQues > 0
         ? (widget.correctAns / widget.totalQues) * 100
         : 0.0;
@@ -80,20 +77,63 @@ class _ResultScreenState extends State<ResultScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(
-            message,
-            style: AppTextStyle.profileTitleText,
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
+          child: Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.whiteColor,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyle.heading3.copyWith(
+                    color: AppColors.darkText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  message,
+                  style: AppTextStyle.profileTitleText.copyWith(
+                    color: AppColors.darkText.withValues(alpha: 0.85),
+                  ),
+                ),
+                SizedBox(height: 28),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.indigo,
+                        foregroundColor: AppColors.whiteColor,
+                        padding: EdgeInsets.symmetric(horizontal: 28),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Close',
+                        style: AppTextStyle.bodyText1.copyWith(
+                          color: AppColors.whiteColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -101,6 +141,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -108,67 +149,254 @@ class _ResultScreenState extends State<ResultScreen> {
           style: AppTextStyle.appBarText,
         ),
         centerTitle: true,
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.deepPurple,
         automaticallyImplyLeading: false,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            PieChart(
-              dataMap: dataMap,
-              colorList: [
-                Colors.green.shade600,
-                Colors.red.shade600,
-                Colors.yellow.shade600,
-              ],
-              ringStrokeWidth: 30,
-              chartType: ChartType.disc,
-              animationDuration: const Duration(seconds: 2),
+      body: Center(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: isTablet ? 80 : 16,
+              vertical: isTablet ? 32 : 16,
             ),
-            const SizedBox(height: 30),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  'Correct Answers: ${dataMap['Correct']?.toInt()}',
-                  style: AppTextStyle.profileTitleText,
-                ),
-                Text(
-                  'Incorrect Answers: ${dataMap['Incorrect']?.toInt()}',
-                  style: AppTextStyle.profileTitleText,
-                ),
-                Text(
-                  'Unattempted: ${dataMap['Unattempted']?.toInt() ?? 0}',
-                  style: AppTextStyle.profileTitleText,
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.purpleShadow.withValues(alpha: 0.10),
+                        blurRadius: 16,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 48 : 20,
+                    vertical: isTablet ? 40 : 24,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Text(
+                      //   widget.subject,
+                      //   style: AppTextStyle.heading2.copyWith(
+                      //     color: AppColors.deepPurple,
+                      //     fontWeight: FontWeight.bold,
+                      //     fontSize: isTablet ? 32 : 24,
+                      //   ),
+                      //   textAlign: TextAlign.center,
+                      // ),
+                      // SizedBox(height: 8),
+                      Text(
+                        isPass
+                            ? 'Congratulations on completing your test!'
+                            : 'Keep practicing to improve your score!',
+                        style: AppTextStyle.bodyText1.copyWith(
+                          color: isPass
+                              ? AppColors.successColor
+                              : AppColors.errorColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: isTablet ? 20 : 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Here is your performance breakdown:',
+                        style: AppTextStyle.bodyText2.copyWith(
+                          color: AppColors.greyText,
+                          fontSize: isTablet ? 18 : 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: isTablet ? 32 : 20),
+          
+                      /// pi chart card
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundColor,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.lightIndigo.withOpacity(0.40),
+                              blurRadius: 16,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(30.0),
+                          child: PieChart(
+                            dataMap: dataMap,
+                            colorList: [
+                              AppColors.successColor,
+                              AppColors.errorColor,
+                              AppColors.warningColor,
+                            ],
+                            ringStrokeWidth: isTablet ? 40 : 30,
+                            chartType: ChartType.disc,
+                            animationDuration: const Duration(seconds: 3),
+                            chartLegendSpacing: 20,
+                            legendOptions: LegendOptions(
+                              showLegends: true,
+                              legendPosition: isTablet
+                                  ? LegendPosition.right
+                                  : LegendPosition.bottom,
+                              legendTextStyle: AppTextStyle.bodyText1.copyWith(
+                                color: AppColors.darkText,
+                                fontWeight: FontWeight.w500,
+                                fontSize: isTablet ? 20 : 16,
+                              ),
+                            ),
+                            chartValuesOptions: ChartValuesOptions(
+                              showChartValues: true,
+                              showChartValuesInPercentage: true,
+                              showChartValuesOutside: false,
+                              chartValueStyle: AppTextStyle.bodyText1.copyWith(
+                                color: AppColors.headingColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: isTablet ? 20 : 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: isTablet ? 40 : 30),
+          
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _resultStat(
+                            label: 'Correct',
+                            value: dataMap['Correct']?.toInt() ?? 0,
+                            color: AppColors.successColor,
+                            isTablet: isTablet,
+                          ),
+                          _resultStat(
+                            label: 'Incorrect',
+                            value: dataMap['Incorrect']?.toInt() ?? 0,
+                            color: AppColors.errorColor,
+                            isTablet: isTablet,
+                          ),
+                          _resultStat(
+                            label: 'Unattempted',
+                            value: dataMap['Unattempted']?.toInt() ?? 0,
+                            color: AppColors.warningColor,
+                            isTablet: isTablet,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: isTablet ? 48 : 32),
+                      reusableButton(
+                        isPass ? 'Congratulate Me!' : 'Better Luck Next Time!',
+                        () => _showMessage(
+                          isPass ? 'Congratulations!' : 'Try Again!',
+                          isPass
+                              ? 'You did a great job! Keep up the good work.'
+                              : 'Keep practicing and you will improve!',
+                        ),
+                      ),
+                      SizedBox(height: isTablet ? 32 : 24),
+          
+                      /// floating action button inside card
+                      Column(
+                        children: [
+                          Tooltip(
+                            message: 'Retake Test',
+                            child: InkWell(
+                              onTap: () {
+                                Provider.of<MockTestProvider>(context,
+                                        listen: false)
+                                    .resetProvider();
+                                Provider.of<CreateMockTestProvider>(context,
+                                        listen: false)
+                                    .resetProvider();
+                                Navigator.pop(context);
+                              },
+                              borderRadius: BorderRadius.circular(30),
+                              child: Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: AppColors.indigo,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.purpleShadow
+                                          .withValues(alpha: 0.18),
+                                      blurRadius: 12,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(Icons.restart_alt,
+                                    color: AppColors.whiteColor, size: 32),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Retake Test',
+                            style: AppTextStyle.bodyText2.copyWith(
+                              color: AppColors.indigo,
+                              fontWeight: FontWeight.w600,
+                              fontSize: isTablet ? 18 : 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 40),
-            reusableButton(
-              isPass ? 'Congratulate Me!' : 'Better Luck Next Time!',
-              () => _showMessage(
-                isPass ? 'Congratulations!' : 'Try Again!',
-                isPass
-                    ? 'You did a great job! Keep up the good work.'
-                    : 'Keep practicing and you’ll improve!',
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Provider.of<MockTestProvider>(context, listen: false).resetProvider();
-          Provider.of<CreateMockTestProvider>(context, listen: false)
-              .resetProvider();
-          Navigator.pop(context);
-        },
-        backgroundColor: AppColors.primaryColor,
-        child: const Icon(Icons.restart_alt, color: Colors.white),
-      ),
+    );
+  }
+
+  Widget _resultStat({
+    required String label,
+    required int value,
+    required Color color,
+    required bool isTablet,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: isTablet ? 60 : 44,
+          height: isTablet ? 60 : 44,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              value.toString(),
+              style: AppTextStyle.heading2.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: isTablet ? 28 : 20,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 8),
+        Text(
+          label,
+          style: AppTextStyle.bodyText1.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+            fontSize: isTablet ? 18 : 14,
+          ),
+        ),
+      ],
     );
   }
 }
