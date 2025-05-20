@@ -26,6 +26,12 @@ class SubjectProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void disposeChapters() {
+    _subjectId = [];
+    _subjects = [];
+    notifyListeners();
+  }
+
   void setSelectedSubjectId(int id) {
     _selectedSubjectId = id;
     notifyListeners();

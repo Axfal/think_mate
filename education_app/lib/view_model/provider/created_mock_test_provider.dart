@@ -6,7 +6,6 @@ import '../../model/create_mock_test_model.dart';
 import '../../model/hive_database_model/submitted_questions_model.dart';
 import '../../model/mock_test_question_count_model.dart';
 import '../../repository/create_mock_test_repo.dart';
-import 'package:education_app/utils/toast_helper.dart';
 
 class CreateMockTestProvider with ChangeNotifier {
   CreateMockTestRepo createMockTestRepo = CreateMockTestRepo();
@@ -174,42 +173,67 @@ class CreateMockTestProvider with ChangeNotifier {
   List<Map<String, dynamic>> get questionsToPost => _questionsToPost;
 
   void submitAnswer(BuildContext context, int index) {
-    if (_selectedOptions[index] != null) {
-      _isSubmitted[index] = true;
-
-      final correctAnswer = _questionList[index].correctAnswer?.toLowerCase();
-      final selectedOption = _selectedOptions[index];
-
-      if (correctAnswer != null && selectedOption != null) {
-        final correctOptionIndex = correctOptionMapping[correctAnswer];
-        _correctAnswerOptionIndex![index] = correctOptionIndex!;
-
-        if (selectedOption == correctOptionIndex) {
-          _isTrue![index] = true;
-          _correctAns++;
-        } else {
-          _isTrue![index] = false;
-          _incorrectAns++;
-        }
-
-        Map<String, dynamic> questionData = {
-          "question_id": _questionList[index].id,
-          "selected_option": selectedOption,
-          "is_correct": _isTrue![index],
-        };
-
-        _questionsToPost.add(questionData);
+    if (_selectedOptions.isNotEmpty &&
+        index < _selectedOptions.length &&
+        _selectedOptions[index] != null) {
+      if (_isSubmitted.isNotEmpty &&
+          index >= 0 &&
+          index < _isSubmitted.length) {
+        _isSubmitted[index] = true;
       }
 
-      if (index < _questionList.length - 1) {
-        _isNxtEnabled = true;
+      if (_questionList.isNotEmpty && index < _questionList.length) {
+        final question = _questionList[index];
+        String correctAnswerKey = question.correctAnswer!.toLowerCase();
+        int? correctAnswerIndex = correctOptionMapping[correctAnswerKey];
+        _correctAnswerOptionIndex![index] = correctAnswerIndex!;
+        bool isCorrect = (_selectedOptions[index] == correctAnswerIndex);
+
+        if (isCorrect) {
+          _correctAns++;
+          _isTrue![index] = true;
+        } else {
+          _incorrectAns++;
+          _isTrue![index] = false;
+        }
+
+        _questionsToPost.add({
+          'question_id': question.id,
+          'question_result': isCorrect ? "correct" : "incorrect",
+          'question_status': "submitted",
+          'question_text': question.question,
+          'selected_option': _selectedOptions[index],
+          'correct_option': correctAnswerIndex,
+        });
+
+        // Check if all questions are submitted
+        bool allSubmitted =
+            _isSubmitted.every((submitted) => submitted == true);
+        print("allSubmitted ===> $allSubmitted");
+
+        if (allSubmitted) {
+          Future.microtask(() {
+            Navigator.pushReplacementNamed(
+              context,
+              RoutesName.resultScreen,
+              arguments: {
+                'correctAns': _correctAns,
+                'incorrectAns': _incorrectAns,
+                'totalQuestions': _numberOfQuestions,
+                'questions': _questionsToPost,
+              },
+            );
+          });
+        }
       } else {
-        _isNxtEnabled = false;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please select an option before submitting!"),
+          ),
+        );
       }
 
       notifyListeners();
-    } else {
-      ToastHelper.showError("Please select an option before submitting!");
     }
   }
 
@@ -233,8 +257,6 @@ class CreateMockTestProvider with ChangeNotifier {
   navigate(BuildContext context) {
     if (_shouldNavigate) {
       _isTestStarted = false;
-      // final _provider = Provider.of<ChapterProvider>(context,listen: false);
-      // _subject = _provider.subject;
       Navigator.pushReplacementNamed(context, RoutesName.resultScreen,
           arguments: {
             'subject': 'Created Mock Test',

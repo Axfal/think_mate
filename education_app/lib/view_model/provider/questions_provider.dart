@@ -230,7 +230,7 @@ class QuestionsProvider with ChangeNotifier {
     return _checkMap[questionId] ?? false;
   }
 
-  Future<void> applyFilter(BuildContext context, FilterType filterType) async {
+  Future<void> applyFilter(BuildContext context, FilterType filterType, testId) async {
     final chapterProvider =
         Provider.of<ChapterProvider>(context, listen: false);
     final subjectId = chapterProvider.subjectId;
@@ -241,31 +241,27 @@ class QuestionsProvider with ChangeNotifier {
         if (!_isQuestionsAllSubmitted) {
           showIncorrectQuestionLocally(context);
         } else {
-          await fetchIncorrectQuestions(context, subjectId!, chapterId);
+          await fetchIncorrectQuestions(context,  testId, subjectId!, chapterId);
         }
         break;
       case FilterType.marked:
-        await fetchQuestions(context, subjectId!, chapterId);
-        // if (_getCheckedQuestionModel!.success == true &&
-        //     _getCheckedQuestionModel!.checkMarkQuestions != null) {
+        await fetchQuestions(context, testId, subjectId!, chapterId);
         _filteredQuestions =
             _filteredQuestions.where((q) => _checkMap[q.id] == true).toList();
         _numberOfQuestions = _filteredQuestions.length;
         _showExplanation = List<bool>.filled(_numberOfQuestions!, false);
-        // } else {
-        //   print("No marked questions found or invalid response.");
-        // }
+
         break;
 
       case FilterType.unmarked:
-        await fetchQuestions(context, subjectId!, chapterId);
+        await fetchQuestions(context, testId, subjectId!, chapterId);
         _filteredQuestions = _filteredQuestions
             .where((q) => _checkMap[q.id] == null || _checkMap[q.id] == false)
             .toList();
         break;
       case FilterType.all:
       default:
-        await fetchQuestions(context, subjectId!, chapterId);
+        await fetchQuestions(context, testId, subjectId!, chapterId);
         await getCheckedQuestions(context);
         break;
     }
@@ -273,7 +269,7 @@ class QuestionsProvider with ChangeNotifier {
   }
 
   Future<void> fetchIncorrectQuestions(
-      BuildContext context, int subjectId, int chapterId) async {
+      BuildContext context,int testId, int subjectId, int chapterId) async {
     try {
       _loading = true;
       notifyListeners();
@@ -307,6 +303,7 @@ class QuestionsProvider with ChangeNotifier {
                   detail: incorrect.detail!,
                   capacity: incorrect.capacity!,
                   correctAnswer: incorrect.correctAnswer!,
+          subjectName: ''// as i don't need subject name in questions screen of chapters. so set it default empty
                 ))
             .toList();
 
@@ -331,7 +328,7 @@ class QuestionsProvider with ChangeNotifier {
   }
 
   Future<void> fetchQuestions(
-      BuildContext context, int subjectId, int chapterId) async {
+      BuildContext context, int testId, int subjectId, int chapterId) async {
     try {
       _loading = true;
       // clearSubmittedQuestions(); // for testing purpose, to remove testing data
@@ -339,14 +336,12 @@ class QuestionsProvider with ChangeNotifier {
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userId = authProvider.userSession?.userId ?? 0;
-      Map<String, dynamic> data =
-          authProvider.userSession?.userType == "premium"
-              ? {
+      Map<String, dynamic> data = {
                   "user_id": userId,
+                  "test_id": testId,
                   "subject_id": subjectId,
                   "chapter_id": chapterId
-                }
-              : {'user_id': userId};
+                };
 
       final response = await _mockTestRepo.fetchQuestions(data);
 
@@ -598,7 +593,6 @@ class QuestionsProvider with ChangeNotifier {
 
   void goBack(context) {
     _questionsToPost = [];
-    // _checkMap = {};
     Navigator.pop(context);
     notifyListeners();
   }

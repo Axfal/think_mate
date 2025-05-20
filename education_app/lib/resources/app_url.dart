@@ -8,8 +8,7 @@ class AppUrl {
   static var fetchQuestions = '$baseUrl/user_test_data.php';
   static var feedback = '$baseUrl/feedback.php';
   static var createMockTest = '$baseUrl/MockTestGenerator.php';
-  static var getMockTestQuestionCount =
-      '$baseUrl/MockTestGeneratorQuestionCount.php';
+  static var getMockTestQuestionCount =  '$baseUrl/MockTestGeneratorQuestionCount.php';
   static var mockTestFeedback = '$baseUrl/user_test_feedback.php';
   static var postTestResult = '$baseUrl/submit_result.php';
   static var getTestResult = '$baseUrl/get_test_result.php?user_id=';
@@ -40,5 +39,5 @@ class AppUrl {
   /// https://nomore.com.pk/MDCAT_ECAT_Education/API/get_notes.php?user_id=10&test_id=3&subject_id=10
   static var deleteNote = '$baseUrl/delete_note.php';
   static var updateNote = '$baseUrl/update_note.php';
-
+  static var getNoteBook = '$baseUrl/get_upload_books.php?user_id=';
 }

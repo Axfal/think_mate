@@ -31,6 +31,7 @@ class SubscriptionProvider with ChangeNotifier {
   VerifyPromoModel? _verifyPromoCodeModel;
   VerifyPromoModel? get verifyPromoCodeModel => _verifyPromoCodeModel;
 
+  /// check user plan
   Future<void> getUserSubscriptionPlan(context) async {
     final provider = Provider.of<AuthProvider>(context, listen: false);
     await provider.loadUserSession();

@@ -223,7 +223,7 @@ class _ResultScreenState extends State<ResultScreen> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.lightIndigo.withOpacity(0.40),
+                              color: AppColors.lightIndigo.withValues(alpha: 0.40),
                               blurRadius: 16,
                               offset: Offset(0, 4),
                             ),
@@ -373,7 +373,7 @@ class _ResultScreenState extends State<ResultScreen> {
           width: isTablet ? 60 : 44,
           height: isTablet ? 60 : 44,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
           child: Center(

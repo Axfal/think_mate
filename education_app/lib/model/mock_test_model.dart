@@ -32,6 +32,7 @@ class Question {
   final String detail;
   final String capacity;
   final String correctAnswer;
+  final String subjectName;
 
   Question({
     required this.id,
@@ -43,6 +44,7 @@ class Question {
     required this.detail,
     required this.capacity,
     required this.correctAnswer,
+    required this.subjectName
   });
 
   // Helper method to remove HTML tags and decode HTML entities
@@ -64,6 +66,7 @@ class Question {
       detail: _cleanHtml(json['detail'] ?? ''),
       capacity: json['capacity'] ?? '',
       correctAnswer: json['correct_answer'] ?? '',
+      subjectName: json['subject_name'] ?? ''
     );
   }
 
@@ -78,6 +81,7 @@ class Question {
       'detail': detail,
       'capacity': capacity,
       'correct_answer': correctAnswer,
+      'subject_name': subjectName
     };
   }
 }

@@ -1,9 +1,7 @@
 import 'package:education_app/resources/exports.dart';
+import 'dart:ui';
 
 /// A widget that displays a subscription plan card with customizable styling and features.
-///
-/// This widget is used to show different subscription plans in the subscription screen.
-/// It supports both regular and recommended (premium) plan displays with different visual styles.
 class SubscriptionCard extends StatelessWidget {
   final String title;
   final String price;
@@ -11,16 +9,21 @@ class SubscriptionCard extends StatelessWidget {
   final bool isRecommended;
   final List<String> features;
   final VoidCallback onTap;
+  final String startDate;
+  final String endDate;
+  final String userType;
 
-  const SubscriptionCard({
-    super.key,
-    required this.title,
-    required this.price,
-    required this.duration,
-    required this.isRecommended,
-    required this.features,
-    required this.onTap,
-  });
+  const SubscriptionCard(
+      {super.key,
+      required this.title,
+      required this.price,
+      required this.duration,
+      required this.isRecommended,
+      required this.features,
+      required this.onTap,
+      this.startDate = "...",
+      this.endDate = "...",
+      required this.userType});
 
   @override
   Widget build(BuildContext context) {
@@ -56,26 +59,51 @@ class SubscriptionCard extends StatelessWidget {
               children: [
                 if (isRecommended)
                   Align(
-                    alignment: Alignment.topRight,
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.whiteColor,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.purpleShadow,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
+                    alignment: Alignment.topLeft,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.whiteColor.withOpacity(0.7),
+                                AppColors.indigo.withOpacity(0.4)
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.purpleShadow.withOpacity(0.45),
+                                blurRadius: 10,
+                                offset: Offset(0, 6),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: AppColors.whiteColor.withOpacity(0.4),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        "Current Plan",
-                        style: AppTextStyle.bodyText2.copyWith(
-                          color: AppColors.deepPurple,
-                          fontWeight: FontWeight.w600,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.workspace_premium_rounded,
+                                  color: AppColors.deepPurple, size: 22),
+                              SizedBox(width: 8),
+                              Text(
+                                "Current Plan",
+                                style: AppTextStyle.bodyText1.copyWith(
+                                  color: AppColors.whiteColor,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -123,36 +151,64 @@ class SubscriptionCard extends StatelessWidget {
                       ),
                     )),
                 SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isRecommended
-                          ? AppColors.whiteColor
-                          : AppColors.deepPurple,
-                      foregroundColor: isRecommended
-                          ? AppColors.deepPurple
-                          : AppColors.whiteColor,
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      elevation: 2,
-                      shadowColor: AppColors.purpleShadow,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+
+                /// Bottom Section: Either show Dates (if recommended) or CTA button
+                isRecommended
+                    ? Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.whiteColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.whiteColor),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Start Date: $startDate",
+                              style: AppTextStyle.bodyText2.copyWith(
+                                color: AppColors.whiteColor,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              "Expire Date: $endDate",
+                              style: AppTextStyle.bodyText2.copyWith(
+                                color: AppColors.whiteColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: userType == 'free'
+                                ? Colors.grey.shade400
+                                : AppColors.deepPurple,
+                            foregroundColor: AppColors.whiteColor,
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            elevation: 2,
+                            shadowColor: AppColors.purpleShadow,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: userType == 'free' ? onTap : null,
+                          child: Text(
+                            "Select Plan",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: userType == 'free'
+                                  ? AppColors.whiteColor.withValues(alpha: 0.5)
+                                  : AppColors.whiteColor,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    onPressed: onTap,
-                    child: Text(
-                      "Select Plan",
-                      style: GoogleFonts.poppins(
-                        color: isRecommended
-                            ? AppColors.deepPurple
-                            : AppColors.whiteColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

@@ -1,17 +1,18 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print, use_build_context_synchronously
 
 import 'package:education_app/resources/exports.dart';
-import 'package:education_app/view_model/provider/reset_provider.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:no_screenshot/no_screenshot.dart';
-import 'package:education_app/utils/toast_helper.dart';
 import 'package:education_app/utils/screenshot_protector.dart';
 
 class QuestionScreen extends StatefulWidget {
   final int subjectId;
   final int chapterId;
+  final int testId;
   const QuestionScreen(
-      {super.key, required this.subjectId, required this.chapterId});
+      {super.key,
+      required this.subjectId,
+      required this.chapterId,
+      required this.testId});
 
   @override
   State<QuestionScreen> createState() => _QuestionScreenState();
@@ -24,6 +25,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     ScreenshotProtector.enableProtection();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getData();
+      _showPremiumAccessDialog(context);
     });
   }
 
@@ -33,6 +35,88 @@ class _QuestionScreenState extends State<QuestionScreen> {
     super.dispose();
   }
 
+  void _showPremiumAccessDialog(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.userSession!.userType == 'free' ||
+        authProvider.userSession!.testId != widget.testId) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppColors.surfaceColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: Text(
+              "Upgrade to Premium",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.successColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ),
+          content: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              "Get access to the full question bank, exclusive content, and boost your learning journey.\nEnjoy 5 demo questions for free!",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.darkText,
+                fontSize: 15,
+                height: 1.4,
+              ),
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(
+                        context, RoutesName.subscriptionScreen);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    backgroundColor: AppColors.successColor,
+                    elevation: 4,
+                  ),
+                  child: Text(
+                    'Go Premium',
+                    style: TextStyle(
+                      color: AppColors.whiteColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.greyText,
+                    textStyle: const TextStyle(fontSize: 14),
+                  ),
+                  child: const Text("Try Demo"),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   Future<void> getData() async {
     try {
       final bookMarkProvider =
@@ -40,7 +124,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
       final provider = Provider.of<QuestionsProvider>(context, listen: false);
 
       await provider.fetchQuestions(
-          context, widget.subjectId, widget.chapterId);
+          context, widget.testId, widget.subjectId, widget.chapterId);
       await bookMarkProvider.getBookMarking(context);
       provider.getSelectedOptions();
       await provider.getCheckedQuestions(context);
@@ -123,7 +207,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             icon: const Icon(Icons.more_vert),
             onSelected: (filter) {
               print("Selected Filter: $filter");
-              provider.applyFilter(context, filter);
+              provider.applyFilter(context, filter, widget.testId);
             },
             itemBuilder: (context) => FilterType.values
                 .map((filter) => PopupMenuItem(
@@ -146,23 +230,35 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 12, horizontal: 16),
                       decoration: BoxDecoration(
-                        color: AppColors.indigo.withOpacity(0.1),
+                        color: AppColors.indigo.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       margin: const EdgeInsets.all(16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Total Questions: ${provider.filteredQuestions.length}',
-                            style: AppTextStyle.heading3.copyWith(
-                              color: AppColors.darkText,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          (authProvider.userSession!.userType == 'free' ||
+                                  authProvider.userSession!.testId !=
+                                      widget.testId)
+                              ? Text(
+                                  'Total Demo Questions: 5',
+                                  style: AppTextStyle.heading3.copyWith(
+                                    color: AppColors.darkText,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                )
+                              : Text(
+                                  'Total Questions: ${provider.filteredQuestions.length}',
+                                  style: AppTextStyle.heading3.copyWith(
+                                      color: AppColors.darkText,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16),
+                                ),
                           Text(
                             'Answered: ${provider.isSubmitted.entries.where((entry) => provider.filteredQuestions.any((q) => q.id == entry.key)).length}',
                             style: AppTextStyle.bodyText1.copyWith(
+                              fontSize: 12,
                               color: AppColors.darkText,
                             ),
                           ),
@@ -171,7 +267,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     ),
                     Expanded(
                       child: ListView.builder(
-                        itemCount: provider.filteredQuestions.length,
+                        itemCount:
+                            (authProvider.userSession!.userType == "free" ||
+                                    authProvider.userSession!.testId !=
+                                        widget.testId)
+                                ? 5
+                                : provider.filteredQuestions.length,
                         itemBuilder: (context, index) {
                           final question = provider.filteredQuestions[index];
                           Widget buildOption(
@@ -252,9 +353,9 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   Widget _buildExplanation(QuestionsProvider provider, int index) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final chapterProvider =
-        Provider.of<ChapterProvider>(context, listen: false);
+    // final authProvider = Provider.of<AuthProvider>(context);
+    // final chapterProvider =
+    //     Provider.of<ChapterProvider>(context, listen: false);
     final question = provider.filteredQuestions[index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,

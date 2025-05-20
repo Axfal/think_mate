@@ -1,5 +1,6 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 class UploadPaymentScreen extends StatefulWidget {
   final price;
@@ -119,6 +120,60 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
     }
   }
 
+  void _showPaymentDetailsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          title: Row(
+            children: [
+              Icon(Icons.account_balance_wallet, color: AppColors.primaryColor),
+              SizedBox(width: 10),
+              Text("Payment Details",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildPaymentTile(
+                  title: "Easypaisa",
+                  name: "Toheed Ahmad",
+                  detail: "0332 6984463",
+                  context: context,
+                ),
+                SizedBox(height: 10),
+                _buildPaymentTile(
+                  title: "JazzCash",
+                  name: "Tauheed Ahmad",
+                  detail: "0314 6588261",
+                  context: context,
+                ),
+                SizedBox(height: 10),
+                _buildPaymentTile(
+                  title: "Bank Alfalah Limited",
+                  name: "Tusif Ahmad",
+                  detail: "PK04ALFH0358001006064601",
+                  context: context,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Close",
+                  style: TextStyle(color: AppColors.primaryColor)),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   void submitPayment() async {
     if (_image == null) {
       ToastHelper.showError("Please upload a screenshot");
@@ -204,19 +259,24 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
             ),
           ),
         ),
+        // actions: [
+        //   IconButton(onPressed: () => _showPaymentDetailsDialog(context), icon: Icon(Icons.payment_rounded, color: Colors.white,)), SizedBox(width: 5)
+        // ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 color: AppColors.deepPurple,
                 child: Container(
+                  width: double.infinity, // covers screen width
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(
@@ -229,35 +289,100 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12), // reduced padding
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min, // helps make it compact
                       children: [
-                        Text("Premium Plan",
-                            style: AppTextStyle.heading2.copyWith(
-                              color: AppColors.whiteColor,
-                            )),
-                        SizedBox(height: 8),
+                        Text(
+                          "Premium Plan",
+                          style: AppTextStyle.heading2.copyWith(
+                            color: AppColors.whiteColor,
+                          ),
+                        ),
+                        SizedBox(height: 6), // reduced spacing
                         Text(
                           "• Access to all quizzes\n• No ads\n• Progress tracking",
                           style: AppTextStyle.bodyText1.copyWith(
                             color: AppColors.whiteOverlay90,
                           ),
                         ),
-                        SizedBox(height: 10),
-                        Text("Rs. ${widget.price} / ${widget.month} Months",
-                            style: AppTextStyle.bodyText1.copyWith(
-                              color: AppColors.whiteColor,
-                              fontWeight: FontWeight.w600,
-                            )),
+                        SizedBox(height: 6), // reduced spacing
+                        Text(
+                          "Rs. ${widget.price} / ${widget.month} Months",
+                          style: AppTextStyle.bodyText1.copyWith(
+                            color: AppColors.whiteColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+//CLICK FOR ACCOUNT DETAILS
+              SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: Stack(
+                  children: [
+                    // Bottom layer for double effect
+                    Positioned(
+                      top: 4,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade800,
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                      ),
+                    ),
+                    // Top layer (main button with icon)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () => _showPaymentDetailsDialog(context),
+                        child: Container(
+                          height: 56,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "CLICK FOR ACCOUNT DETAILS",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Icon(
+                                Icons.touch_app,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
-              // Upload Screenshot
+              SizedBox(height: 20),
               Text(
                 "Upload Payment Screenshot",
                 style: AppTextStyle.heading3.copyWith(
@@ -268,7 +393,7 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
-                  height: 180,
+                  height: 160,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
@@ -366,94 +491,8 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
                 ],
               ),
 
-              SizedBox(height: 10),
-              // TextField(
-              //   controller: _amountController,
-              //   keyboardType: TextInputType.number,
-              //   decoration: InputDecoration(
-              //     hintText: "e.g. 499",
-              //     border: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //         borderSide: BorderSide(color: AppColors.borderColor)),
-              //     enabledBorder: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //         borderSide: BorderSide(color: AppColors.borderColor)),
-              //     focusedBorder: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //         borderSide: BorderSide(color: AppColors.deepPurple)),
-              //     contentPadding:
-              //         EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              //   ),
-              // ),
-
-              // Promo Field
-              // Text("Enter Promo (optional)",
-              //     style: AppTextStyle.heading3.copyWith(
-              //       color: AppColors.darkText,
-              //     )),
-              // SizedBox(height: 10),
-              // TextField(
-              //   controller: _promoCodeController,
-              //   keyboardType: TextInputType.text,
-              //   decoration: InputDecoration(
-              //     hintText: "e.g  Z9A2BE2E",
-              //     border: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //         borderSide: BorderSide(color: AppColors.borderColor)),
-              //     enabledBorder: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //         borderSide: BorderSide(color: AppColors.borderColor)),
-              //     focusedBorder: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //         borderSide: BorderSide(color: AppColors.deepPurple)),
-              //     contentPadding:
-              //         EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              //   ),
-              // ),
               SizedBox(height: 20),
-              // authProvider.loading
-              //     ? Shimmer.fromColors(
-              //         baseColor: Colors.grey.shade300,
-              //         highlightColor: Colors.grey.shade100,
-              //         child: Container(
-              //           height: 50,
-              //           width: double.infinity,
-              //           decoration: BoxDecoration(
-              //             borderRadius: BorderRadius.circular(10),
-              //             color: Colors.white,
-              //           ),
-              //         ),
-              //       )
-              //     : (authProvider.courseList == null ||
-              //             authProvider.courseList!.data == null ||
-              //             authProvider.courseList!.data!.isEmpty)
-              //         ? Text("No subjects available",
-              //             style: TextStyle(color: Colors.red))
-              //         : DropdownButtonFormField<String>(
-              //             value: selectedTestId,
-              //             decoration: InputDecoration(
-              //               labelText: "Select Subject",
-              //               border: OutlineInputBorder(
-              //                   borderRadius: BorderRadius.circular(10)),
-              //             ),
-              //             items: authProvider.courseList!.data!.map((subject) {
-              //               return DropdownMenuItem(
-              //                 value: subject.id.toString(),
-              //                 child: Text(subject.testName ?? "Unknown"),
-              //               );
-              //             }).toList(),
-              //             onChanged: (value) {
-              //               setState(() {
-              //                 selectedTestId = value;
-              //               });
-              //             },
-              //             validator: (value) =>
-              //                 value == null ? "Please select a Subject" : null,
-              //           ),
-              //
-              // SizedBox(height: 20),
 
-              // Submit Button
               SizedBox(
                   width: double.infinity,
                   child: Consumer<SubscriptionProvider>(
@@ -479,6 +518,83 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentTile({
+    required String title,
+    required String name,
+    required String detail,
+    required BuildContext context,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.person, size: 18, color: Colors.grey[600]),
+              SizedBox(width: 8),
+              Text(name, style: TextStyle(fontSize: 15)),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.phone_android, size: 18, color: Colors.grey[600]),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  detail,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: detail));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Copied $title number"),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child:
+                      Icon(Icons.copy, size: 18, color: AppColors.primaryColor),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

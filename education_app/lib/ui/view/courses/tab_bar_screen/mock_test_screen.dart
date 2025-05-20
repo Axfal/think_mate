@@ -232,6 +232,41 @@ class MockTestScreenState extends State<MockTestScreen> {
                         padding: const EdgeInsets.all(16.0),
                         child: ListView(
                           children: [
+                            Container(
+                              width: double.infinity/2,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              margin: EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: AppColors.indigo.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.indigo.withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.book_rounded, color: AppColors.indigo, size: 20),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      provider.questions!.questions[provider.currentIndex].subjectName,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.indigo,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
                             Text(
                               "${provider.currentIndex + 1}) ${provider
                                   .questions!.questions[provider.currentIndex]
@@ -601,10 +636,10 @@ class MockTestScreenState extends State<MockTestScreen> {
                     decoration: InputDecoration(
                       hintText: 'Enter your feedback',
                       hintStyle: AppTextStyle.bodyText1.copyWith(
-                        color: AppColors.darkText.withOpacity(0.5),
+                        color: AppColors.darkText.withValues(alpha: 0.5),
                       ),
                       filled: true,
-                      fillColor: AppColors.deepPurple.withOpacity(0.05),
+                      fillColor: AppColors.deepPurple.withValues(alpha: 0.05),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,

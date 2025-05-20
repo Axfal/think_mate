@@ -81,7 +81,9 @@ class Routes {
                 ));
 
       case RoutesName.chapterScreen:
-        return MaterialPageRoute(builder: (context) => ChaptersScreen());
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final testId = args['testId'] ?? 0;
+        return MaterialPageRoute(builder: (context) => ChaptersScreen(testId: testId));
 
       case RoutesName.myNoteBookScreen:
         return MaterialPageRoute(builder: (context) => MyNoteBook());
@@ -90,10 +92,12 @@ class Routes {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final subjectId = args['subjectId'] ?? 0;
         final chapterId = args['chapterId'] ?? 0;
+        final testId = args['testId'] ?? 0;
         return MaterialPageRoute(
             builder: (context) => QuestionScreen(
                   subjectId: subjectId,
                   chapterId: chapterId,
+              testId: testId,
                 ));
 
       case RoutesName.createdMockTestScreen:

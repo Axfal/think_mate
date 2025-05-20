@@ -6,6 +6,7 @@ import 'package:education_app/ui/view/subscription/payment_screen.dart';
 import 'package:education_app/ui/view/subscription/subscription_history.dart';
 import 'package:education_app/ui/widgets/subscription_card.dart';
 import 'package:education_app/ui/widgets/subscription_shimmer.dart';
+import 'package:flutter/services.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -24,6 +25,60 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       await _loadUserSubscription();
       _loadSubscriptions();
     });
+  }
+
+  void _showPaymentDetailsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          title: Row(
+            children: [
+              Icon(Icons.account_balance_wallet, color: AppColors.primaryColor),
+              SizedBox(width: 10),
+              Text("Payment Details",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildPaymentTile(
+                  title: "Easypaisa",
+                  name: "Toheed Ahmad",
+                  detail: "0332 6984463",
+                  context: context,
+                ),
+                SizedBox(height: 10),
+                _buildPaymentTile(
+                  title: "JazzCash",
+                  name: "Tauheed Ahmad",
+                  detail: "0314 6588261",
+                  context: context,
+                ),
+                SizedBox(height: 10),
+                _buildPaymentTile(
+                  title: "Bank Alfalah Limited",
+                  name: "Tusif Ahmad",
+                  detail: "PK04ALFH0358001006064601",
+                  context: context,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Close",
+                  style: TextStyle(color: AppColors.primaryColor)),
+            )
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _loadUserSubscription() async {
@@ -112,6 +167,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         ),
       ),
       actions: [
+        // IconButton(onPressed: () => _showPaymentDetailsDialog(context), icon: Icon(Icons.payment_rounded)),
         PopupMenuButton<String>(
           icon: Icon(Icons.more_vert, color: AppColors.whiteColor),
           onSelected: (value) {
@@ -123,12 +179,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 ),
               );
             }
+            if (value == 'Payment Method') {
+              _showPaymentDetailsDialog(context);
+            }
           },
           itemBuilder: (BuildContext context) => [
             PopupMenuItem(
               value: 'Subscription History',
               child: Text(
                 'Subscription History',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            PopupMenuItem(
+              value: 'Payment Method',
+              child: Text(
+                'Payment Method',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -184,10 +250,23 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           itemCount: subscriptions.length,
           itemBuilder: (context, index) {
             final subscription = subscriptions[index];
+            final startDate = provider
+                    .checkUserSubscriptionPlanModel?.subscriptionStartDate ??
+                "...";
+            final expireDate =
+                provider.checkUserSubscriptionPlanModel?.subscriptionEndDate ??
+                    "...";
+            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+            authProvider.loadUserSession();
+            final userType = authProvider.userSession!.userType;
+
             return SubscriptionCard(
               title: subscription.subscriptionName!,
               price: "Rs. ${subscription.price}",
               duration: "${subscription.months} Month",
+              startDate: startDate,
+              endDate: expireDate,
+              userType: userType,
               isRecommended:
                   currentSubscriptionName == subscription.subscriptionName,
               features: const [
@@ -207,6 +286,83 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildPaymentTile({
+    required String title,
+    required String name,
+    required String detail,
+    required BuildContext context,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.person, size: 18, color: Colors.grey[600]),
+              SizedBox(width: 8),
+              Text(name, style: TextStyle(fontSize: 15)),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.phone_android, size: 18, color: Colors.grey[600]),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  detail,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: detail));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Copied $title number"),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child:
+                      Icon(Icons.copy, size: 18, color: AppColors.primaryColor),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

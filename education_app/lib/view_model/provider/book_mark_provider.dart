@@ -6,7 +6,7 @@ class BookMarkProvider with ChangeNotifier {
   bool _isMarked = false;
   bool get isMarked => _isMarked;
 
-  final Map<int, bool> _bookmarkedQuestions = {};
+  Map<int, bool> _bookmarkedQuestions = {};
   Map<int, bool> get bookmarkedQuestions => _bookmarkedQuestions;
 
   BookMarkModel? _bookMarkModel;
@@ -54,16 +54,16 @@ class BookMarkProvider with ChangeNotifier {
         Question? question = questionProvider.questionList.firstWhere(
           (q) => q.id == questionId,
           orElse: () => Question(
-            id: -1,
-            question: '',
-            detail: '',
-            option1: '',
-            option2: '',
-            option3: '',
-            option4: '',
-            capacity: '',
-            correctAnswer: '',
-          ),
+              id: -1,
+              question: '',
+              detail: '',
+              option1: '',
+              option2: '',
+              option3: '',
+              option4: '',
+              capacity: '',
+              correctAnswer: '',
+              subjectName: ''),
         );
         if (question.id != -1) {
           addNoteWithKey(question.id, question.question, question.detail);
@@ -81,6 +81,7 @@ class BookMarkProvider with ChangeNotifier {
 
   Future<void> getBookMarking(BuildContext context) async {
     _isLoading = true;
+    _bookmarkedQuestions = {};
     notifyListeners();
     final questionProvider =
         Provider.of<QuestionsProvider>(context, listen: false);
@@ -102,7 +103,8 @@ class BookMarkProvider with ChangeNotifier {
                   option3: '',
                   option4: '',
                   capacity: '',
-                  correctAnswer: ''),
+                  correctAnswer: '',
+                  subjectName: ''),
             );
             addNoteWithKey(question.id, question.question, question.detail);
             if (question.id != -1) {

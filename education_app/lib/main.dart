@@ -1,4 +1,5 @@
 import 'package:education_app/resources/exports.dart';
+import 'package:education_app/view_model/provider/note_book_provider.dart';
 import 'model/hive_database_model/previous_test_report_model.dart';
 import 'model/hive_database_model/submitted_questions_model.dart';
 import 'model/hive_database_model/user_session_model.dart';
@@ -40,6 +41,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => MockTestProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => BookMarkProvider()),
+        ChangeNotifierProvider(create: (_) => NoteBookProvider()),
         ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
         ChangeNotifierProvider(create: (_) => QuestionsProvider()),
         ChangeNotifierProvider(create: (_) => FeedbackProvider()),
@@ -47,7 +49,8 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => UploadImageProvider()),
         ChangeNotifierProvider(create: (_) => NotesProvider()),
         ChangeNotifierProvider(create: (_) => PostTestResultProvider()),
-        ChangeNotifierProvider(create: (_) => CreateMockTestProvider(),
+        ChangeNotifierProvider(
+          create: (_) => CreateMockTestProvider(),
           lazy: false,
         ),
       ],

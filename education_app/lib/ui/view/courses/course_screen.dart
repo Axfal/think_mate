@@ -40,6 +40,9 @@ class _CourseScreenState extends State<CourseScreen> {
             onPressed: () {
               provider.restartTest();
               Navigator.pushNamed(context, RoutesName.home);
+              final subjectProvider =
+                  Provider.of<SubjectProvider>(context, listen: false);
+              subjectProvider.disposeChapters();
             },
             icon: Icon(
               Icons.arrow_back_ios,

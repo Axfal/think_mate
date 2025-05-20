@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:education_app/resources/exports.dart';
+import 'package:education_app/ui/view/drawer/help/help_screen.dart';
 import 'package:education_app/view_model/provider/profile_provider.dart';
 
 Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
@@ -107,7 +108,7 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                         Navigator.pushNamed(
                             context, RoutesName.previousTestScreen);
                       }, Icons.history_rounded),
-                      drawerItems('Notes', () {
+                      drawerItems('My Notes', () {
                         final authProvider =
                             Provider.of<AuthProvider>(context, listen: false);
                         authProvider.loadUserSession();
@@ -118,11 +119,24 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                           Navigator.pushNamed(context, RoutesName.noteScreen);
                         }
                       }, Icons.note_alt_outlined),
-                      drawerItems('My Notebook', () {
-                        Navigator.pushNamed(
-                            context, RoutesName.myNoteBookScreen);
+                      drawerItems('My Library', () {
+                        final authProvider =
+                            Provider.of<AuthProvider>(context, listen: false);
+                        authProvider.loadUserSession();
+
+                        if (authProvider.userSession!.userType == "free") {
+                          _showPremiumAccessDialog(context);
+                        } else {
+                          Navigator.pushNamed(
+                              context, RoutesName.myNoteBookScreen);
+                        }
                       }, Icons.book_outlined),
-                      drawerItems('Help', () {}, Icons.help_outline_rounded),
+                      drawerItems('Help', () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HelpScreen()));
+                      }, Icons.help_outline_rounded),
                       drawerItems('Terms & Conditions', () {
                         Navigator.pushNamed(context, RoutesName.terms);
                       }, Icons.description_outlined),
@@ -137,7 +151,7 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                             context,
                             listen: false);
                         logOut(context);
-                        // questionProvider.clearSubmittedQuestions();
+                        questionProvider.clearSubmittedQuestions();
                       }, Icons.logout_rounded),
                     ],
                   ),

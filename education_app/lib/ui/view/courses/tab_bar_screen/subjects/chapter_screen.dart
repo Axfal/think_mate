@@ -1,12 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:education_app/resources/exports.dart';
-import 'package:no_screenshot/no_screenshot.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:education_app/utils/screenshot_protector.dart';
 
 class ChaptersScreen extends StatefulWidget {
-  const ChaptersScreen({super.key});
+  final int testId;
+  const ChaptersScreen({super.key, required this.testId});
 
   @override
   State<ChaptersScreen> createState() => _ChaptersScreenState();
@@ -238,10 +237,16 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
     if (authProvider.userSession?.userType == "premium") {
       Navigator.pushNamed(context, RoutesName.questionScreen, arguments: {
         "subjectId": provider.subjectId,
-        "chapterId": provider.chapterId
+        "chapterId": provider.chapterId,
+        "testId": widget.testId
       });
     } else {
-      _showPremiumAccessDialog(context);
+      // _showPremiumAccessDialog(context);
+      Navigator.pushNamed(context, RoutesName.questionScreen, arguments: {
+        "subjectId": provider.subjectId,
+        "chapterId": provider.chapterId,
+        "testId": widget.testId
+      });
     }
   }
 

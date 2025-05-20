@@ -76,7 +76,7 @@ export 'package:education_app/model/subject_model.dart';
 export 'package:education_app/view_model/provider/subject_provider.dart';
 export 'package:education_app/repository/subjects_repo.dart';
 export 'package:education_app/model/chapter_model.dart';
-export 'package:education_app/ui/view/drawer/my_note_book.dart';
+export 'package:education_app/ui/view/drawer/note_book/my_note_book.dart';
 export 'package:education_app/view_model/provider/chapter_provider.dart';
 export 'package:education_app/repository/question_repo.dart';
 export 'package:education_app/view_model/provider/questions_provider.dart';

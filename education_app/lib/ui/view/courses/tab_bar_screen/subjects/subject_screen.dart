@@ -1,10 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:education_app/resources/exports.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:flutter/cupertino.dart';
 
 class SubjectScreen extends StatefulWidget {
-  final courseId;
+  final int courseId;
   const SubjectScreen({super.key, required this.courseId});
 
   @override
@@ -38,68 +38,7 @@ class _SubjectScreenState extends State<SubjectScreen> {
 
     return Scaffold(
       body: provider.subjectId.isEmpty
-          ? Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8),
-              child: GridView.builder(
-                itemCount: 6, // You can adjust count for shimmer placeholders
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 3 / 2,
-                ),
-                itemBuilder: (context, index) {
-                  return Shimmer.fromColors(
-                    baseColor: AppColors.indigo.withValues(alpha: 0.3),
-                    highlightColor: AppColors.lightIndigo.withValues(alpha: 0.2),
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.indigo.withOpacity(0.5),
-                              AppColors.lightIndigo.withOpacity(0.3),
-                            ],
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.whiteColor.withOpacity(0.15),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              SizedBox(height: 12),
-                              Container(
-                                height: 20,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: AppColors.whiteColor.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            )
+          ? Center(child: CupertinoActivityIndicator(),)
           : Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8),
@@ -155,7 +94,7 @@ class _SubjectScreenState extends State<SubjectScreen> {
                               String subjectName = provider.subjects[index];
                               subjectProvider.setSelectedSubjectId(subjectId);
                               Navigator.pushNamed(
-                                  context, RoutesName.chapterScreen);
+                                  context, RoutesName.chapterScreen, arguments: {'testId': testId});
                               await chapterProvider.setData(
                                   testId, subjectId, subjectName);
                             } catch (e) {
@@ -212,3 +151,65 @@ class _SubjectScreenState extends State<SubjectScreen> {
     );
   }
 }
+//Padding(
+//               padding:
+//                   const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8),
+//               child: GridView.builder(
+//                 itemCount: 6, // You can adjust count for shimmer placeholders
+//                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+//                   crossAxisCount: 2,
+//                   crossAxisSpacing: 10,
+//                   mainAxisSpacing: 10,
+//                   childAspectRatio: 3 / 2,
+//                 ),
+//                 itemBuilder: (context, index) {
+//                   return Shimmer.fromColors(
+//                     baseColor: AppColors.indigo.withValues(alpha: 0.3),
+//                     highlightColor: AppColors.lightIndigo.withValues(alpha: 0.2),
+//                     child: Card(
+//                       elevation: 4,
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(16),
+//                       ),
+//                       child: Container(
+//                         decoration: BoxDecoration(
+//                           borderRadius: BorderRadius.circular(16),
+//                           gradient: LinearGradient(
+//                             begin: Alignment.topLeft,
+//                             end: Alignment.bottomRight,
+//                             colors: [
+//                               AppColors.indigo.withOpacity(0.5),
+//                               AppColors.lightIndigo.withOpacity(0.3),
+//                             ],
+//                           ),
+//                         ),
+//                         child: Padding(
+//                           padding: const EdgeInsets.all(16.0),
+//                           child: Column(
+//                             mainAxisAlignment: MainAxisAlignment.center,
+//                             children: [
+//                               Container(
+//                                 padding: EdgeInsets.all(12),
+//                                 decoration: BoxDecoration(
+//                                   color: AppColors.whiteColor.withOpacity(0.15),
+//                                   shape: BoxShape.circle,
+//                                 ),
+//                               ),
+//                               SizedBox(height: 12),
+//                               Container(
+//                                 height: 20,
+//                                 width: double.infinity,
+//                                 decoration: BoxDecoration(
+//                                   color: AppColors.whiteColor.withOpacity(0.15),
+//                                   borderRadius: BorderRadius.circular(8),
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                   );
+//                 },
+//               ),
+//             )
