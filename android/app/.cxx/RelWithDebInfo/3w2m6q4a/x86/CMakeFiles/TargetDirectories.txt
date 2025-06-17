@@ -1,0 +1,2 @@
+C:/Users/Syeda/cursor ai/education_app/android/app/.cxx/RelWithDebInfo/3w2m6q4a/x86/CMakeFiles/edit_cache.dir
+C:/Users/Syeda/cursor ai/education_app/android/app/.cxx/RelWithDebInfo/3w2m6q4a/x86/CMakeFiles/rebuild_cache.dir
