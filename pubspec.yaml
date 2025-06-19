@@ -43,6 +43,8 @@ dependencies:
 #  flutter_widget_from_html: ^0.16.0
   syncfusion_flutter_pdfviewer: ^29.1.38
   shimmer: ^2.0.0
+  math_expressions: 2.1.0
+  petitparser: 4.4.0
   permission_handler: ^11.4.0
   flutter_html: ^3.0.0
   no_screenshot: ^0.3.1

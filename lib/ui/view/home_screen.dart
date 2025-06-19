@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:education_app/resources/exports.dart';
 import 'package:education_app/ui/view/courses/tab_bar_screen/subjects/test.dart';
+import 'package:education_app/ui/view/global_screens/calculator_screen.dart';
 import 'package:no_screenshot/no_screenshot.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -199,12 +200,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColors.darkText),
-        // actions: [
-        //   IconButton(
-        //       onPressed: () => Navigator.push(
-        //           context, MaterialPageRoute(builder: (context) => Test())),
-        //       icon: Icon(Icons.add, color: Colors.red))
-        // ],
+        actions: [
+          IconButton(
+              onPressed: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
+              icon: Icon(Icons.add, color: Colors.red))
+        ],
       ),
       drawer: userData?.profileModel != null
           ? drawerWidget(context, userData!)
