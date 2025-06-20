@@ -407,8 +407,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                   buildOption(1, question.option2),
                                   buildOption(2, question.option3),
                                   buildOption(3, question.option4),
-                                  // if (question.option5 != '')
-                                  buildOption(4, question.option5),
+                                  if (question.option5 != '')
+                                    buildOption(4, question.option5),
                                   _buildActionButtons(
                                       context,
                                       provider,

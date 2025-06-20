@@ -439,6 +439,48 @@ class MockTestScreenState extends State<MockTestScreen> {
                                     Icons.close, color: AppColors.errorColor,
                                     weight: 100)
                             ),
+                           if(currentQuestion.option5 != '')
+                            ListTile(
+                                title: Text(
+                                    removeHtmlTags(currentQuestion.option5)
+                                        .replaceAll(RegExp(r'[a-d]\)'), '')
+                                        .trim(),
+                                    style: AppTextStyle.answerText),
+                                leading: Radio<int>(
+                                    activeColor: AppColors.indigo,
+                                    value: 4,
+                                    groupValue: provider.isTestStarted
+                                        ? provider.selectedOptions[provider
+                                        .currentIndex]
+                                        : null,
+                                    onChanged: (provider.isTestStarted &&
+                                        !provider.isSubmitted[provider
+                                            .currentIndex])
+                                        ? (value) {
+                                      if (value != null) {
+                                        provider.onChangeRadio(
+                                            provider.currentIndex, value);
+                                      }
+                                    }
+                                        : null
+                                ),
+                                trailing: provider.isSubmitted[provider
+                                    .currentIndex] == false
+                                    ? null : provider.isTrue![provider
+                                    .currentIndex]
+                                    && 4 == provider.selectedOptions[provider
+                                        .currentIndex] ?
+                                Icon(Icons.check, color: AppColors.successColor,
+                                    weight: 100) :
+                                provider.correctAnswerOptionIndex![provider
+                                    .currentIndex] == 4 ? Icon(
+                                    Icons.check, color: AppColors.successColor,
+                                    weight: 100) :
+                                provider.selectedOptions[provider
+                                    .currentIndex] != 4 ? null : Icon(
+                                    Icons.close, color: AppColors.errorColor,
+                                    weight: 100)
+                            ),
 
                             SizedBox(height: 10),
 

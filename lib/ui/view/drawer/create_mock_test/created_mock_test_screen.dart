@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
 
+import 'dart:ffi';
+
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:no_screenshot/no_screenshot.dart';
@@ -387,7 +389,7 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
                 ],
               ),
               SizedBox(height: 10),
-              ...List.generate(4, (index) {
+              ...List.generate(currentQuestion.option5 != '' ? 5 : 4, (index) {
                 String? optionText;
                 switch (index) {
                   case 0:
@@ -401,6 +403,9 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
                     break;
                   case 3:
                     optionText = currentQuestion.option4;
+                    break;
+                  case 4:
+                    optionText = currentQuestion.option5;
                     break;
                 }
                 return ListTile(
@@ -612,8 +617,8 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
       BuildContext context, int userId, int testId, int questionId) {
     final formKey = GlobalKey<FormState>();
     TextEditingController feedbackController = TextEditingController();
-    final provider =
-        Provider.of<CreateMockTestProvider>(context, listen: false);
+
+    // final provider = Provider.of<CreateMockTestProvider>(context, listen: false);
 
     showDialog(
       context: context,

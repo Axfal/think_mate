@@ -26,7 +26,8 @@ class CreateMockTestProvider with ChangeNotifier {
     "a": 0,
     "b": 1,
     "c": 2,
-    "d": 3
+    "d": 3,
+    "e": 4
   };
 
   int _numberOfQuestions = 1;
@@ -96,7 +97,7 @@ class CreateMockTestProvider with ChangeNotifier {
     }
 
     _isLoading = true;
-    notifyListeners(); // Notify listeners about loading state
+    notifyListeners();
 
     try {
       Map<String, dynamic> data = {
