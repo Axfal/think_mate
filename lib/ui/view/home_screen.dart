@@ -200,12 +200,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColors.darkText),
-        actions: [
-          IconButton(
-              onPressed: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
-              icon: Icon(Icons.add, color: Colors.red))
-        ],
+        // actions: [
+        //   IconButton(
+        //       onPressed: () => Navigator.push(
+        //           context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
+        //       icon: Icon(Icons.add, color: Colors.red))
+        // ],
       ),
       drawer: userData?.profileModel != null
           ? drawerWidget(context, userData!)

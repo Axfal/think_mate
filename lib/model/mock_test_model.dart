@@ -29,23 +29,24 @@ class Question {
   final String option2;
   final String option3;
   final String option4;
+  final String option5;
   final String detail;
   final String capacity;
   final String correctAnswer;
   final String subjectName;
 
-  Question({
-    required this.id,
-    required this.question,
-    required this.option1,
-    required this.option2,
-    required this.option3,
-    required this.option4,
-    required this.detail,
-    required this.capacity,
-    required this.correctAnswer,
-    required this.subjectName
-  });
+  Question(
+      {required this.id,
+      required this.question,
+      required this.option1,
+      required this.option2,
+      required this.option3,
+      required this.option4,
+      required this.option5,
+      required this.detail,
+      required this.capacity,
+      required this.correctAnswer,
+      required this.subjectName});
 
   // Helper method to remove HTML tags and decode HTML entities
   static String _cleanHtml(String html) {
@@ -57,17 +58,17 @@ class Question {
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-      id: json['id'] ?? 0,
-      question: _cleanHtml(json['question'] ?? ''),
-      option1: _cleanHtml(json['option1'] ?? ''),
-      option2: _cleanHtml(json['option2'] ?? ''),
-      option3: _cleanHtml(json['option3'] ?? ''),
-      option4: _cleanHtml(json['option4'] ?? ''),
-      detail: _cleanHtml(json['detail'] ?? ''),
-      capacity: json['capacity'] ?? '',
-      correctAnswer: json['correct_answer'] ?? '',
-      subjectName: json['subject_name'] ?? ''
-    );
+        id: json['id'] ?? 0,
+        question: _cleanHtml(json['question'] ?? ''),
+        option1: _cleanHtml(json['option1'] ?? ''),
+        option2: _cleanHtml(json['option2'] ?? ''),
+        option3: _cleanHtml(json['option3'] ?? ''),
+        option4: _cleanHtml(json['option4'] ?? ''),
+        option5: _cleanHtml(json['option5'] ?? ''),
+        detail: _cleanHtml(json['detail'] ?? ''),
+        capacity: json['capacity'] ?? '',
+        correctAnswer: json['correct_answer'] ?? '',
+        subjectName: json['subject_name'] ?? '');
   }
 
   Map<String, dynamic> toJson() {
@@ -78,6 +79,7 @@ class Question {
       'option2': option2,
       'option3': option3,
       'option4': option4,
+      'option5': option5,
       'detail': detail,
       'capacity': capacity,
       'correct_answer': correctAnswer,

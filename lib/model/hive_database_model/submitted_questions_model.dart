@@ -18,7 +18,7 @@ class SubmittedQuestionsModel extends HiveObject {
 
   SubmittedQuestionsModel(
       {required this.questionId,
-        required this.chapterId,
+      required this.chapterId,
       required this.questionResult,
       required this.selectedOption});
 }

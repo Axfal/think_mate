@@ -2,7 +2,6 @@
 
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:education_app/utils/screenshot_protector.dart';
 import 'package:flutter_html/flutter_html.dart';
 // import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
@@ -238,34 +237,106 @@ class _QuestionScreenState extends State<QuestionScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       margin: const EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Column(
                         children: [
-                          (authProvider.userSession!.userType == 'free' ||
-                                  authProvider.userSession!.testId !=
-                                      widget.testId)
-                              ? Text(
-                                  'Total Demo Questions: 5',
-                                  style: AppTextStyle.heading3.copyWith(
-                                    color: AppColors.darkText,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                )
-                              : Text(
-                                  'Total Questions: ${provider.filteredQuestions.length}',
-                                  style: AppTextStyle.heading3.copyWith(
-                                      color: AppColors.darkText,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isSmallScreen = constraints.maxWidth < 360;
+
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Left Side: Total Questions Info
+                                    Flexible(
+                                      flex: 2,
+                                      child: Text(
+                                        (authProvider.userSession!.userType ==
+                                                    'free' ||
+                                                authProvider
+                                                        .userSession!.testId !=
+                                                    widget.testId)
+                                            ? 'Total Demo Questions: 5'
+                                            : 'Total Questions: ${provider.filteredQuestions.length}',
+                                        style: AppTextStyle.heading3.copyWith(
+                                          color: AppColors.darkText,
+                                          fontSize: isSmallScreen ? 14 : 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 12),
+
+                                    // Right Side: Answered Count
+                                    Flexible(
+                                      flex: 1,
+                                      child: Text(
+                                        'Answered: ${provider.isSubmitted.entries.where((entry) => provider.filteredQuestions.any((q) => q.id == entry.key)).length}',
+                                        style: AppTextStyle.bodyText1.copyWith(
+                                          fontSize: isSmallScreen ? 11 : 13,
+                                          color: AppColors.darkText,
+                                        ),
+                                        textAlign: TextAlign.end,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                          Text(
-                            'Answered: ${provider.isSubmitted.entries.where((entry) => provider.filteredQuestions.any((q) => q.id == entry.key)).length}',
-                            style: AppTextStyle.bodyText1.copyWith(
-                              fontSize: 12,
-                              color: AppColors.darkText,
-                            ),
+                              );
+                            },
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    "Calculator :",
+                                    style: AppTextStyle.heading3.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14),
+                                  ),
+                                  IconButton(
+                                      onPressed: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CalculatorScreen())),
+                                      icon: Icon(Icons.calculate_outlined,
+                                          color: AppColors.primaryColor,
+                                          size: 30)),
+                                ],
+                              ),
+                              SizedBox(
+                                width: 30,
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    "Hint: ",
+                                    style: AppTextStyle.heading3.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14),
+                                  ),
+                                  Icon(
+                                    Icons.lightbulb_outline_rounded,
+                                    color: AppColors.primaryColor,
+                                    size: 30,
+                                  )
+                                ],
+                              ),
+                            ],
+                          )
                         ],
                       ),
                     ),
@@ -336,6 +407,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                   buildOption(1, question.option2),
                                   buildOption(2, question.option3),
                                   buildOption(3, question.option4),
+                                  // if (question.option5 != '')
+                                  buildOption(4, question.option5),
                                   _buildActionButtons(
                                       context,
                                       provider,
@@ -477,7 +550,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               chapterProvider.chapterId,
               provider.questions!.questions[index].id,
             ),
-            child: Icon(Icons.feedback, size: 22, color: AppColors.whiteColor),
+            child: Icon(Icons.feedback_outlined,
+                size: 22, color: AppColors.whiteColor),
           ),
           const SizedBox(width: 10),
           ElevatedButton(

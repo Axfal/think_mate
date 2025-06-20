@@ -35,6 +35,7 @@ class IncorrectQuestions {
   String? option2;
   String? option3;
   String? option4;
+  String? option5;
   String? detail;
   String? capacity;
   String? correctAnswer;
@@ -49,6 +50,7 @@ class IncorrectQuestions {
       this.option2,
       this.option3,
       this.option4,
+      this.option5,
       this.detail,
       this.capacity,
       this.correctAnswer});
@@ -63,6 +65,7 @@ class IncorrectQuestions {
     option2 = json['option2'];
     option3 = json['option3'];
     option4 = json['option4'];
+    option5 = json['option5'];
     detail = json['detail'];
     capacity = json['capacity'];
     correctAnswer = json['correct_answer'];
@@ -79,6 +82,7 @@ class IncorrectQuestions {
     data['option2'] = this.option2;
     data['option3'] = this.option3;
     data['option4'] = this.option4;
+    data['option5'] = this.option5;
     data['detail'] = this.detail;
     data['capacity'] = this.capacity;
     data['correct_answer'] = this.correctAnswer;

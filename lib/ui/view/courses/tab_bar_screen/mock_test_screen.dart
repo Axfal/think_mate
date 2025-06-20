@@ -2,9 +2,6 @@
 
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:no_screenshot/no_screenshot.dart';
-import 'package:education_app/utils/toast_helper.dart';
-import 'package:education_app/utils/screenshot_protector.dart';
 
 class MockTestScreen extends StatefulWidget {
   final int subjectId;

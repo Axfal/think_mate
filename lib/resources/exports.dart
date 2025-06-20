@@ -90,3 +90,5 @@ export 'package:education_app/model/get_book_mark_model.dart';
 export 'package:education_app/model/delete_book_mark.dart';
 export 'package:education_app/ui/view/auth_screen/reset_password_screen.dart';
 export 'package:education_app/ui/view/auth_screen/enter_otp_and_reset_password_screen.dart';
+export 'package:education_app/ui/view/global_screens/calculator_screen.dart';
+export 'package:education_app/utils/screenshot_protector.dart';

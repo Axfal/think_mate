@@ -36,6 +36,7 @@ class QuestionsProvider with ChangeNotifier {
     "b": 1,
     "c": 2,
     "d": 3,
+    "e": 4
   };
 
   Map<int, int> _correctAnswerOptionIndex = {};
@@ -59,13 +60,13 @@ class QuestionsProvider with ChangeNotifier {
   bool _isTestStarted = false;
   bool get isTestStarted => _isTestStarted;
 
-  Map<int, int> _selectedOptions = {};
+  Map<int, int> _selectedOptions = {}; // question id + selected option number
   Map<int, int> get selectedOptions => _selectedOptions;
 
   List<bool> _showExplanation = [];
   List<bool> get showExplanation => _showExplanation;
 
-  final Map<int, bool> _bookmarkedQuestions = {};
+  final Map<int, bool> _bookmarkedQuestions = {}; // question id + true/false
   Map<int, bool> get bookmarkedQuestions => _bookmarkedQuestions;
 
   final bool _explanationSwitch = false;
@@ -298,6 +299,7 @@ class QuestionsProvider with ChangeNotifier {
                 option2: incorrect.option2!,
                 option3: incorrect.option3!,
                 option4: incorrect.option4!,
+                option5: incorrect.option5!,
                 detail: incorrect.detail!,
                 capacity: incorrect.capacity!,
                 correctAnswer: incorrect.correctAnswer!,
@@ -349,11 +351,6 @@ class QuestionsProvider with ChangeNotifier {
         _questionList = _questions!.questions;
         _filteredQuestions = List.from(_questionList);
         _numberOfQuestions = _questionList.length;
-        // for (var i in _questionList) {
-        //   if (!_restQuestionData.contains(i.id)) {
-        //     _restQuestionData.add(i.id);
-        //   }
-        // }
         _showExplanation = List<bool>.filled(_numberOfQuestions!, false);
       } else {
         _questions = null;
