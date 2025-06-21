@@ -1,5 +1,7 @@
 // import 'dart:convert';
 
+// ignore_for_file: avoid_print
+
 import 'package:education_app/resources/exports.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -109,6 +111,29 @@ class AuthRepository {
         print("Error in resetPasswordApi: $error");
       }
       rethrow;
+    }
+  }
+
+  /// post user test data
+  Future<dynamic> postUserTestData(dynamic data) async {
+    try {
+      dynamic response =
+          await _apiServices.getPostApiResponse(AppUrl.postUserTestData, data);
+      return response;
+    } catch (e) {
+      print("error in repo side: $e");
+      rethrow;
+    }
+  }
+
+  /// getUseTestData
+  Future<dynamic> getUserTestData(int userId) async {
+    try {
+      dynamic response =
+          await _apiServices.getGetApiResponse("${AppUrl.getuserTestData}$userId");
+      return response;
+    } catch (e) {
+      print("error: $e");
     }
   }
 }

@@ -126,12 +126,79 @@ class MockTestScreenState extends State<MockTestScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 10),
-                if (!provider.isTestStarted)
-                  Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Container(
+                SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                    if (!provider.isTestStarted)
+                      Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.indigo,
+                              AppColors.lightIndigo,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.purpleShadow,
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: provider.startTest,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text('Start Test'),
+                        ),
+                      ),
+                    if (provider.isTestStarted)
+                      Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.redColor,
+                              AppColors.redColor,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.darkShadow,
+                              blurRadius: 1,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () => provider.navigate(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text('End Test'),
+                        ),
+                      ),
+                    Container(
                       height: 50,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -142,17 +209,18 @@ class MockTestScreenState extends State<MockTestScreen> {
                             AppColors.lightIndigo,
                           ],
                         ),
+
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.purpleShadow,
-                            blurRadius: 8,
+                            color: AppColors.darkShadow,
+                            blurRadius: 1,
                             offset: Offset(0, 4),
                           ),
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: provider.startTest,
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -160,43 +228,47 @@ class MockTestScreenState extends State<MockTestScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text('Start Test'),
+                        child: Icon(Icons.calculate_outlined, color: AppColors.whiteColor,size: 30)
                       ),
                     ),
-                  ),
-                if (provider.isTestStarted)
-                  Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.redColor,
-                          AppColors.redColor,
+                   Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.indigo,
+                            AppColors.lightIndigo,
+                          ],
+                        ),
+
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.darkShadow,
+                            blurRadius: 1,
+                            offset: Offset(0, 4),
+                          ),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.darkShadow,
-                          blurRadius: 1,
-                          offset: Offset(0, 4),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          /// Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () => provider.navigate(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        child: Icon(Icons.lightbulb_outline, color: AppColors.whiteColor,size: 30)
                       ),
-                      child: Text('End Test'),
                     ),
-                  ),
+                  ],),
+                ),
+               
 
                 /// main test card
                 SizedBox(height: 20),

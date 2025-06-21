@@ -45,4 +45,8 @@ class AppUrl {
   static var deleteNote = '$baseUrl/delete_note.php';
   static var updateNote = '$baseUrl/update_note.php';
   static var getNoteBook = '$baseUrl/get_upload_books.php?user_id=';
+
+  /// maintain user test data session
+  static var postUserTestData = '$baseUrl/logout_user_data.php';
+  static var getuserTestData = '$baseUrl/get_logout_user_data.php?user_id=';
 }

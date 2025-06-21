@@ -1,6 +1,10 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, avoid_print
 
-import 'package:education_app/resources/exports.dart';
+import 'dart:convert';
+
+import 'package:education_app/resources/exports.dart' hide Data;
+import '../../model/get_user_test_data_session_model.dart';
+import '../../model/hive_database_model/submitted_questions_model.dart';
 import '../../model/hive_database_model/user_session_model.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -83,6 +87,8 @@ class AuthProvider with ChangeNotifier {
             subscriptionName: response['subscription_name'],
           );
           await userBox.put('session', _userSession!);
+
+          await getUserTestData();
 
           // Navigate to home
           if (context.mounted) {
@@ -329,4 +335,103 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> postUserTestData() async {
+    _loading = true;
+    notifyListeners();
+
+    try {
+      // Open the Hive box
+      final box = Hive.box<SubmittedQuestionsModel>('submittedQuestionsBox');
+
+      // Prepare the results list
+      final List<Map<String, dynamic>> results = box.values.map((question) {
+        return {
+          "questionId": question.questionId,
+          "questionResult": question.questionResult,
+          "selectedOption": question.selectedOption,
+          "chapterId": question.chapterId,
+        };
+      }).toList();
+
+      // Extract userId from session
+      final int? userId = _userSession?.userId;
+
+      if (userId == null) {
+        print("User ID not found in session.");
+        ToastHelper.showError("User ID not found. Please login again.");
+        return;
+      }
+
+      final Map<String, dynamic> payload = {
+        "user_id": userId,
+        "results": results,
+      };
+
+      // Send POST request
+      final response = await _authRepository.postUserTestData(payload);
+
+      if (response != null && response['success'] == true) {
+        print("User data submitted successfully.");
+        ToastHelper.showSuccess("Logout successfully!");
+      } else {
+        print("Server error: ${response.statusCode} - ${response.body}");
+        ToastHelper.showError("Failed to post data.");
+      }
+    } catch (e) {
+      print("Exception: $e");
+      ToastHelper.showError("Error: $e");
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getUserTestData() async {
+    _loading = true;
+    notifyListeners();
+
+    try {
+      final int? userId = _userSession?.userId;
+
+      if (userId == null) {
+        print("User ID not found in session.");
+        ToastHelper.showError("User ID not found. Please login again.");
+        return;
+      }
+
+      final response = await _authRepository.getUserTestData(userId);
+
+      if (response != null && response['success'] == true) {
+        final UserTestDataModel userTestDataModel = UserTestDataModel.fromJson(response);
+
+        final box = await Hive.openBox<SubmittedQuestionsModel>('submittedQuestionsBox');
+
+        await box.clear();
+
+        /// Store in Hive
+        for (final Data item in userTestDataModel.data ?? []) {
+          final submittedQuestion = SubmittedQuestionsModel(
+            questionId: item.questionId ?? 0,
+            chapterId: item.chapterId ?? 0,
+            questionResult: item.questionResult ?? '',
+            selectedOption: item.selectedOption ?? 0,
+          );
+          await box.add(submittedQuestion);
+        }
+
+        print("User test data saved to Hive successfully.");
+      } else {
+        print("Failed to fetch user test data. Response: $response");
+        ToastHelper.showError("Failed to fetch test data.");
+      }
+    } catch (e) {
+      print("Error in getUserTestData(): $e");
+      ToastHelper.showError("Error: $e");
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
 }

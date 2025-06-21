@@ -3,6 +3,7 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:education_app/ui/view/drawer/help/help_screen.dart';
 import 'package:education_app/view_model/provider/profile_provider.dart';
+import 'package:flutter/cupertino.dart';
 
 Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
@@ -151,7 +152,7 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                             context,
                             listen: false);
                         logOut(context);
-                        questionProvider.clearSubmittedQuestions();
+                        // questionProvider.clearSubmittedQuestions();
                       }, Icons.logout_rounded),
                     ],
                   ),
@@ -239,119 +240,133 @@ void logOut(BuildContext context) {
       ),
       elevation: 0,
       backgroundColor: Colors.transparent,
-      child: Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.blackOverlay10,
-              blurRadius: 10,
-              spreadRadius: 5,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Icon
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.redColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.logout,
-                color: AppColors.redColor,
-                size: 40,
-              ),
-            ),
-            SizedBox(height: 20),
-
-            // Title
-            Text(
-              'Logout',
-              style: AppTextStyle.heading2.copyWith(
-                color: AppColors.darkText,
-              ),
-            ),
-            SizedBox(height: 8),
-
-            /// Message
-            Text(
-              'Are you sure you want to logout?',
-              textAlign: TextAlign.center,
-              style: AppTextStyle.bodyText1.copyWith(
-                color: AppColors.darkText.withOpacity(0.6),
-              ),
-            ),
-            SizedBox(height: 24),
-
-            /// Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Cancel Button
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.indigo),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: AppTextStyle.button.copyWith(
-                        color: AppColors.darkText,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16),
-
-                /// Logout Button
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      try {
-                        final provider =
-                            Provider.of<AuthProvider>(context, listen: false);
-                        provider.logout();
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          RoutesName.login,
-                          (route) => false,
-                        );
-                      } catch (e) {
-                        rethrow;
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      backgroundColor: AppColors.redColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: AppColors.textColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+      child: Consumer<AuthProvider>(
+        builder: (context, provider, _) {
+          return Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.whiteColor,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.blackOverlay10,
+                  blurRadius: 10,
+                  spreadRadius: 5,
                 ),
               ],
             ),
-          ],
-        ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.redColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.logout,
+                    color: AppColors.redColor,
+                    size: 40,
+                  ),
+                ),
+                SizedBox(height: 20),
+
+                // Title
+                Text(
+                  'Logout',
+                  style: AppTextStyle.heading2.copyWith(
+                    color: AppColors.darkText,
+                  ),
+                ),
+                SizedBox(height: 8),
+
+                /// Message
+                Text(
+                  'Are you sure you want to logout?',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyle.bodyText1.copyWith(
+                    color: AppColors.darkText.withOpacity(0.6),
+                  ),
+                ),
+                SizedBox(height: 24),
+
+                /// Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Cancel Button
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: AppColors.indigo),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: AppTextStyle.button.copyWith(
+                            color: AppColors.darkText,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+
+                    // Logout Button
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: provider.loading
+                            ? null
+                            : () async {
+                                try {
+                                  await provider.postUserTestData();
+                                  await provider.logout();
+
+                                  if (context.mounted) {
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      RoutesName.login,
+                                      (route) => false,
+                                    );
+                                  }
+                                } catch (e) {
+                                  print("Error during logout flow: $e");
+                                  ToastHelper.showError(
+                                      "Something went wrong. Try again.");
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          backgroundColor: AppColors.redColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: provider.loading
+                            ? CupertinoActivityIndicator(
+                                color: AppColors.textColor,
+                              )
+                            : Text(
+                                'Logout',
+                                style: TextStyle(
+                                  color: AppColors.textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       ),
     ),
   );

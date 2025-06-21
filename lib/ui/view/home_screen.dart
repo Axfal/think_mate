@@ -185,27 +185,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColors.whiteColor,
-        elevation: 0,
-        title: Text(
-          'ThinkMatte',
-          style: GoogleFonts.poppins(
-            textStyle: TextStyle(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: AppBar(
+          backgroundColor: AppColors.whiteColor,
+          elevation: 2,
+          shadowColor: AppColors.darkShadow, // Soft custom shadow
+          centerTitle: true,
+          surfaceTintColor: Colors.transparent,
+          iconTheme: IconThemeData(color: AppColors.darkText),
+          title: Text(
+            'ThinkMatte',
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
               color: AppColors.darkText,
-              fontWeight: FontWeight.bold,
-              fontSize: 24,
+              letterSpacing: 0.45,
             ),
           ),
         ),
-        centerTitle: true,
-        iconTheme: IconThemeData(color: AppColors.darkText),
-        // actions: [
-        //   IconButton(
-        //       onPressed: () => Navigator.push(
-        //           context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
-        //       icon: Icon(Icons.add, color: Colors.red))
-        // ],
       ),
       drawer: userData?.profileModel != null
           ? drawerWidget(context, userData!)

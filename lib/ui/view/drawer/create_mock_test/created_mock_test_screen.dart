@@ -5,8 +5,6 @@ import 'dart:ffi';
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:no_screenshot/no_screenshot.dart';
-import 'package:education_app/utils/toast_helper.dart';
-import 'package:education_app/utils/screenshot_protector.dart';
 
 class CreatedMockTestScreen extends StatefulWidget {
   final bool testMode;
@@ -199,9 +197,86 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
-                  if (!provider.isTestStarted) _buildStartTestSection(provider),
-                  if (provider.isTestStarted) _buildTestControls(provider),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (!provider.isTestStarted) _buildStartTestSection(provider),
+                        if (provider.isTestStarted) _buildTestControls(provider),
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.indigo,
+                                AppColors.lightIndigo,
+                              ],
+                            ),
+
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.darkShadow,
+                                blurRadius: 1,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Icon(Icons.calculate_outlined, color: AppColors.whiteColor,size: 30)
+                          ),
+                        ),
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.indigo,
+                                AppColors.lightIndigo,
+                              ],
+                            ),
+
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.darkShadow,
+                                blurRadius: 1,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                /// Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen()));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Icon(Icons.lightbulb_outline, color: AppColors.whiteColor,size: 30)
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   const SizedBox(height: 10),
                   _buildQuestionCard(provider),
                 ],
