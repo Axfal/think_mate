@@ -24,6 +24,14 @@ class SubjectProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  Map<int, String>? _subjectsMap;
+  Map<int, String>? get subjectsMap => _subjectsMap;
+
+  String getSubjectName(int id) {
+    return _subjectsMap?[id] ?? 'Unknown Subject';
+  }
+
+
   void setTestId(int id) {
     _testId = id;
     notifyListeners();
@@ -50,12 +58,19 @@ class SubjectProvider with ChangeNotifier {
           response.success == true &&
           response.subjects != null &&
           response.subjects!.isNotEmpty) {
+
         _subjects = response.subjects!
             .map((subject) => subject.subjectName ?? '')
             .toList();
 
+        _subjectsMap = {
+          for (var subject in response.subjects!)
+            subject.id!: subject.subjectName ?? '',
+        };
+
         _subjectId =
             response.subjects!.map((subject) => subject.id ?? 0).toList();
+
       } else {
         _subjects = [];
       }

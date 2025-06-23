@@ -37,7 +37,7 @@ export 'package:education_app/ui/view/courses/tab_bar_screen/subjects/subject_sc
 export 'package:education_app/ui/view/courses/tab_bar_screen/mock_test_screen.dart';
 export 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 export 'package:education_app/ui/view/drawer/create_mock_test/create_mock_test.dart';
-export 'package:education_app/ui/view/result_screen.dart';
+export 'package:education_app/ui/view/global_screens/result_screen.dart';
 export 'package:pie_chart/pie_chart.dart';
 export 'package:education_app/ui/widgets/reusable_button.dart';
 export 'package:education_app/ui/view/courses/tab_bar_screen/subjects/question_screen.dart';
@@ -92,3 +92,8 @@ export 'package:education_app/ui/view/auth_screen/reset_password_screen.dart';
 export 'package:education_app/ui/view/auth_screen/enter_otp_and_reset_password_screen.dart';
 export 'package:education_app/ui/view/global_screens/calculator_screen.dart';
 export 'package:education_app/utils/screenshot_protector.dart';
+export 'package:education_app/view_model/provider/hint_provider.dart';
+export 'package:education_app/view_model/provider/note_book_provider.dart';
+export 'package:flutter_screenutil/flutter_screenutil.dart';
+export 'package:education_app/ui/view/global_screens/hint_screen.dart';
+export 'package:education_app/repository/hint_repo.dart';

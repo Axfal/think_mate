@@ -164,6 +164,34 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.calculate_outlined,
+                size: 25.h, color: AppColors.whiteColor),
+            tooltip: 'Calculator',
+            onPressed: () {
+              // TODO: Navigate to Calculator screen
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => CalculatorScreen()));
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.lightbulb_outline,
+                size: 25.h, color: AppColors.whiteColor),
+            tooltip: 'Hint',
+            onPressed: () {
+              final authProvider =
+                  Provider.of<AuthProvider>(context, listen: false);
+              authProvider.loadUserSession();
+              final testId = authProvider.userSession!.testId;
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => HintScreen(testId: testId)));
+            },
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -203,80 +231,81 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (!provider.isTestStarted) _buildStartTestSection(provider),
-                        if (provider.isTestStarted) _buildTestControls(provider),
-                        Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.indigo,
-                                AppColors.lightIndigo,
-                              ],
-                            ),
-
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.darkShadow,
-                                blurRadius: 1,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Icon(Icons.calculate_outlined, color: AppColors.whiteColor,size: 30)
-                          ),
-                        ),
-                        Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.indigo,
-                                AppColors.lightIndigo,
-                              ],
-                            ),
-
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.darkShadow,
-                                blurRadius: 1,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                /// Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen()));
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Icon(Icons.lightbulb_outline, color: AppColors.whiteColor,size: 30)
-                          ),
-                        ),
+                        if (!provider.isTestStarted)
+                          _buildStartTestSection(provider),
+                        if (provider.isTestStarted)
+                          _buildTestControls(provider),
+                        // Container(
+                        //   height: 50,
+                        //   decoration: BoxDecoration(
+                        //     gradient: LinearGradient(
+                        //       begin: Alignment.topLeft,
+                        //       end: Alignment.bottomRight,
+                        //       colors: [
+                        //         AppColors.indigo,
+                        //         AppColors.lightIndigo,
+                        //       ],
+                        //     ),
+                        //
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: AppColors.darkShadow,
+                        //         blurRadius: 1,
+                        //         offset: Offset(0, 4),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   child: ElevatedButton(
+                        //       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
+                        //       style: ElevatedButton.styleFrom(
+                        //         backgroundColor: Colors.transparent,
+                        //         shadowColor: Colors.transparent,
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius: BorderRadius.circular(12),
+                        //         ),
+                        //       ),
+                        //       child: Icon(Icons.calculate_outlined, color: AppColors.whiteColor,size: 30)
+                        //   ),
+                        // ),
+                        // Container(
+                        //   height: 50,
+                        //   decoration: BoxDecoration(
+                        //     gradient: LinearGradient(
+                        //       begin: Alignment.topLeft,
+                        //       end: Alignment.bottomRight,
+                        //       colors: [
+                        //         AppColors.indigo,
+                        //         AppColors.lightIndigo,
+                        //       ],
+                        //     ),
+                        //
+                        //     borderRadius: BorderRadius.circular(12),
+                        //     boxShadow: [
+                        //       BoxShadow(
+                        //         color: AppColors.darkShadow,
+                        //         blurRadius: 1,
+                        //         offset: Offset(0, 4),
+                        //       ),
+                        //     ],
+                        //   ),
+                        //   child: ElevatedButton(
+                        //       onPressed: () {
+                        //         /// Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen()));
+                        //       },
+                        //       style: ElevatedButton.styleFrom(
+                        //         backgroundColor: Colors.transparent,
+                        //         shadowColor: Colors.transparent,
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius: BorderRadius.circular(12),
+                        //         ),
+                        //       ),
+                        //       child: Icon(Icons.lightbulb_outline, color: AppColors.whiteColor,size: 30)
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 10),
                   _buildQuestionCard(provider),
                 ],
@@ -330,6 +359,7 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
             ),
           ),
         ),
+        SizedBox(width: 20.w),
         if (widget.testMode)
           Text(
             formattedTime,
@@ -342,30 +372,8 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
 
   Widget _buildTestControls(CreateMockTestProvider provider) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (widget.testMode)
-          CountdownTimer(
-            endTime: provider.endTime,
-            onEnd: () => provider.navigate(context),
-            widgetBuilder: (_, time) {
-              if (time == null) {
-                return Text(
-                  'Time\'s up!',
-                  style:
-                      AppTextStyle.bodyText1.copyWith(color: AppColors.indigo),
-                );
-              }
-
-              String minutes = (time.min ?? 0).toString();
-              String seconds = (time.sec ?? 0).toString().padLeft(2, '0');
-
-              return Text(
-                'Time Left: $minutes:$seconds minutes',
-                style: AppTextStyle.bodyText1.copyWith(color: AppColors.indigo),
-              );
-            },
-          ),
         Container(
           height: 50,
           decoration: BoxDecoration(
@@ -398,6 +406,34 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
             ),
           ),
         ),
+        SizedBox(
+          width: 20.w,
+        ),
+        if (widget.testMode)
+          CountdownTimer(
+            endTime: provider.endTime,
+            onEnd: () => provider.navigate(context),
+            widgetBuilder: (_, time) {
+              if (time == null) {
+                return Text(
+                  'Time\'s up!',
+                  style:
+                      AppTextStyle.bodyText1.copyWith(color: AppColors.indigo),
+                );
+              }
+
+              String minutes = (time.min ?? 0).toString();
+              String seconds = (time.sec ?? 0).toString().padLeft(2, '0');
+
+              return Text(
+                'Time Left: $minutes:$seconds min',
+                style: AppTextStyle.bodyText1.copyWith(
+                    fontSize: 18,
+                    color: AppColors.indigo,
+                    fontWeight: FontWeight.w800),
+              );
+            },
+          ),
       ],
     );
   }
@@ -464,7 +500,7 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
                 ],
               ),
               SizedBox(height: 10),
-              ...List.generate(currentQuestion.option5 != '' ? 5 : 4, (index) {
+              ...List.generate(currentQuestion.option5 != '' ? 4 : 3, (index) {
                 String? optionText;
                 switch (index) {
                   case 0:

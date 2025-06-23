@@ -198,77 +198,29 @@ class MockTestScreenState extends State<MockTestScreen> {
                           child: Text('End Test'),
                         ),
                       ),
-                    Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.indigo,
-                            AppColors.lightIndigo,
-                          ],
-                        ),
 
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.darkShadow,
-                            blurRadius: 1,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen())),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Icon(Icons.calculate_outlined, color: AppColors.whiteColor,size: 30)
-                      ),
-                    ),
-                   Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.indigo,
-                            AppColors.lightIndigo,
-                          ],
-                        ),
+                        buttonWidgets('Calculator', Icons.calculate_outlined, (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => CalculatorScreen()),
+                          );
+                        }),
 
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.darkShadow,
-                            blurRadius: 1,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          /// Navigator.push(context, MaterialPageRoute(builder: (context) => CalculatorScreen()));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Icon(Icons.lightbulb_outline, color: AppColors.whiteColor,size: 30)
-                      ),
-                    ),
-                  ],),
+                        buttonWidgets('Hint', Icons.lightbulb_outline_rounded, (){
+                          final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
+                          final testId = subjectProvider.testId;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HintScreen(testId: testId),
+                            ),
+                          );
+                        })
+
+
+                      ],),
                 ),
-               
+
 
                 /// main test card
                 SizedBox(height: 20),
@@ -712,6 +664,56 @@ class MockTestScreenState extends State<MockTestScreen> {
             )));
   }
 
+  Widget buttonWidgets(String text, IconData icon, VoidCallback onTap) =>  Container(
+    height: 50,
+    // margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.indigo,
+          AppColors.lightIndigo,
+        ],
+      ),
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.darkShadow.withValues(alpha: 0.2),
+          blurRadius: 6,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: AppColors.whiteColor, size: 20),
+          const SizedBox(width: 10),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
   void showFeedbackDialog(BuildContext context, int userId, int testId, int questionId) {
     final formKey = GlobalKey<FormState>();
     TextEditingController feedbackController = TextEditingController();
@@ -843,3 +845,4 @@ class MockTestScreenState extends State<MockTestScreen> {
   }
 
 }
+

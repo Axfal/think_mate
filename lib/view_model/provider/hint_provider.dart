@@ -1,5 +1,4 @@
 import 'package:education_app/model/hint_model.dart';
-import 'package:education_app/repository/hint_repo.dart';
 import 'package:education_app/resources/exports.dart' hide Data;
 
 class HintProvider with ChangeNotifier {

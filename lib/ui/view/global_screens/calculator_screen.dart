@@ -73,6 +73,20 @@ class CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
         ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.deepPurple,
+                AppColors.lightPurple,
+              ],
+            ),
+          ),
+        ),
 
         leading: IconButton(
             onPressed: () => Navigator.pop(context),
