@@ -90,6 +90,8 @@ class AuthProvider with ChangeNotifier {
 
           await getUserTestData();
 
+          ToastHelper.showSuccess("Login Successfully!");
+
           // Navigate to home
           if (context.mounted) {
             Navigator.pushReplacementNamed(context, RoutesName.home);
@@ -403,9 +405,11 @@ class AuthProvider with ChangeNotifier {
       final response = await _authRepository.getUserTestData(userId);
 
       if (response != null && response['success'] == true) {
-        final UserTestDataModel userTestDataModel = UserTestDataModel.fromJson(response);
+        final UserTestDataModel userTestDataModel =
+            UserTestDataModel.fromJson(response);
 
-        final box = await Hive.openBox<SubmittedQuestionsModel>('submittedQuestionsBox');
+        final box = await Hive.openBox<SubmittedQuestionsModel>(
+            'submittedQuestionsBox');
 
         await box.clear();
 
@@ -433,5 +437,4 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-
 }

@@ -49,4 +49,9 @@ class AppUrl {
   /// maintain user test data session
   static var postUserTestData = '$baseUrl/logout_user_data.php';
   static var getuserTestData = '$baseUrl/get_logout_user_data.php?user_id=';
+
+  /// hint section
+  static String generalHint = '$baseUrl/get_hints.php?test_id=';
+  // static String subjectiveHint = '$baseUrl/get_hints.php?test_id=3&subject_id=11';
+  static String subjectiveHint = '$baseUrl/get_hints.php?test_id=';
 }
