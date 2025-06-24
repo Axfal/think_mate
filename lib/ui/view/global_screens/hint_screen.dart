@@ -38,8 +38,9 @@ class _HintScreenState extends State<HintScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Hints"),
+        title: const Text("Reference Values"),
         centerTitle: true,
+        leading: IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back_ios, color: Colors.white)),
         elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(

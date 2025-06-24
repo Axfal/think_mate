@@ -2,6 +2,9 @@
 
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_all/flutter_html_all.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 
 class MockTestScreen extends StatefulWidget {
   final int subjectId;
@@ -24,6 +27,7 @@ class MockTestScreenState extends State<MockTestScreen> {
   }
 
   @override
+
   void dispose() {
     ScreenshotProtector.disableProtection();
     super.dispose();
@@ -57,17 +61,64 @@ class MockTestScreenState extends State<MockTestScreen> {
     }
   }
 
-  String removeHtmlTags(String? htmlText) {
-    if (htmlText == null) return '';
+  Widget renderFullHtmlString(
+      String? html, {
+        GlobalKey? anchorKey,
+        TextStyle? defaultTextStyle,
+      }) {
+    if (html == null || html.trim().isEmpty) return const SizedBox.shrink();
 
-    var text = htmlText
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>');
-
-    return text.replaceAll(RegExp(r'<[^>]*>'), '');
+    return Html(
+      anchorKey: anchorKey,
+      data: html,
+      style: {
+        "body": Style.fromTextStyle(defaultTextStyle ?? const TextStyle()),
+      },
+      extensions: [
+        TagExtension(
+          tagsToExtend: {"img"},
+          builder: (context) {
+            final src = context.attributes['src'];
+            if (src == null || !src.startsWith("http")) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  src,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      alignment: Alignment.center,
+                      color: Colors.grey[200],
+                      child: const CupertinoActivityIndicator(),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 200,
+                    color: Colors.grey[300],
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        // You can keep your other extensions as needed
+        const MathHtmlExtension(),
+        const AudioHtmlExtension(),
+        const VideoHtmlExtension(),
+        const IframeHtmlExtension(),
+        const TableHtmlExtension(),
+        const SvgHtmlExtension(),
+      ],
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -199,14 +250,14 @@ class MockTestScreenState extends State<MockTestScreen> {
                         ),
                       ),
 
-                        buttonWidgets('Calculator', Icons.calculate_outlined, (){
+                        buttonWidgets('Calculator:', Icons.calculate_outlined, (){
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => CalculatorScreen()),
                           );
                         }),
 
-                        buttonWidgets('Hint', Icons.lightbulb_outline_rounded, (){
+                        buttonWidgets('Ref:', Icons.lightbulb_outline_rounded, (){
                           final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
                           final testId = subjectProvider.testId;
                           Navigator.push(
@@ -288,23 +339,41 @@ class MockTestScreenState extends State<MockTestScreen> {
                               ),
                             ),
 
-                            Text(
-                              "${provider.currentIndex + 1}) ${provider
-                                  .questions!.questions[provider.currentIndex]
-                                  .question}",
-                              style: AppTextStyle.questionText.copyWith(
-                                color: AppColors.darkText,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Baseline(
+                                  baseline: 45,
+                                  baselineType: TextBaseline.alphabetic,
+                                  child: Text(
+                                    "${provider.currentIndex + 1}) ",
+                                    style: AppTextStyle.questionText.copyWith(
+                                      color: AppColors.darkText,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: renderFullHtmlString(
+                                    provider.questions!.questions[provider.currentIndex].question,
+                                    defaultTextStyle: AppTextStyle.questionText.copyWith(
+                                      color: AppColors.darkText,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
+
+
                             SizedBox(height: 10),
                             ListTile(
-                                title: Text(
-                                    removeHtmlTags(currentQuestion.option1)
-                                        .replaceAll(RegExp(r'[a-d]\)'), '')
-                                        .trim(),
-                                    style: AppTextStyle.answerText),
+                                title: renderFullHtmlString(
+                                  currentQuestion.option1,
+                                  defaultTextStyle: AppTextStyle.answerText,
+                                ),
                                 leading: Radio<int>(
                                     activeColor: AppColors.indigo,
                                     value: 0,
@@ -341,11 +410,10 @@ class MockTestScreenState extends State<MockTestScreen> {
                                     weight: 100)
                             ),
                             ListTile(
-                                title: Text(
-                                    removeHtmlTags(currentQuestion.option2)
-                                        .replaceAll(RegExp(r'[a-d]\)'), '')
-                                        .trim(),
-                                    style: AppTextStyle.answerText),
+                                title: renderFullHtmlString(
+                                  currentQuestion.option2,
+                                  defaultTextStyle: AppTextStyle.answerText,
+                                ),
                                 leading: Radio<int>(
                                     activeColor: AppColors.indigo,
                                     value: 1,
@@ -382,11 +450,10 @@ class MockTestScreenState extends State<MockTestScreen> {
                                     weight: 100)
                             ),
                             ListTile(
-                                title: Text(
-                                    removeHtmlTags(currentQuestion.option3)
-                                        .replaceAll(RegExp(r'[a-d]\)'), '')
-                                        .trim(),
-                                    style: AppTextStyle.answerText),
+                                title: renderFullHtmlString(
+                                  currentQuestion.option3,
+                                  defaultTextStyle: AppTextStyle.answerText,
+                                ),
                                 leading: Radio<int>(
                                     activeColor: AppColors.indigo,
                                     value: 2,
@@ -423,11 +490,10 @@ class MockTestScreenState extends State<MockTestScreen> {
                                     weight: 100)
                             ),
                             ListTile(
-                                title: Text(
-                                    removeHtmlTags(currentQuestion.option4)
-                                        .replaceAll(RegExp(r'[a-d]\)'), '')
-                                        .trim(),
-                                    style: AppTextStyle.answerText),
+                                title: renderFullHtmlString(
+                                  currentQuestion.option4,
+                                  defaultTextStyle: AppTextStyle.answerText,
+                                ),
                                 leading: Radio<int>(
                                     activeColor: AppColors.indigo,
                                     value: 3,
@@ -465,11 +531,10 @@ class MockTestScreenState extends State<MockTestScreen> {
                             ),
                            if(currentQuestion.option5 != '')
                             ListTile(
-                                title: Text(
-                                    removeHtmlTags(currentQuestion.option5)
-                                        .replaceAll(RegExp(r'[a-d]\)'), '')
-                                        .trim(),
-                                    style: AppTextStyle.answerText),
+                                title: renderFullHtmlString(
+                                  currentQuestion.option5,
+                                  defaultTextStyle: AppTextStyle.answerText,
+                                ),
                                 leading: Radio<int>(
                                     activeColor: AppColors.indigo,
                                     value: 4,
@@ -647,13 +712,11 @@ class MockTestScreenState extends State<MockTestScreen> {
                             provider.currentIndex] &&
                                 provider.isSubmitted[
                                 provider.currentIndex])
-                              Text(
-                                provider
-                                    .questions!
-                                    .questions[provider.currentIndex]
-                                    .detail,
-                                style: AppTextStyle.answerText,
+                              renderFullHtmlString(
+                                provider.questions!.questions[provider.currentIndex].detail,
+                                defaultTextStyle: AppTextStyle.answerText,
                               ),
+
                           ],
                         ),
                       ),
@@ -698,8 +761,6 @@ class MockTestScreenState extends State<MockTestScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: AppColors.whiteColor, size: 20),
-          const SizedBox(width: 10),
           Text(
             text,
             style: TextStyle(
@@ -709,6 +770,9 @@ class MockTestScreenState extends State<MockTestScreen> {
               letterSpacing: 0.5,
             ),
           ),
+
+          const SizedBox(width: 10),
+          Icon(icon, color: AppColors.whiteColor, size: 20),
         ],
       ),
     ),

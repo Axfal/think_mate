@@ -3,7 +3,8 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_html/flutter_html.dart';
-// import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:flutter_html_all/flutter_html_all.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 
 class QuestionScreen extends StatefulWidget {
   final int subjectId;
@@ -139,16 +140,65 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
-  String removeHtmlTags(String? htmlText) {
-    if (htmlText == null) return '';
+  Widget renderFullHtmlString(
+    String? html, {
+    GlobalKey? anchorKey,
+    TextStyle? defaultTextStyle,
+  }) {
+    if (html == null || html.trim().isEmpty) return const SizedBox.shrink();
 
-    var text = htmlText
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>');
-
-    return text.replaceAll(RegExp(r'<[^>]*>'), '');
+    return Html(
+      anchorKey: anchorKey,
+      data: html,
+      style: {
+        "body": Style.fromTextStyle(defaultTextStyle ?? const TextStyle()),
+      },
+      extensions: [
+        TagExtension(
+          tagsToExtend: {"img"},
+          builder: (context) {
+            final src = context.attributes['src'];
+            if (src == null || !src.startsWith("http"))
+              // ignore: curly_braces_in_flow_control_structures
+              return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  src,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      alignment: Alignment.center,
+                      color: Colors.grey[200],
+                      child: const CupertinoActivityIndicator(),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 200,
+                    color: Colors.grey[300],
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.broken_image,
+                        size: 48, color: Colors.grey),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        // You can keep your other extensions as needed
+        const MathHtmlExtension(),
+        const AudioHtmlExtension(),
+        const VideoHtmlExtension(),
+        const IframeHtmlExtension(),
+        const TableHtmlExtension(),
+        const SvgHtmlExtension(),
+      ],
+    );
   }
 
   @override
@@ -322,16 +372,29 @@ class _QuestionScreenState extends State<QuestionScreen> {
                               Row(
                                 children: [
                                   Text(
-                                    "Hint: ",
+                                    "Ref: ",
                                     style: AppTextStyle.heading3.copyWith(
                                         color: AppColors.darkText,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14),
                                   ),
-                                  Icon(
-                                    Icons.lightbulb_outline_rounded,
-                                    color: AppColors.primaryColor,
-                                    size: 30,
+                                  IconButton(
+                                    onPressed: () {
+                                      final subjectProvider =
+                                          Provider.of<SubjectProvider>(context,
+                                              listen: false);
+                                      final testId = subjectProvider.testId;
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  HintScreen(testId: testId)));
+                                    },
+                                    icon: Icon(
+                                      Icons.lightbulb_outline_rounded,
+                                      color: AppColors.primaryColor,
+                                      size: 30,
+                                    ),
                                   )
                                 ],
                               ),
@@ -354,11 +417,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           Widget buildOption(
                               int optionIndex, String optionText) {
                             return ListTile(
-                              title: Text(
-                                  removeHtmlTags(optionText)
-                                      .replaceAll(RegExp(r'[a-d]\)'), '')
-                                      .trim(),
-                                  style: AppTextStyle.answerText),
+                              title: renderFullHtmlString(
+                                optionText,
+                                defaultTextStyle: AppTextStyle.answerText,
+                              ),
                               leading: Radio<int>(
                                 activeColor: AppColors.indigo,
                                 value: optionIndex,
@@ -389,9 +451,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                   ListTile(
                                     leading: Text('${index + 1}',
                                         style: AppTextStyle.questionText),
-                                    title: Text(
-                                        removeHtmlTags(question.question),
-                                        style: AppTextStyle.questionText),
+                                    title: renderFullHtmlString(
+                                        question.question,
+                                        defaultTextStyle:
+                                            AppTextStyle.questionText.copyWith(
+                                          color: AppColors.darkText,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                        )),
                                     trailing: Checkbox(
                                       activeColor: AppColors.lightIndigo,
                                       value: provider
@@ -432,22 +499,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   Widget _buildExplanation(QuestionsProvider provider, int index) {
     final question = provider.filteredQuestions[index];
-    print(provider.filteredQuestions[index].detail ?? '');
-
-    String cleanHtml(String html) {
-      String cleaned = html.replaceAll(
-        RegExp(r'data-start="[^"]*"|data-end="[^"]*"'),
-        '',
-      );
-
-      cleaned = cleaned.replaceAllMapped(
-        RegExp(r'(https?:\/\/[^\s"]+\.(png|jpe?g|gif|svg|webp))',
-            caseSensitive: false),
-        (match) => '<img src="${match.group(0)}" />',
-      );
-
-      return cleaned;
-    }
+    print("hinasdjlkas ======> ${question.detail}" ?? '');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -467,8 +519,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     WidgetStatePropertyAll(WidgetStateColor.transparent),
                 value: provider.showExplanation[index],
                 onChanged: (value) {
-                  if (provider.isQuestionAlreadySubmitted(
-                          provider.filteredQuestions[index].id) ||
+                  if (provider.isQuestionAlreadySubmitted(question.id) ||
                       provider.isSubmitted[question.id] == true) {
                     provider.toggleExplanationSwitch(index, value);
                   }
@@ -478,17 +529,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ),
         ),
         if (provider.showExplanation[index])
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15.0),
-            child: Html(
-              data: cleanHtml(provider.filteredQuestions[index].detail ?? ''),
-              style: {
-                "strong": Style(fontWeight: FontWeight.bold),
-                "b": Style(fontWeight: FontWeight.bold),
-                "i": Style(fontStyle: FontStyle.italic),
-                "u": Style(textDecoration: TextDecoration.underline),
-              },
-            ),
+          SingleChildScrollView(
+            child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 15.0),
+                child: renderFullHtmlString(
+                  question.detail ?? '',
+                  defaultTextStyle: AppTextStyle.answerText,
+                )),
           ),
       ],
     );

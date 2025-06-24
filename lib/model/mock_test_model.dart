@@ -17,7 +17,7 @@ class MockTestModel {
   Map<String, dynamic> toJson() {
     return {
       'success': success,
-      'questions': questions.map((q) => q.toJson()).toList(),
+       'questions': questions.map((q) => q.toJson()).toList(),
     };
   }
 }
@@ -35,40 +35,34 @@ class Question {
   final String correctAnswer;
   final String subjectName;
 
-  Question(
-      {required this.id,
-      required this.question,
-      required this.option1,
-      required this.option2,
-      required this.option3,
-      required this.option4,
-      required this.option5,
-      required this.detail,
-      required this.capacity,
-      required this.correctAnswer,
-      required this.subjectName});
-
-  // Helper method to remove HTML tags and decode HTML entities
-  static String _cleanHtml(String html) {
-    return html
-        .replaceAll(RegExp(r'<[^>]*>'), '') // Remove HTML tags
-        .replaceAll('&nbsp;', ' ') // Replace &nbsp; with space
-        .trim();
-  }
+  Question({
+    required this.id,
+    required this.question,
+    required this.option1,
+    required this.option2,
+    required this.option3,
+    required this.option4,
+    required this.option5,
+    required this.detail,
+    required this.capacity,
+    required this.correctAnswer,
+    required this.subjectName,
+  });
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-        id: json['id'] ?? 0,
-        question: _cleanHtml(json['question'] ?? ''),
-        option1: _cleanHtml(json['option1'] ?? ''),
-        option2: _cleanHtml(json['option2'] ?? ''),
-        option3: _cleanHtml(json['option3'] ?? ''),
-        option4: _cleanHtml(json['option4'] ?? ''),
-        option5: _cleanHtml(json['option5'] ?? ''),
-        detail: _cleanHtml(json['detail'] ?? ''),
-        capacity: json['capacity'] ?? '',
-        correctAnswer: json['correct_answer'] ?? '',
-        subjectName: json['subject_name'] ?? '');
+      id: json['id'] ?? 0,
+      question: json['question'] ?? '',
+      option1: json['option1'] ?? '',
+      option2: json['option2'] ?? '',
+      option3: json['option3'] ?? '',
+      option4: json['option4'] ?? '',
+      option5: json['option5'] ?? '',
+      detail: json['detail'] ?? '',
+      capacity: json['capacity'] ?? '',
+      correctAnswer: json['correct_answer'] ?? '',
+      subjectName: json['subject_name'] ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -83,7 +77,7 @@ class Question {
       'detail': detail,
       'capacity': capacity,
       'correct_answer': correctAnswer,
-      'subject_name': subjectName
+      'subject_name': subjectName,
     };
   }
 }
