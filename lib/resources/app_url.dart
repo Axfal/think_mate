@@ -13,6 +13,7 @@ class AppUrl {
   static var mockTestFeedback = '$baseUrl/user_test_feedback.php';
   static var postTestResult = '$baseUrl/submit_result.php';
   static var getTestResult = '$baseUrl/get_test_result.php?user_id=';
+  static var pastPaperQuestion = '$baseUrl/past_exam_questions.php';
 
   /// https://nomore.com.pk/MDCAT_ECAT_Education/API/get_test_result.php?user_id=9&test_id=3
   static var bookMark = "$baseUrl/book_mark.php";

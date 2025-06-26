@@ -1,15 +1,31 @@
 class MockTestModel {
   final bool success;
+  final String? error; // nullable error field
   final List<Question> questions;
 
-  MockTestModel({required this.success, required this.questions});
+  MockTestModel({
+    required this.success,
+    this.error,
+    required this.questions,
+  });
 
   factory MockTestModel.fromJson(Map<String, dynamic> json) {
+    // Handle error response
+    if (json.containsKey('error')) {
+      return MockTestModel(
+        success: false,
+        error: json['error'],
+        questions: [],
+      );
+    }
+
+    // Handle success response
     return MockTestModel(
       success: json['success'] ?? false,
+      error: null,
       questions: (json['questions'] as List<dynamic>?)
-              ?.map((e) => Question.fromJson(e))
-              .toList() ??
+          ?.map((e) => Question.fromJson(e))
+          .toList() ??
           [],
     );
   }
@@ -17,7 +33,8 @@ class MockTestModel {
   Map<String, dynamic> toJson() {
     return {
       'success': success,
-       'questions': questions.map((q) => q.toJson()).toList(),
+      if (error != null) 'error': error,
+      'questions': questions.map((q) => q.toJson()).toList(),
     };
   }
 }

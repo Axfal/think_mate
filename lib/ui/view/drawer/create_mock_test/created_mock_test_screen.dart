@@ -5,6 +5,9 @@ import 'dart:ffi';
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:no_screenshot/no_screenshot.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_all/flutter_html_all.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 
 class CreatedMockTestScreen extends StatefulWidget {
   final bool testMode;
@@ -119,16 +122,65 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
     }
   }
 
-  String removeHtmlTags(String? htmlText) {
-    if (htmlText == null) return '';
+  Widget renderFullHtmlString(
+    String? html, {
+    GlobalKey? anchorKey,
+    TextStyle? defaultTextStyle,
+  }) {
+    if (html == null || html.trim().isEmpty) return const SizedBox.shrink();
 
-    var text = htmlText
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>');
-
-    return text.replaceAll(RegExp(r'<[^>]*>'), '');
+    return Html(
+      anchorKey: anchorKey,
+      data: html,
+      style: {
+        "body": Style.fromTextStyle(defaultTextStyle ?? const TextStyle()),
+      },
+      extensions: [
+        TagExtension(
+          tagsToExtend: {"img"},
+          builder: (context) {
+            final src = context.attributes['src'];
+            if (src == null || !src.startsWith("http"))
+              // ignore: curly_braces_in_flow_control_structures
+              return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  src,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      alignment: Alignment.center,
+                      color: Colors.grey[200],
+                      child: const CupertinoActivityIndicator(),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 200,
+                    color: Colors.grey[300],
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.broken_image,
+                        size: 48, color: Colors.grey),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        // You can keep your other extensions as needed
+        const MathHtmlExtension(),
+        const AudioHtmlExtension(),
+        const VideoHtmlExtension(),
+        const IframeHtmlExtension(),
+        const TableHtmlExtension(),
+        const SvgHtmlExtension(),
+      ],
+    );
   }
 
   @override
@@ -470,86 +522,107 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "${provider.currentIndex + 1}) ",
-                    style: AppTextStyle.questionText.copyWith(
-                      color: AppColors.darkText,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      removeHtmlTags(currentQuestion.question),
-                      style: AppTextStyle.questionText.copyWith(
-                        color: AppColors.darkText,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+        child: InteractiveViewer(
+          minScale: 1.0,
+          maxScale: 3.0,
+          panEnabled: true,
+          scaleEnabled: true,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Baseline(
+                      baseline: 45,
+                      baselineType: TextBaseline.alphabetic,
+                      child: Text(
+                        "${provider.currentIndex + 1}) ",
+                        style: AppTextStyle.questionText.copyWith(
+                          color: AppColors.darkText,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              ...List.generate(currentQuestion.option5 != '' ? 4 : 3, (index) {
-                String? optionText;
-                switch (index) {
-                  case 0:
-                    optionText = currentQuestion.option1;
-                    break;
-                  case 1:
-                    optionText = currentQuestion.option2;
-                    break;
-                  case 2:
-                    optionText = currentQuestion.option3;
-                    break;
-                  case 3:
-                    optionText = currentQuestion.option4;
-                    break;
-                  case 4:
-                    optionText = currentQuestion.option5;
-                    break;
-                }
-                return ListTile(
-                  title: Text(
-                    removeHtmlTags(optionText)
-                        .replaceAll(RegExp(r'[a-d]\)'), '')
-                        .trim(),
-                    style: AppTextStyle.bodyText1
-                        .copyWith(color: AppColors.darkText),
-                  ),
-                  leading: Radio<int>(
-                    activeColor: AppColors.indigo,
-                    value: index,
-                    groupValue: provider.selectedOptions[provider.currentIndex],
-                    onChanged: !provider.isSubmitted[provider.currentIndex]
-                        ? (value) {
-                            if (value != null) {
-                              provider.onChangeRadio(
-                                  provider.currentIndex, value);
+
+                    Expanded(
+                      child: InteractiveViewer(
+                        minScale: 1.0,
+                        maxScale: 3.0,
+                        panEnabled: true,
+                        scaleEnabled: true,
+                        constrained: true,
+                        child: renderFullHtmlString(
+                          currentQuestion.question,
+                          defaultTextStyle: AppTextStyle.questionText.copyWith(
+                            color: AppColors.darkText,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                ...List.generate(currentQuestion.option5 != '' ? 4 : 3,
+                    (index) {
+                  String? optionText;
+                  switch (index) {
+                    case 0:
+                      optionText = currentQuestion.option1;
+                      break;
+                    case 1:
+                      optionText = currentQuestion.option2;
+                      break;
+                    case 2:
+                      optionText = currentQuestion.option3;
+                      break;
+                    case 3:
+                      optionText = currentQuestion.option4;
+                      break;
+                    case 4:
+                      optionText = currentQuestion.option5;
+                      break;
+                  }
+                  return ListTile(
+                    title: renderFullHtmlString(
+                      optionText,
+                      defaultTextStyle: AppTextStyle.questionText.copyWith(
+                        color: AppColors.darkText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    leading: Radio<int>(
+                      activeColor: AppColors.indigo,
+                      value: index,
+                      groupValue:
+                          provider.selectedOptions[provider.currentIndex],
+                      onChanged: !provider.isSubmitted[provider.currentIndex]
+                          ? (value) {
+                              if (value != null) {
+                                provider.onChangeRadio(
+                                    provider.currentIndex, value);
+                              }
                             }
-                          }
-                        : null,
-                  ),
-                  trailing: provider.isSubmitted[provider.currentIndex] == false
-                      ? null
-                      : _buildAnswerIcon(provider, index),
-                );
-              }),
-              SizedBox(height: 16),
-              _buildNavigationButtons(provider),
-              SizedBox(height: 16),
-              _buildExplanation(provider),
-            ],
+                          : null,
+                    ),
+                    trailing:
+                        provider.isSubmitted[provider.currentIndex] == false
+                            ? null
+                            : _buildAnswerIcon(provider, index),
+                  );
+                }),
+                SizedBox(height: 16),
+                _buildNavigationButtons(provider),
+                SizedBox(height: 16),
+                _buildExplanation(provider),
+              ],
+            ),
           ),
         ),
       ),
@@ -711,14 +784,13 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
             provider.isSubmitted[provider.currentIndex])
           Padding(
             padding: const EdgeInsets.only(top: 16.0),
-            child: Text(
-              removeHtmlTags(
-                  provider.questionList[provider.currentIndex].detail),
-              style: AppTextStyle.bodyText1.copyWith(
-                color: AppColors.darkText,
-                height: 1.5,
-              ),
-            ),
+            child: renderFullHtmlString(
+                provider.questionList[provider.currentIndex].detail,
+                defaultTextStyle: AppTextStyle.questionText.copyWith(
+                  color: AppColors.darkText,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                )),
           ),
       ],
     );

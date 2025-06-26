@@ -47,7 +47,7 @@ class AppTextStyle {
   static TextStyle questionText = TextStyle(
     fontSize: 14,
     color: AppColors.headingColor,
-    fontWeight: FontWeight.w600,
+    // fontWeight: FontWeight.w600,
   );
 
   static TextStyle answerText = TextStyle(

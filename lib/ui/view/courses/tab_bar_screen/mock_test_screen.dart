@@ -9,8 +9,9 @@ import 'package:flutter_math_fork/flutter_math.dart';
 class MockTestScreen extends StatefulWidget {
   final int subjectId;
   final int chapterId;
+  final int testId;
 
-  const MockTestScreen({super.key, this.subjectId = 0, this.chapterId = 0});
+  const MockTestScreen({super.key, this.subjectId = 0, this.chapterId = 0, this.testId = 0});
 
   @override
   MockTestScreenState createState() => MockTestScreenState();
@@ -44,7 +45,8 @@ class MockTestScreenState extends State<MockTestScreen> {
       if (userType == "free") {
         await provider.validateUser(context);
         if (provider.validateUserModel?.status == "allowed") {
-          await provider.fetchQuestions(context);
+          if(!mounted) return;
+          await provider.fetchQuestions(context, widget.testId);
         } else {
           debugPrint(
               "You have completed your demo test. Please buy a subscription to continue.");
@@ -53,7 +55,7 @@ class MockTestScreenState extends State<MockTestScreen> {
           );
         }
       } else {
-        await provider.fetchQuestions(context);
+        await provider.fetchQuestions(context, widget.testId);
       }
     } catch (e) {
       debugPrint("Failed to fetch questions: $e");
@@ -257,7 +259,7 @@ class MockTestScreenState extends State<MockTestScreen> {
                           );
                         }),
 
-                        buttonWidgets('Ref:', Icons.lightbulb_outline_rounded, (){
+                        buttonWidgets('Ref', Icons.lightbulb_outline_rounded, (){
                           final subjectProvider = Provider.of<SubjectProvider>(context, listen: false);
                           final testId = subjectProvider.testId;
                           Navigator.push(
@@ -281,443 +283,447 @@ class MockTestScreenState extends State<MockTestScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.whiteColor,
-                            AppColors.backgroundColor,
+                    child: InteractiveViewer(
+                      minScale: 1.0,
+                      maxScale: 3.0,
+                      panEnabled: true,
+                      scaleEnabled: true,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppColors.whiteColor,
+                              AppColors.backgroundColor,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.purpleShadow,
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
                           ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.purpleShadow,
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ListView(
-                          children: [
-                            Container(
-                              width: double.infinity/2,
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              margin: EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: AppColors.indigo.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.indigo.withValues(alpha: 0.1),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListView(
+                            children: [
+                              Container(
+                                width: double.infinity/2,
+                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                margin: EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.indigo.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.indigo.withValues(alpha: 0.1),
+                                      blurRadius: 10,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.book_rounded, color: AppColors.indigo, size: 20),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        provider.questions!.questions[provider.currentIndex].subjectName,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.indigo,
+                                          letterSpacing: 0.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.book_rounded, color: AppColors.indigo, size: 20),
-                                  SizedBox(width: 8),
-                                  Expanded(
+                                  Baseline(
+                                    baseline: 45,
+                                    baselineType: TextBaseline.alphabetic,
                                     child: Text(
-                                      provider.questions!.questions[provider.currentIndex].subjectName,
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.indigo,
-                                        letterSpacing: 0.3,
+                                      "${provider.currentIndex + 1}) ",
+                                      style: AppTextStyle.questionText.copyWith(
+                                        color: AppColors.darkText,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: renderFullHtmlString(
+                                      provider.questions!.questions[provider.currentIndex].question,
+                                      defaultTextStyle: AppTextStyle.questionText.copyWith(
+                                        color: AppColors.darkText,
+                                        fontSize: 18,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
 
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Baseline(
-                                  baseline: 45,
-                                  baselineType: TextBaseline.alphabetic,
-                                  child: Text(
-                                    "${provider.currentIndex + 1}) ",
-                                    style: AppTextStyle.questionText.copyWith(
-                                      color: AppColors.darkText,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+
+                              SizedBox(height: 10),
+                              ListTile(
+                                  title: renderFullHtmlString(
+                                    currentQuestion.option1,
+                                    defaultTextStyle: AppTextStyle.answerText,
                                   ),
-                                ),
-                                Expanded(
-                                  child: renderFullHtmlString(
-                                    provider.questions!.questions[provider.currentIndex].question,
-                                    defaultTextStyle: AppTextStyle.questionText.copyWith(
-                                      color: AppColors.darkText,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-
-                            SizedBox(height: 10),
-                            ListTile(
-                                title: renderFullHtmlString(
-                                  currentQuestion.option1,
-                                  defaultTextStyle: AppTextStyle.answerText,
-                                ),
-                                leading: Radio<int>(
-                                    activeColor: AppColors.indigo,
-                                    value: 0,
-                                    groupValue: provider.isTestStarted ?
-                                    provider.selectedOptions[provider
-                                        .currentIndex]
-                                        : null,
-                                    onChanged: (provider.isTestStarted &&
-                                        !provider.isSubmitted[provider
-                                            .currentIndex])
-                                        ? (value) {
-                                      if (value != null) {
-                                        provider.onChangeRadio(
-                                            provider.currentIndex, value);
+                                  leading: Radio<int>(
+                                      activeColor: AppColors.indigo,
+                                      value: 0,
+                                      groupValue: provider.isTestStarted ?
+                                      provider.selectedOptions[provider
+                                          .currentIndex]
+                                          : null,
+                                      onChanged: (provider.isTestStarted &&
+                                          !provider.isSubmitted[provider
+                                              .currentIndex])
+                                          ? (value) {
+                                        if (value != null) {
+                                          provider.onChangeRadio(
+                                              provider.currentIndex, value);
+                                        }
                                       }
-                                    }
-                                        : null
-                                ),
-                                trailing: provider.isSubmitted[provider
-                                    .currentIndex] == false
-                                    ? null : provider.isTrue![provider
-                                    .currentIndex]
-                                    && 0 == provider.selectedOptions[provider
-                                        .currentIndex] ?
-                                Icon(Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.correctAnswerOptionIndex![provider
-                                    .currentIndex] == 0 ? Icon(
-                                    Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.selectedOptions[provider
-                                    .currentIndex] != 0 ? null : Icon(
-                                    Icons.close, color: AppColors.errorColor,
-                                    weight: 100)
-                            ),
-                            ListTile(
-                                title: renderFullHtmlString(
-                                  currentQuestion.option2,
-                                  defaultTextStyle: AppTextStyle.answerText,
-                                ),
-                                leading: Radio<int>(
-                                    activeColor: AppColors.indigo,
-                                    value: 1,
-                                    groupValue: provider.isTestStarted
-                                        ? provider.selectedOptions[provider
-                                        .currentIndex]
-                                        : null,
-                                    onChanged: (provider.isTestStarted &&
-                                        !provider.isSubmitted[provider
-                                            .currentIndex])
-                                        ? (value) {
-                                      if (value != null) {
-                                        provider.onChangeRadio(
-                                            provider.currentIndex, value);
+                                          : null
+                                  ),
+                                  trailing: provider.isSubmitted[provider
+                                      .currentIndex] == false
+                                      ? null : provider.isTrue![provider
+                                      .currentIndex]
+                                      && 0 == provider.selectedOptions[provider
+                                          .currentIndex] ?
+                                  Icon(Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.correctAnswerOptionIndex![provider
+                                      .currentIndex] == 0 ? Icon(
+                                      Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.selectedOptions[provider
+                                      .currentIndex] != 0 ? null : Icon(
+                                      Icons.close, color: AppColors.errorColor,
+                                      weight: 100)
+                              ),
+                              ListTile(
+                                  title: renderFullHtmlString(
+                                    currentQuestion.option2,
+                                    defaultTextStyle: AppTextStyle.answerText,
+                                  ),
+                                  leading: Radio<int>(
+                                      activeColor: AppColors.indigo,
+                                      value: 1,
+                                      groupValue: provider.isTestStarted
+                                          ? provider.selectedOptions[provider
+                                          .currentIndex]
+                                          : null,
+                                      onChanged: (provider.isTestStarted &&
+                                          !provider.isSubmitted[provider
+                                              .currentIndex])
+                                          ? (value) {
+                                        if (value != null) {
+                                          provider.onChangeRadio(
+                                              provider.currentIndex, value);
+                                        }
                                       }
-                                    }
-                                        : null
-                                ),
-                                trailing: provider.isSubmitted[provider
-                                    .currentIndex] == false
-                                    ? null : provider.isTrue![provider
-                                    .currentIndex]
-                                    && 1 == provider.selectedOptions[provider
-                                        .currentIndex] ?
-                                Icon(Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.correctAnswerOptionIndex![provider
-                                    .currentIndex] == 1 ? Icon(
-                                    Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.selectedOptions[provider
-                                    .currentIndex] != 1 ? null : Icon(
-                                    Icons.close, color: AppColors.errorColor,
-                                    weight: 100)
-                            ),
-                            ListTile(
-                                title: renderFullHtmlString(
-                                  currentQuestion.option3,
-                                  defaultTextStyle: AppTextStyle.answerText,
-                                ),
-                                leading: Radio<int>(
-                                    activeColor: AppColors.indigo,
-                                    value: 2,
-                                    groupValue: provider.isTestStarted
-                                        ? provider.selectedOptions[provider
-                                        .currentIndex]
-                                        : null,
-                                    onChanged: (provider.isTestStarted &&
-                                        !provider.isSubmitted[provider
-                                            .currentIndex])
-                                        ? (value) {
-                                      if (value != null) {
-                                        provider.onChangeRadio(
-                                            provider.currentIndex, value);
+                                          : null
+                                  ),
+                                  trailing: provider.isSubmitted[provider
+                                      .currentIndex] == false
+                                      ? null : provider.isTrue![provider
+                                      .currentIndex]
+                                      && 1 == provider.selectedOptions[provider
+                                          .currentIndex] ?
+                                  Icon(Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.correctAnswerOptionIndex![provider
+                                      .currentIndex] == 1 ? Icon(
+                                      Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.selectedOptions[provider
+                                      .currentIndex] != 1 ? null : Icon(
+                                      Icons.close, color: AppColors.errorColor,
+                                      weight: 100)
+                              ),
+                              ListTile(
+                                  title: renderFullHtmlString(
+                                    currentQuestion.option3,
+                                    defaultTextStyle: AppTextStyle.answerText,
+                                  ),
+                                  leading: Radio<int>(
+                                      activeColor: AppColors.indigo,
+                                      value: 2,
+                                      groupValue: provider.isTestStarted
+                                          ? provider.selectedOptions[provider
+                                          .currentIndex]
+                                          : null,
+                                      onChanged: (provider.isTestStarted &&
+                                          !provider.isSubmitted[provider
+                                              .currentIndex])
+                                          ? (value) {
+                                        if (value != null) {
+                                          provider.onChangeRadio(
+                                              provider.currentIndex, value);
+                                        }
                                       }
-                                    }
-                                        : null
-                                ),
-                                trailing: provider.isSubmitted[provider
-                                    .currentIndex] == false
-                                    ? null : provider.isTrue![provider
-                                    .currentIndex]
-                                    && 2 == provider.selectedOptions[provider
-                                        .currentIndex] ?
-                                Icon(Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.correctAnswerOptionIndex![provider
-                                    .currentIndex] == 2 ? Icon(
-                                    Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.selectedOptions[provider
-                                    .currentIndex] != 2 ? null : Icon(
-                                    Icons.close, color: AppColors.errorColor,
-                                    weight: 100)
-                            ),
-                            ListTile(
-                                title: renderFullHtmlString(
-                                  currentQuestion.option4,
-                                  defaultTextStyle: AppTextStyle.answerText,
-                                ),
-                                leading: Radio<int>(
-                                    activeColor: AppColors.indigo,
-                                    value: 3,
-                                    groupValue: provider.isTestStarted
-                                        ? provider.selectedOptions[provider
-                                        .currentIndex]
-                                        : null,
-                                    onChanged: (provider.isTestStarted &&
-                                        !provider.isSubmitted[provider
-                                            .currentIndex])
-                                        ? (value) {
-                                      if (value != null) {
-                                        provider.onChangeRadio(
-                                            provider.currentIndex, value);
+                                          : null
+                                  ),
+                                  trailing: provider.isSubmitted[provider
+                                      .currentIndex] == false
+                                      ? null : provider.isTrue![provider
+                                      .currentIndex]
+                                      && 2 == provider.selectedOptions[provider
+                                          .currentIndex] ?
+                                  Icon(Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.correctAnswerOptionIndex![provider
+                                      .currentIndex] == 2 ? Icon(
+                                      Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.selectedOptions[provider
+                                      .currentIndex] != 2 ? null : Icon(
+                                      Icons.close, color: AppColors.errorColor,
+                                      weight: 100)
+                              ),
+                              ListTile(
+                                  title: renderFullHtmlString(
+                                    currentQuestion.option4,
+                                    defaultTextStyle: AppTextStyle.answerText,
+                                  ),
+                                  leading: Radio<int>(
+                                      activeColor: AppColors.indigo,
+                                      value: 3,
+                                      groupValue: provider.isTestStarted
+                                          ? provider.selectedOptions[provider
+                                          .currentIndex]
+                                          : null,
+                                      onChanged: (provider.isTestStarted &&
+                                          !provider.isSubmitted[provider
+                                              .currentIndex])
+                                          ? (value) {
+                                        if (value != null) {
+                                          provider.onChangeRadio(
+                                              provider.currentIndex, value);
+                                        }
                                       }
-                                    }
-                                        : null
-                                ),
-                                trailing: provider.isSubmitted[provider
-                                    .currentIndex] == false
-                                    ? null : provider.isTrue![provider
-                                    .currentIndex]
-                                    && 3 == provider.selectedOptions[provider
-                                        .currentIndex] ?
-                                Icon(Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.correctAnswerOptionIndex![provider
-                                    .currentIndex] == 3 ? Icon(
-                                    Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.selectedOptions[provider
-                                    .currentIndex] != 3 ? null : Icon(
-                                    Icons.close, color: AppColors.errorColor,
-                                    weight: 100)
-                            ),
-                           if(currentQuestion.option5 != '')
-                            ListTile(
-                                title: renderFullHtmlString(
-                                  currentQuestion.option5,
-                                  defaultTextStyle: AppTextStyle.answerText,
-                                ),
-                                leading: Radio<int>(
-                                    activeColor: AppColors.indigo,
-                                    value: 4,
-                                    groupValue: provider.isTestStarted
-                                        ? provider.selectedOptions[provider
-                                        .currentIndex]
-                                        : null,
-                                    onChanged: (provider.isTestStarted &&
-                                        !provider.isSubmitted[provider
-                                            .currentIndex])
-                                        ? (value) {
-                                      if (value != null) {
-                                        provider.onChangeRadio(
-                                            provider.currentIndex, value);
+                                          : null
+                                  ),
+                                  trailing: provider.isSubmitted[provider
+                                      .currentIndex] == false
+                                      ? null : provider.isTrue![provider
+                                      .currentIndex]
+                                      && 3 == provider.selectedOptions[provider
+                                          .currentIndex] ?
+                                  Icon(Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.correctAnswerOptionIndex![provider
+                                      .currentIndex] == 3 ? Icon(
+                                      Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.selectedOptions[provider
+                                      .currentIndex] != 3 ? null : Icon(
+                                      Icons.close, color: AppColors.errorColor,
+                                      weight: 100)
+                              ),
+                             if(currentQuestion.option5 != '')
+                              ListTile(
+                                  title: renderFullHtmlString(
+                                    currentQuestion.option5,
+                                    defaultTextStyle: AppTextStyle.answerText,
+                                  ),
+                                  leading: Radio<int>(
+                                      activeColor: AppColors.indigo,
+                                      value: 4,
+                                      groupValue: provider.isTestStarted
+                                          ? provider.selectedOptions[provider
+                                          .currentIndex]
+                                          : null,
+                                      onChanged: (provider.isTestStarted &&
+                                          !provider.isSubmitted[provider
+                                              .currentIndex])
+                                          ? (value) {
+                                        if (value != null) {
+                                          provider.onChangeRadio(
+                                              provider.currentIndex, value);
+                                        }
                                       }
-                                    }
-                                        : null
-                                ),
-                                trailing: provider.isSubmitted[provider
-                                    .currentIndex] == false
-                                    ? null : provider.isTrue![provider
-                                    .currentIndex]
-                                    && 4 == provider.selectedOptions[provider
-                                        .currentIndex] ?
-                                Icon(Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.correctAnswerOptionIndex![provider
-                                    .currentIndex] == 4 ? Icon(
-                                    Icons.check, color: AppColors.successColor,
-                                    weight: 100) :
-                                provider.selectedOptions[provider
-                                    .currentIndex] != 4 ? null : Icon(
-                                    Icons.close, color: AppColors.errorColor,
-                                    weight: 100)
-                            ),
+                                          : null
+                                  ),
+                                  trailing: provider.isSubmitted[provider
+                                      .currentIndex] == false
+                                      ? null : provider.isTrue![provider
+                                      .currentIndex]
+                                      && 4 == provider.selectedOptions[provider
+                                          .currentIndex] ?
+                                  Icon(Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.correctAnswerOptionIndex![provider
+                                      .currentIndex] == 4 ? Icon(
+                                      Icons.check, color: AppColors.successColor,
+                                      weight: 100) :
+                                  provider.selectedOptions[provider
+                                      .currentIndex] != 4 ? null : Icon(
+                                      Icons.close, color: AppColors.errorColor,
+                                      weight: 100)
+                              ),
 
-                            SizedBox(height: 10),
+                              SizedBox(height: 10),
 
-                            /// buttons row
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: provider.isPrevEnabled
-                                      ? provider.goToPrevious
-                                      : null,
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.textColor,
-                                    backgroundColor: provider.isPrevEnabled
-                                        ? AppColors.indigo
-                                        : AppColors.lightIndigo,
-                                    elevation: provider.isPrevEnabled ? 0 : 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                              /// buttons row
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: provider.isPrevEnabled
+                                        ? provider.goToPrevious
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: AppColors.textColor,
+                                      backgroundColor: provider.isPrevEnabled
+                                          ? AppColors.indigo
+                                          : AppColors.lightIndigo,
+                                      elevation: provider.isPrevEnabled ? 0 : 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: Icon(Icons.arrow_back,
+                                        color: provider.isPrevEnabled
+                                            ? AppColors.whiteColor
+                                            : AppColors.darkText),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: provider.isTestStarted == false ||
+                                        provider.isSubmitted[
+                                        provider.currentIndex]
+                                        ? null
+                                        : () =>
+                                        provider.submitAnswer(
+                                            context, provider.currentIndex),
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: AppColors.textColor,
+                                      backgroundColor: AppColors.indigo,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 35, vertical: 0),
+                                      elevation: .5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Submit',
+                                      style: AppTextStyle.bodyText1.copyWith(
+                                        color: AppColors.textColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
-                                  child: Icon(Icons.arrow_back,
-                                      color: provider.isPrevEnabled
-                                          ? AppColors.whiteColor
-                                          : AppColors.darkText),
-                                ),
-                                ElevatedButton(
-                                  onPressed: provider.isTestStarted == false ||
-                                      provider.isSubmitted[
-                                      provider.currentIndex]
-                                      ? null
-                                      : () =>
-                                      provider.submitAnswer(
-                                          context, provider.currentIndex),
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.textColor,
-                                    backgroundColor: AppColors.indigo,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 35, vertical: 0),
-                                    elevation: .5,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                  ElevatedButton(
+                                    onPressed: provider.isNxtEnabled
+                                        ? provider.goToNext
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: AppColors.textColor,
+                                      backgroundColor: provider.isNxtEnabled
+                                          ? AppColors.indigo
+                                          : AppColors.lightIndigo,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 20),
+                                      elevation: provider.isNxtEnabled ? 0 : 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                     ),
-                                  ),
-                                  child: Text(
-                                    'Submit',
-                                    style: AppTextStyle.bodyText1.copyWith(
-                                      color: AppColors.textColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                ElevatedButton(
-                                  onPressed: provider.isNxtEnabled
-                                      ? provider.goToNext
-                                      : null,
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: AppColors.textColor,
-                                    backgroundColor: provider.isNxtEnabled
-                                        ? AppColors.indigo
-                                        : AppColors.lightIndigo,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 20),
-                                    elevation: provider.isNxtEnabled ? 0 : 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: Icon(Icons.arrow_forward,
-                                      color: provider.isNxtEnabled
-                                          ? AppColors.whiteColor
-                                          : AppColors.darkText),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-
-                            /// feedback button
-                            Container(
-                              width: double.infinity,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.indigo,
-                                    AppColors.lightIndigo,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.darkShadow,
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
+                                    child: Icon(Icons.arrow_forward,
+                                        color: provider.isNxtEnabled
+                                            ? AppColors.whiteColor
+                                            : AppColors.darkText),
                                   ),
                                 ],
                               ),
-                              child: ElevatedButton(
-                                onPressed: () =>
-                                    showFeedbackDialog(
-                                        context,
-                                        authProvider.userSession!.userId,
-                                        authProvider.userSession!.testId,
-                                        provider.questionList[provider
-                                            .currentIndex].id),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text('Feedback'),
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Show Explanation',
-                                    style: AppTextStyle.questionText),
-                                Switch(
-                                    activeColor: AppColors.successColor,
-                                    inactiveThumbColor: AppColors.lightIndigo,
-                                    inactiveTrackColor: AppColors.dividerColor,
-                                    activeTrackColor: AppColors.dividerColor,
-                                    trackOutlineColor: WidgetStatePropertyAll(WidgetStateColor.transparent),
-                                    value: provider.showExplanation[
-                                    provider.currentIndex],
-                                    onChanged: (value) =>
-                                        provider
-                                            .toggleExplanationSwitch(
-                                            value)),
-                              ],
-                            ),
-                            if (provider.showExplanation[
-                            provider.currentIndex] &&
-                                provider.isSubmitted[
-                                provider.currentIndex])
-                              renderFullHtmlString(
-                                provider.questions!.questions[provider.currentIndex].detail,
-                                defaultTextStyle: AppTextStyle.answerText,
-                              ),
+                              SizedBox(height: 20),
 
-                          ],
+                              /// feedback button
+                              Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.indigo,
+                                      AppColors.lightIndigo,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.darkShadow,
+                                      blurRadius: 8,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () =>
+                                      showFeedbackDialog(
+                                          context,
+                                          authProvider.userSession!.userId,
+                                          authProvider.userSession!.testId,
+                                          provider.questionList[provider
+                                              .currentIndex].id),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: Text('Feedback'),
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Show Explanation',
+                                      style: AppTextStyle.questionText),
+                                  Switch(
+                                      activeColor: AppColors.successColor,
+                                      inactiveThumbColor: AppColors.lightIndigo,
+                                      inactiveTrackColor: AppColors.dividerColor,
+                                      activeTrackColor: AppColors.dividerColor,
+                                      trackOutlineColor: WidgetStatePropertyAll(WidgetStateColor.transparent),
+                                      value: provider.showExplanation[
+                                      provider.currentIndex],
+                                      onChanged: (value) =>
+                                          provider
+                                              .toggleExplanationSwitch(
+                                              value)),
+                                ],
+                              ),
+                              if (provider.showExplanation[
+                              provider.currentIndex] &&
+                                  provider.isSubmitted[
+                                  provider.currentIndex])
+                                renderFullHtmlString(
+                                  provider.questions!.questions[provider.currentIndex].detail,
+                                  defaultTextStyle: AppTextStyle.answerText,
+                                ),
+
+                            ],
+                          ),
                         ),
                       ),
                     ),

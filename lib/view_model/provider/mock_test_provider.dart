@@ -109,8 +109,9 @@ class MockTestProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchQuestions(BuildContext context) async {
+  Future<void> fetchQuestions(BuildContext context, int testId) async {
     try {
+      print("test id  ====>>> $testId");
       _loading = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         notifyListeners();
@@ -119,13 +120,13 @@ class MockTestProvider with ChangeNotifier {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userId = authProvider.userSession?.userId ?? 0;
       Map<String, dynamic> data = {};
-      if (authProvider.userSession?.userType == "premium") {
-        data = {'user_id': userId, "status": "mock"};
-      } else if (authProvider.userSession?.userType == "free") {
-        data = {'user_id': userId};
-      } else {
-        data = {};
-      }
+      // if (authProvider.userSession?.userType == "premium") {
+      data = {'user_id': userId, "test_id": testId, "status": "mock"};
+      // } else if (authProvider.userSession?.userType == "free") {
+      //   data = {'user_id': userId};
+      // } else {
+      //   data = {};
+      // }
 
       if (kDebugMode) {
         print(userId);
@@ -142,7 +143,16 @@ class MockTestProvider with ChangeNotifier {
         _correctAnswerOptionIndex = List<int>.filled(_questionList.length, 0);
         _showExplanation = List<bool>.filled(_questionList.length, false);
       } else {
-        ToastHelper.showError("Failed to fetch questions");
+        _questions = null;
+        _questionList = [];
+        _numberOfQuestions = 0;
+        _isSubmitted = List<bool>.filled(_questionList.length, false);
+        _selectedOptions = List<int?>.filled(_questionList.length, null);
+        _isTrue = List<bool>.filled(_questionList.length, false);
+        _correctAnswerOptionIndex = List<int>.filled(_questionList.length, 0);
+        _showExplanation = List<bool>.filled(_questionList.length, false);
+        ToastHelper.showError(
+            response.error ?? "No mock criteria found for the test.");
       }
     } catch (e) {
       print("Error fetching questions: $e");

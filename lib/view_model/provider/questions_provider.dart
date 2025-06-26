@@ -5,11 +5,12 @@ import 'package:education_app/model/check_model.dart';
 import 'package:education_app/model/get_checked_question_model.dart';
 import 'package:education_app/repository/check_question_repo.dart';
 import 'package:education_app/resources/exports.dart';
+import 'package:education_app/resources/model/past_paper_model.dart';
 import '../../model/incorrect_questions_model.dart';
 import '../../model/hive_database_model/submitted_questions_model.dart';
 import '../../repository/incorrect_question_repo.dart';
 
-enum FilterType { all, incorrect, unmarked, marked }
+enum FilterType { all, incorrect, unmarked, marked, past }
 
 class QuestionsProvider with ChangeNotifier {
   final QuestionRepository _mockTestRepo = QuestionRepository();
@@ -110,6 +111,9 @@ class QuestionsProvider with ChangeNotifier {
       _getCheckedQuestionModel;
 
   bool _isQuestionsAllSubmitted = false;
+
+  PastPaperModel? _pastPaperModel;
+  PastPaperModel? get pastPaperModel => _pastPaperModel;
 
   void getSelectedOptions() {
     _selectedOptions.clear();
@@ -258,6 +262,10 @@ class QuestionsProvider with ChangeNotifier {
             .where((q) => _checkMap[q.id] == null || _checkMap[q.id] == false)
             .toList();
         break;
+
+      case FilterType.past:
+        await fetchPastPaper(context, testId, subjectId!, chapterId);
+        break;
       case FilterType.all:
       default:
         await fetchQuestions(context, testId, subjectId!, chapterId);
@@ -265,6 +273,57 @@ class QuestionsProvider with ChangeNotifier {
         break;
     }
     notifyListeners();
+  }
+
+  Future<void> fetchPastPaper(
+      context, int testId, int subjectId, int chapterId) async {
+    _loading = true;
+    notifyListeners();
+    try {
+      Map<String, dynamic> data = {
+        "test_id": testId,
+        "subject_id": subjectId,
+        "chapter_id": chapterId,
+        "past_exam": true
+      };
+      final response = await _mockTestRepo.pastPaperTest(data);
+
+      if (response.success == true && response.data != null) {
+        // Save the original PastPaperModel
+        _pastPaperModel = response;
+
+        // Convert its List<Data> to List<Question>
+        List<Question> pastPaperQuestions = response.data!
+            .map((pastPaper) => Question(
+                  id: pastPaper.id ?? 0,
+                  question: pastPaper.question ?? '',
+                  option1: pastPaper.option1 ?? '',
+                  option2: pastPaper.option2 ?? '',
+                  option3: pastPaper.option3 ?? '',
+                  option4: pastPaper.option4 ?? '',
+                  option5: pastPaper.option5 ?? '',
+                  detail: pastPaper.detail ?? '',
+                  capacity: pastPaper.capacity ?? '',
+                  correctAnswer: pastPaper.correctAnswer ?? '',
+                  subjectName: "",
+                ))
+            .toList();
+
+        _filteredQuestions = List.from(pastPaperQuestions);
+        _numberOfQuestions = _filteredQuestions.length;
+        _showExplanation = List<bool>.filled(_numberOfQuestions!, false);
+      } else {
+        debugPrint("Response contains no questions.");
+        _questions = null;
+        _filteredQuestions = [];
+        _numberOfQuestions = 0;
+      }
+    } catch (e) {
+      print('error: $e');
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> fetchIncorrectQuestions(

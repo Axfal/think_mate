@@ -444,48 +444,76 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 10.0, horizontal: 10.0),
-                            child: Card(
-                              elevation: 2,
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                    leading: Text('${index + 1}',
-                                        style: AppTextStyle.questionText),
-                                    title: renderFullHtmlString(
-                                        question.question,
-                                        defaultTextStyle:
-                                            AppTextStyle.questionText.copyWith(
-                                          color: AppColors.darkText,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                        )),
-                                    trailing: Checkbox(
-                                      activeColor: AppColors.lightIndigo,
-                                      value: provider
-                                          .isQuestionChecked(question.id),
-                                      onChanged: (value) {
-                                        provider.checkTheQuestion(
-                                            context, question.id);
-                                      },
+                            child: ClipRect(
+                              child: Card(
+                                elevation: 2,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: InteractiveViewer(
+                                    minScale: 1.0,
+                                    maxScale: 3.0,
+                                    panEnabled: true,
+                                    scaleEnabled: true,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize
+                                          .min, // important for dynamic height
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const SizedBox(width: 12),
+                                            Text(
+                                              '${index + 1}.',
+                                              style: AppTextStyle.questionText,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Checkbox(
+                                              activeColor:
+                                                  AppColors.lightIndigo,
+                                              value: provider.isQuestionChecked(
+                                                  question.id),
+                                              onChanged: (value) {
+                                                provider.checkTheQuestion(
+                                                    context, question.id);
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12.0),
+                                          child: renderFullHtmlString(
+                                            question.question,
+                                            defaultTextStyle: AppTextStyle
+                                                .questionText
+                                                .copyWith(
+                                              color: AppColors.darkText,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        buildOption(0, question.option1),
+                                        buildOption(1, question.option2),
+                                        buildOption(2, question.option3),
+                                        buildOption(3, question.option4),
+                                        if (question.option5 != '')
+                                          buildOption(4, question.option5),
+                                        _buildActionButtons(
+                                          context,
+                                          provider,
+                                          authProvider,
+                                          subjectProvider,
+                                          chapterProvider,
+                                          bookMarkProvider,
+                                          index,
+                                        ),
+                                        _buildExplanation(provider, index),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
-                                  buildOption(0, question.option1),
-                                  buildOption(1, question.option2),
-                                  buildOption(2, question.option3),
-                                  buildOption(3, question.option4),
-                                  if (question.option5 != '')
-                                    buildOption(4, question.option5),
-                                  _buildActionButtons(
-                                      context,
-                                      provider,
-                                      authProvider,
-                                      subjectProvider,
-                                      chapterProvider,
-                                      bookMarkProvider,
-                                      index),
-                                  _buildExplanation(provider, index)
-                                ],
+                                ),
                               ),
                             ),
                           );
@@ -499,7 +527,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   Widget _buildExplanation(QuestionsProvider provider, int index) {
     final question = provider.filteredQuestions[index];
-    print("hinasdjlkas ======> ${question.detail}" ?? '');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,

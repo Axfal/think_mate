@@ -106,7 +106,7 @@ class _CourseScreenState extends State<CourseScreen> {
               SubjectScreen(
                 courseId: widget.courseId,
               ),
-              MockTestScreen(),
+              MockTestScreen(testId: widget.courseId,),
             ],
           ),
         ),
