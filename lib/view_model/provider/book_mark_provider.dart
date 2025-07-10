@@ -44,13 +44,13 @@ class BookMarkProvider with ChangeNotifier {
     };
 
     _isLoading = true;
+    _isMarked = true;
+    _bookmarkedQuestions[questionId] = true;
     notifyListeners();
 
     try {
       _bookMarkModel = await _bookMarkRepo.bookMarking(data);
       if (_bookMarkModel != null && _bookMarkModel!.success == true) {
-        _isMarked = true;
-        _bookmarkedQuestions[questionId] = true;
         Question? question = questionProvider.questionList.firstWhere(
           (q) => q.id == questionId,
           orElse: () => Question(
@@ -150,15 +150,18 @@ class BookMarkProvider with ChangeNotifier {
     };
 
     _isLoading = true;
+    _isMarked = false;
+    _bookmarkedQuestions.remove(questionId);
+    removeNoteByKey(questionId);
     notifyListeners();
 
     try {
       _deleteBookMarkModel = await _bookMarkRepo.deleteBookMarking(data);
       if (_deleteBookMarkModel != null &&
           _deleteBookMarkModel!.success == true) {
-        _isMarked = false;
-        _bookmarkedQuestions.remove(questionId);
-        removeNoteByKey(questionId);
+        // _isMarked = false;
+        // _bookmarkedQuestions.remove(questionId);
+        // removeNoteByKey(questionId);
         ToastHelper.showSuccess("BookMarks deleted successfully");
       } else {
         ToastHelper.showError("BookMark not found.");

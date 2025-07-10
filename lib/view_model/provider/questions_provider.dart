@@ -177,14 +177,16 @@ class QuestionsProvider with ChangeNotifier {
     };
 
     try {
+      _checkMap[questionId] = true;
+      notifyListeners();
       _checkModel = await _checkQuestionRepo.checkQuestion(data);
 
       if (_checkModel?.success == true &&
           _checkModel?.message?.isNotEmpty == true) {
-        _checkMap[questionId] = true;
+        // _checkMap[questionId] = true;
         notifyListeners();
 
-        ToastHelper.showSuccess(_checkModel!.message!);
+        // ToastHelper.showSuccess(_checkModel!.message!);
       }
     } catch (e) {
       debugPrint('Error checking question: $e');
@@ -206,12 +208,15 @@ class QuestionsProvider with ChangeNotifier {
     };
 
     try {
+      _checkMap[questionId] = false;
+      notifyListeners();
+
       _checkModel = await _checkQuestionRepo.unCheckQuestion(data);
 
       if (_checkModel?.success == true &&
           _checkModel?.message?.isNotEmpty == true) {
         _checkMap.remove(questionId);
-        ToastHelper.showSuccess(_checkModel!.message!);
+        // ToastHelper.showSuccess(_checkModel!.message!);
       }
     } catch (e) {
       print('Error unchecking question: $e');

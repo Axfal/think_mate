@@ -50,16 +50,17 @@ class ProfileProvider with ChangeNotifier {
     }
   }
 
-  Future<void> getUserProfileData(context) async {
+  Future<void> getUserProfileData(BuildContext context) async {
     try {
       isLoading = true;
+      notifyListeners();
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      // authProvider.loadUserSession();
       final userId = authProvider.userSession?.userId;
 
       if (userId == null) {
         debugPrint("Error: User ID is null");
-        isLoading = false;
         return;
       }
 
@@ -68,6 +69,7 @@ class ProfileProvider with ChangeNotifier {
       debugPrint("Error fetching profile data: $e");
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 

@@ -3,8 +3,6 @@
 import 'dart:async';
 
 import 'package:education_app/resources/exports.dart';
-import 'package:education_app/ui/view/courses/tab_bar_screen/subjects/test.dart';
-import 'package:education_app/ui/view/global_screens/calculator_screen.dart';
 import 'package:no_screenshot/no_screenshot.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,11 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isLoading = true;
-  // Timer? _periodicTimer;
   final NoScreenshot _noScreenshot = NoScreenshot.instance;
-  bool isProfileFetched = false;
-  bool isCoursesFetched = false;
+
 
   @override
   void initState() {
@@ -27,22 +22,17 @@ class _HomeScreenState extends State<HomeScreen> {
     _noScreenshot.screenshotOn();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!isProfileFetched) getUserData();
-      if (!isCoursesFetched) fetchCourses();
-      startPeriodicSubscriptionCheck();
+      subscriptionCheck();
     });
   }
 
-  void startPeriodicSubscriptionCheck() async {
+  void subscriptionCheck() async {
     final subscriptionProvider =
         Provider.of<SubscriptionProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     await _updateUserSubscription(subscriptionProvider, authProvider);
 
-    // _periodicTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
-    //   await _updateUserSubscription(subscriptionProvider, authProvider);
-    // });
   }
 
   /// Helper method to fetch and update user subscription and type
@@ -68,19 +58,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
     await profileProvider.getUserProfileData(context);
-    isProfileFetched = true;
   }
 
   void fetchCourses() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    if (authProvider.courseList?.data?.isEmpty ?? true) {
       await authProvider.fetchCoursesList();
-    }
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   Widget shimmerBox({required double width, required double height}) {
@@ -208,23 +190,23 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: userData?.profileModel != null
           ? drawerWidget(context, userData!)
           : Container(),
-      body: isLoading
+      body: courseProvider.loading
           ? fullScreenShimmer()
           : RefreshIndicator(
               onRefresh: () async {
-                setState(() {
-                  isLoading = true;
-                  isProfileFetched = false;
-                  isCoursesFetched = false;
-                });
+                // setState(() {
+                //   isLoading = true;
+                //   isProfileFetched = false;
+                //   isCoursesFetched = false;
+                // });
 
-                startPeriodicSubscriptionCheck();
-                // fetchCourses();
-                // getUserData();
+                subscriptionCheck();
+                fetchCourses();
+                getUserData();
 
-                setState(() {
-                  isLoading = false;
-                });
+                // setState(() {
+                //   isLoading = false;
+                // });
               },
               child: CustomScrollView(
                 slivers: [
@@ -260,12 +242,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (userData?.profileModel?.success == true)
+                              // if (userData?.profileModel?.success == true)
                                 Text(
-                                  'Hello ${userData?.profileModel?.user?.username ?? "User not found!"}',
+                                  'Hi, ${userData?.profileModel?.user?.username ?? "Not found!"}',
                                   style: GoogleFonts.poppins(
                                     textStyle: TextStyle(
                                       fontSize: 18,
+                                      overflow: TextOverflow.ellipsis,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.whiteColor,
                                       shadows: [
@@ -278,18 +261,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                )
-                              else
-                                Text(
-                                  'Hello',
-                                  style: GoogleFonts.poppins(
-                                    textStyle: TextStyle(
-                                      color: AppColors.errorLight,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                  // overflow: TextOverflow.ellipsis,
                                 ),
+                              // else
+                              //   Text(
+                              //     'Hello',
+                              //     style: GoogleFonts.poppins(
+                              //       textStyle: TextStyle(
+                              //         color: AppColors.errorLight,
+                              //         fontWeight: FontWeight.bold,
+                              //       ),
+                              //     ),
+                              //   ),
                               SizedBox(height: 4),
                               Container(
                                 padding: EdgeInsets.symmetric(

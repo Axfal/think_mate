@@ -7,6 +7,7 @@ import 'package:education_app/ui/view/subscription/subscription_history.dart';
 import 'package:education_app/ui/widgets/subscription_card.dart';
 import 'package:education_app/ui/widgets/subscription_shimmer.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_math_fork/ast.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -17,6 +18,7 @@ class SubscriptionScreen extends StatefulWidget {
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
   String? currentSubscriptionName;
+  String? selectedTestId;
 
   @override
   void initState() {
@@ -24,7 +26,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadUserSubscription();
       _loadSubscriptions();
+      callSubjectApi();
     });
+  }
+
+  void callSubjectApi() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await authProvider.fetchCoursesList();
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print("Error fetching subjects: $e");
+      }
+      if (kDebugMode) {
+        print(stackTrace);
+      }
+    }
   }
 
   void _showPaymentDetailsDialog(BuildContext context) {
@@ -89,9 +106,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     });
   }
 
-  void _loadSubscriptions() async {
+  void _loadSubscriptions({int? selectedTestId}) async {
     final provider = Provider.of<SubscriptionProvider>(context, listen: false);
-    await provider.getSubscription();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.loadUserSession();
+    final userId = authProvider.userSession!.userId;
+    final testId = authProvider.userSession!.testId;
+    await provider.getSubscription(userId: userId);
+    if (selectedTestId == null) {
+      /// default test_id
+      await provider.getSubscription(testId: testId);
+    } else {
+      /// user selected test_id
+      await provider.getSubscription(testId: selectedTestId);
+    }
   }
 
   void _navigateToPaymentScreen(subscription) {
@@ -131,11 +159,73 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
+              _coursesWidget(),
               _buildSubscriptionList(),
               SizedBox(height: 20),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _coursesWidget() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          authProvider.loading
+              ? Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                  child: Container(
+                    height: 50,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              : (authProvider.courseList == null ||
+                      authProvider.courseList!.data == null ||
+                      authProvider.courseList!.data!.isEmpty)
+                  ? const Text(
+                      "No subjects available",
+                      style: TextStyle(color: Colors.red),
+                    )
+                  : DropdownButtonFormField<String>(
+                      value: selectedTestId,
+                      decoration: InputDecoration(
+                        labelText: "Select Subject",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      items: authProvider.courseList!.data!.map((subject) {
+                        return DropdownMenuItem<String>(
+                          value: subject.id.toString(),
+                          child: Text(subject.testName ?? "Unknown"),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedTestId = value;
+                          if (selectedTestId != '' || selectedTestId != null) {
+                            final testId = int.parse(selectedTestId!);
+                            _loadSubscriptions(selectedTestId: testId);
+                          }
+                        });
+                      },
+                      validator: (value) =>
+                          value == null ? "Please select a Subject" : null,
+                    ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
@@ -231,11 +321,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       builder: (context, provider, _) {
         final subscriptions = provider.getSubscriptionModel?.subscriptions;
 
-        if (subscriptions == null) {
+        if (provider.isLoading) {
           return const SubscriptionShimmer();
         }
 
-        if (subscriptions.isEmpty) {
+        if (subscriptions == null || subscriptions.isEmpty) {
           return Center(
             child: Text(
               "No subscription plans available",
@@ -250,25 +340,30 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           itemCount: subscriptions.length,
           itemBuilder: (context, index) {
             final subscription = subscriptions[index];
+
             final startDate = provider
                     .checkUserSubscriptionPlanModel?.subscriptionStartDate ??
                 "...";
             final expireDate =
                 provider.checkUserSubscriptionPlanModel?.subscriptionEndDate ??
                     "...";
-            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+            final authProvider =
+                Provider.of<AuthProvider>(context, listen: false);
             authProvider.loadUserSession();
-            final userType = authProvider.userSession!.userType;
+
+            final userType = authProvider.userSession?.userType ?? "Guest";
 
             return SubscriptionCard(
-              title: subscription.subscriptionName!,
+              title: subscription.subscriptionName ?? "Unnamed Plan",
               price: "Rs. ${subscription.price}",
               duration: "${subscription.months} Month",
               startDate: startDate,
               endDate: expireDate,
               userType: userType,
               isRecommended:
-                  currentSubscriptionName == subscription.subscriptionName,
+                  provider.currentPlanModel!.subscriptions!.first.id ==
+                      subscription.id,
               features: const [
                 "Unlimited Quizzes",
                 "Ad-Free Experience",

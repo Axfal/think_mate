@@ -71,8 +71,8 @@ class SubscriptionCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                AppColors.whiteColor.withOpacity(0.7),
-                                AppColors.indigo.withOpacity(0.4)
+                                AppColors.whiteColor.withValues(alpha: 0.7),
+                                AppColors.indigo.withValues(alpha: 0.4)
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -80,7 +80,7 @@ class SubscriptionCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(50),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.purpleShadow.withOpacity(0.45),
+                                color: AppColors.purpleShadow.withValues(alpha: 0.45),
                                 blurRadius: 10,
                                 offset: Offset(0, 6),
                               ),
@@ -124,7 +124,7 @@ class SubscriptionCard extends StatelessWidget {
                   style: AppTextStyle.bodyText1.copyWith(
                     color: isRecommended
                         ? AppColors.whiteOverlay90
-                        : AppColors.darkText.withOpacity(0.7),
+                        : AppColors.darkText.withValues(alpha: 0.7),
                   ),
                 ),
                 SizedBox(height: 16),
@@ -158,7 +158,7 @@ class SubscriptionCard extends StatelessWidget {
                     width: double.infinity,
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.whiteColor.withOpacity(0.1),
+                      color: AppColors.whiteColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.whiteColor),
                     ),

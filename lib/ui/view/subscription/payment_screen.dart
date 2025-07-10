@@ -27,7 +27,7 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
   @override
   void initState() {
     super.initState();
-    callSubjectApi();
+    // callSubjectApi();
 
     Future.delayed(Duration(milliseconds: 300), () {
       showPromoCodeDialog();
@@ -106,19 +106,19 @@ class _UploadPaymentScreenState extends State<UploadPaymentScreen> {
     );
   }
 
-  void callSubjectApi() async {
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.fetchCoursesList();
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print("Error fetching subjects: $e");
-      }
-      if (kDebugMode) {
-        print(stackTrace);
-      }
-    }
-  }
+  // void callSubjectApi() async {
+  //   try {
+  //     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  //     await authProvider.fetchCoursesList();
+  //   } catch (e, stackTrace) {
+  //     if (kDebugMode) {
+  //       print("Error fetching subjects: $e");
+  //     }
+  //     if (kDebugMode) {
+  //       print(stackTrace);
+  //     }
+  //   }
+  // }
 
   void _showPaymentDetailsDialog(BuildContext context) {
     showDialog(

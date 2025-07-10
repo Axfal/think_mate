@@ -17,11 +17,14 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+
+    // Book animation controller
     _bookController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
 
+    // Fade-in animation controller
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -36,9 +39,14 @@ class _SplashScreenState extends State<SplashScreen>
 
     _fadeController.forward();
 
-    // Load user session before checking it
+    // Initialize _sessionLoader immediately
     _sessionLoader =
         Provider.of<AuthProvider>(context, listen: false).loadUserSession();
+
+    // Fetch other data safely after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchAllData();
+    });
   }
 
   @override
@@ -48,10 +56,26 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  void fetchAllData() async {
+    fetchCourses();
+  }
+
+  void getUserData() async {
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    await profileProvider.getUserProfileData(context);
+  }
+
+  void fetchCourses() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.fetchCoursesList();
+  }
+
   void navigateToNextScreen(BuildContext context) {
     final provider = Provider.of<AuthProvider>(context, listen: false);
 
     if (provider.userSession != null) {
+      getUserData();
       Navigator.pushReplacementNamed(context, RoutesName.home);
     } else {
       Navigator.pushReplacementNamed(context, RoutesName.login);
@@ -94,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen>
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.purpleShadow.withOpacity(0.5),
+                          color: AppColors.purpleShadow.withValues(alpha: 0.5),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
@@ -116,7 +140,7 @@ class _SplashScreenState extends State<SplashScreen>
                     shaderCallback: (bounds) => LinearGradient(
                       colors: [
                         AppColors.whiteColor,
-                        AppColors.whiteColor.withOpacity(0.8),
+                        AppColors.whiteColor.withValues(alpha: 0.8),
                       ],
                     ).createShader(bounds),
                     child: Text(

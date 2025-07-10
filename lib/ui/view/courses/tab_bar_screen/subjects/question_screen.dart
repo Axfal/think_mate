@@ -279,130 +279,121 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)))
               : Column(
                   children: [
+                    /// header => total questions + answers + calculator + reference
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.indigo.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.indigo.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      margin: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final isSmallScreen = constraints.maxWidth < 360;
-
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          initiallyExpanded: true,
+                          tilePadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          childrenPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 2),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                (authProvider.userSession!.userType == 'free' ||
+                                        authProvider.userSession!.testId !=
+                                            widget.testId)
+                                    ? 'Demo Questions: 5'
+                                    : 'Total: ${provider.filteredQuestions.length}',
+                                style: AppTextStyle.heading3.copyWith(
+                                  fontSize: 14,
+                                  color: AppColors.darkText,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                'Answered: ${provider.isSubmitted.entries.where((entry) => provider.filteredQuestions.any((q) => q.id == entry.key)).length}',
+                                style: AppTextStyle.bodyText1.copyWith(
+                                  fontSize: 14,
+                                  color: AppColors.darkText,
+                                ),
+                              ),
+                            ],
+                          ),
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                /// Calculator
+                                Row(
                                   children: [
-                                    // Left Side: Total Questions Info
-                                    Flexible(
-                                      flex: 2,
-                                      child: Text(
-                                        (authProvider.userSession!.userType ==
-                                                    'free' ||
-                                                authProvider
-                                                        .userSession!.testId !=
-                                                    widget.testId)
-                                            ? 'Total Demo Questions: 5'
-                                            : 'Total Questions: ${provider.filteredQuestions.length}',
-                                        style: AppTextStyle.heading3.copyWith(
-                                          color: AppColors.darkText,
-                                          fontSize: isSmallScreen ? 14 : 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
+                                    Text(
+                                      "Calculator:",
+                                      style: AppTextStyle.heading3.copyWith(
+                                        color: AppColors.darkText,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
                                       ),
                                     ),
-
-                                    const SizedBox(width: 12),
-
-                                    // Right Side: Answered Count
-                                    Flexible(
-                                      flex: 1,
-                                      child: Text(
-                                        'Answered: ${provider.isSubmitted.entries.where((entry) => provider.filteredQuestions.any((q) => q.id == entry.key)).length}',
-                                        style: AppTextStyle.bodyText1.copyWith(
-                                          fontSize: isSmallScreen ? 11 : 13,
-                                          color: AppColors.darkText,
+                                    IconButton(
+                                      onPressed: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CalculatorScreen(),
                                         ),
-                                        textAlign: TextAlign.end,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
+                                      ),
+                                      icon: Icon(
+                                        Icons.calculate_outlined,
+                                        color: AppColors.primaryColor,
+                                        size: 26,
                                       ),
                                     ),
                                   ],
                                 ),
-                              );
-                            },
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    "Calculator :",
-                                    style: AppTextStyle.heading3.copyWith(
+
+                                /// Reference
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Ref:",
+                                      style: AppTextStyle.heading3.copyWith(
                                         color: AppColors.darkText,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 14),
-                                  ),
-                                  IconButton(
-                                      onPressed: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CalculatorScreen())),
-                                      icon: Icon(Icons.calculate_outlined,
-                                          color: AppColors.primaryColor,
-                                          size: 30)),
-                                ],
-                              ),
-                              SizedBox(
-                                width: 30,
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Ref: ",
-                                    style: AppTextStyle.heading3.copyWith(
-                                        color: AppColors.darkText,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      final subjectProvider =
-                                          Provider.of<SubjectProvider>(context,
-                                              listen: false);
-                                      final testId = subjectProvider.testId;
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  HintScreen(testId: testId)));
-                                    },
-                                    icon: Icon(
-                                      Icons.lightbulb_outline_rounded,
-                                      color: AppColors.primaryColor,
-                                      size: 30,
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  )
-                                ],
-                              ),
-                            ],
-                          )
-                        ],
+                                    IconButton(
+                                      onPressed: () {
+                                        final subjectProvider =
+                                            Provider.of<SubjectProvider>(
+                                                context,
+                                                listen: false);
+                                        final testId = subjectProvider.testId;
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                HintScreen(testId: testId),
+                                          ),
+                                        );
+                                      },
+                                      icon: Icon(
+                                        Icons.lightbulb_outline_rounded,
+                                        color: AppColors.primaryColor,
+                                        size: 26,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+
+                    /// question card
                     Expanded(
                       child: ListView.builder(
                         itemCount:
@@ -458,7 +449,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize
-                                          .min, // important for dynamic height
+                                          .min,
                                       children: [
                                         Row(
                                           children: [
@@ -678,12 +669,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ToastHelper.showSuccess('Bookmark added');
               }
             },
-      child: bookMarkProvider.isLoading
-          ? SizedBox(
-              child: CupertinoActivityIndicator(
-              color: AppColors.whiteColor,
-            ))
-          : Icon(
+      child: Icon(
               isBookmarked ? Icons.bookmark : Icons.bookmark_outline_outlined,
               size: 22,
               color: AppColors.whiteColor),

@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:education_app/model/current_plan_model.dart';
 import 'package:education_app/model/verify_promo_model.dart';
 import 'package:education_app/resources/exports.dart';
 
@@ -8,6 +9,9 @@ class SubscriptionProvider with ChangeNotifier {
 
   GetSubscriptionModel? _getSubscriptionModel;
   GetSubscriptionModel? get getSubscriptionModel => _getSubscriptionModel;
+
+  CurrentPlanModel? _currentPlanModel;
+  CurrentPlanModel? get currentPlanModel => _currentPlanModel;
 
   PostSubscriptionModel? _postSubscriptionModel;
   PostSubscriptionModel? get postSubscriptionModel => _postSubscriptionModel;
@@ -57,13 +61,32 @@ class SubscriptionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> getSubscription() async {
+  /// Fetch subscription plan and user current plan
+  Future<void> getSubscription({int? testId, int? userId}) async {
     _isLoading = true;
     notifyListeners();
+
     try {
-      final response = await _subscription.getSubscription();
-      if (response.success == true && response.subscriptions != null) {
-        _getSubscriptionModel = response;
+      if (testId != null) {
+        final response = await _subscription.getSubscription(testId: testId);
+
+        if (response is Map<String, dynamic> &&
+            response['success'] == true &&
+            response['subscriptions'] != null) {
+          _getSubscriptionModel = GetSubscriptionModel.fromJson(response);
+        } else {
+          debugPrint('Failed to load subscriptions or "success" key missing.');
+        }
+      } else {
+        final response = await _subscription.getSubscription(userId: userId);
+
+        if (response is Map<String, dynamic> &&
+            response['success'] == true &&
+            response['subscriptions'] != null) {
+          _currentPlanModel = CurrentPlanModel.fromJson(response);
+        } else {
+          debugPrint('Failed to load subscriptions or "success" key missing.');
+        }
       }
     } catch (e, stackTrace) {
       debugPrint('Error fetching subscription: $e');

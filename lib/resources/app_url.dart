@@ -1,5 +1,6 @@
 class AppUrl {
   static var baseUrl = 'https://nomore.com.pk/MDCAT_ECAT_Education/API';
+
   static var signIn = '$baseUrl/SignIn.php';
   static var signUp = '$baseUrl/Signup.php';
   static var fetchTest = '$baseUrl/fetch_test.php';
@@ -11,6 +12,7 @@ class AppUrl {
   static var getMockTestQuestionCount =
       '$baseUrl/MockTestGeneratorQuestionCount.php';
   static var mockTestFeedback = '$baseUrl/user_test_feedback.php';
+
   static var postTestResult = '$baseUrl/submit_result.php';
   static var getTestResult = '$baseUrl/get_test_result.php?user_id=';
   static var pastPaperQuestion = '$baseUrl/past_exam_questions.php';
@@ -23,13 +25,14 @@ class AppUrl {
   static var profile = "$baseUrl/update_profile.php?user_id=";
   static var changePassword = "$baseUrl/update_profile.php";
   static var uploadImage = "$baseUrl/update_profile.php";
+
   static var incorrectQuestions = "$baseUrl/get_incorrect_questions.php";
   static var checkQuestion = "$baseUrl/check_questions.php";
   static var unCheckQuestion = "$baseUrl/delete_check_questions.php";
   static var getCheckQuestion = "$baseUrl/get_check_questions.php?user_id=";
 
   /// https://nomore.com.pk/MDCAT_ECAT_Education/API/get_check_questions.php?user_id=10&test_id=3&subject_id=12&chapter_id=3
-  static var getSubscription = "$baseUrl/get_subscriptions.php";
+  static var getSubscription = "$baseUrl/get_subscriptions.php?";
   static var postSubscription = "$baseUrl/submit_payment.php";
   static var getSubscriptionHistory = "$baseUrl/payments_history.php?user_id=";
 
@@ -37,6 +40,7 @@ class AppUrl {
   static var validateUserForMockTest = "$baseUrl/free_user_test_validate.php";
   static var requestResetPassword = '$baseUrl/request_reset_password.php';
   static var resetPassword = '$baseUrl/reset_password.php';
+
   static var checkSubscriptionPlan = '$baseUrl/get_user_subscription_info.php';
   static var verifyPromoCode = '$baseUrl/verify_promo.php';
   static var addNotes = '$baseUrl/add_notes.php';
@@ -53,6 +57,7 @@ class AppUrl {
 
   /// hint section
   static String generalHint = '$baseUrl/get_hints.php?test_id=';
+
   // static String subjectiveHint = '$baseUrl/get_hints.php?test_id=3&subject_id=11';
   static String subjectiveHint = '$baseUrl/get_hints.php?test_id=';
 }

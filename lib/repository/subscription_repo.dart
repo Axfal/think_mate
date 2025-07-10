@@ -5,16 +5,17 @@ class SubscriptionRepo {
   final BaseApiServices _apiServices = NetworkApiServices();
 
   /// Fetch subscription plans (GET)
-  Future<GetSubscriptionModel> getSubscription() async {
+  Future<dynamic> getSubscription({int? testId, int? userId}) async {
     try {
-      final response =
-          await _apiServices.getGetApiResponse(AppUrl.getSubscription);
-
-      if (kDebugMode) {
-        print("GET Subscription Response: $response");
+      if (testId != null) {
+        final response = await _apiServices
+            .getGetApiResponse("${AppUrl.getSubscription}test_id=$testId");
+        return response;
+      } else {
+        final response = await _apiServices
+            .getGetApiResponse("${AppUrl.getSubscription}user_id=$userId");
+        return response;
       }
-
-      return GetSubscriptionModel.fromJson(response);
     } catch (error) {
       if (kDebugMode) {
         print("GET Subscription Error: $error");

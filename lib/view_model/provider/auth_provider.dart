@@ -33,25 +33,15 @@ class AuthProvider with ChangeNotifier {
     }
 
     try {
-      if (kDebugMode) {
-        print("Fetching subjects...");
-      }
+      _loading = true;
+      notifyListeners();
 
       final response = await _authRepository.setSubject();
 
       if (response != null) {
-        if (kDebugMode) {
-          print("Response received: ${response.toJson()}");
-        }
-
-        if (response.success == true && response.data != null) {
+         if (response.success == true && response.data != null) {
           _courseList = response;
           _userId = response.toJson()['user_id'] ?? 0;
-
-          if (kDebugMode) {
-            print(
-                "Subjects list updated successfully: ${_courseList!.data!.length} subjects found");
-          }
         } else {
           if (kDebugMode) {
             print("API Response indicates failure: ${response.success}");
@@ -66,6 +56,9 @@ class AuthProvider with ChangeNotifier {
       if (kDebugMode) {
         print("Error in subjectsList(): $error");
       }
+    }finally{
+      _loading = false;
+      notifyListeners();
     }
 
     notifyListeners();
@@ -88,7 +81,7 @@ class AuthProvider with ChangeNotifier {
           );
           await userBox.put('session', _userSession!);
 
-          await getUserTestData();
+          await getUserTestData(); /// load user test data
 
           ToastHelper.showSuccess("Login Successfully!");
 
