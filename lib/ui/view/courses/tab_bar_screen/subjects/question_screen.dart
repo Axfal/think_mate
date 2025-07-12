@@ -663,10 +663,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
           : () async {
               if (isBookmarked) {
                 await bookMarkProvider.deleteBookMarking(context, questionId);
-                ToastHelper.showSuccess('Bookmark removed');
+                // ToastHelper.showSuccess('Bookmark removed');
               } else {
                 await bookMarkProvider.bookMarking(context, questionId);
-                ToastHelper.showSuccess('Bookmark added');
+                // ToastHelper.showSuccess('Bookmark added');
               }
             },
       child: Icon(
