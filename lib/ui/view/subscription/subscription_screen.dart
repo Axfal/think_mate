@@ -7,7 +7,6 @@ import 'package:education_app/ui/view/subscription/subscription_history.dart';
 import 'package:education_app/ui/widgets/subscription_card.dart';
 import 'package:education_app/ui/widgets/subscription_shimmer.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_math_fork/ast.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});

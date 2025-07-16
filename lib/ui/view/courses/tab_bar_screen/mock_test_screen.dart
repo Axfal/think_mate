@@ -4,7 +4,6 @@ import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_all/flutter_html_all.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
 
 class MockTestScreen extends StatefulWidget {
   final int subjectId;

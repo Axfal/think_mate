@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:no_screenshot/no_screenshot.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_all/flutter_html_all.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
 
 class CreatedMockTestScreen extends StatefulWidget {
   final bool testMode;
