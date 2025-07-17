@@ -6,7 +6,7 @@ import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:no_screenshot/no_screenshot.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html_all/flutter_html_all.dart';
+// import 'package:flutter_html_all/flutter_html_all.dart';
 
 class CreatedMockTestScreen extends StatefulWidget {
   final bool testMode;
@@ -172,12 +172,12 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
           },
         ),
         // You can keep your other extensions as needed
-        const MathHtmlExtension(),
-        const AudioHtmlExtension(),
-        const VideoHtmlExtension(),
-        const IframeHtmlExtension(),
-        const TableHtmlExtension(),
-        const SvgHtmlExtension(),
+        // const MathHtmlExtension(),
+        // const AudioHtmlExtension(),
+        // const VideoHtmlExtension(),
+        // const IframeHtmlExtension(),
+        // const TableHtmlExtension(),
+        // const SvgHtmlExtension(),
       ],
     );
   }

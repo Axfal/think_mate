@@ -3,7 +3,7 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html_all/flutter_html_all.dart';
+// import 'package:flutter_html_all/flutter_html_all.dart';
 
 class QuestionScreen extends StatefulWidget {
   final int subjectId;
@@ -190,12 +190,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
           },
         ),
         // You can keep your other extensions as needed
-        const MathHtmlExtension(),
-        const AudioHtmlExtension(),
-        const VideoHtmlExtension(),
-        const IframeHtmlExtension(),
-        const TableHtmlExtension(),
-        const SvgHtmlExtension(),
+        // const MathHtmlExtension(),
+        // const AudioHtmlExtension(),
+        // const VideoHtmlExtension(),
+        // const IframeHtmlExtension(),
+        // const TableHtmlExtension(),
+        // const SvgHtmlExtension(),
       ],
     );
   }
