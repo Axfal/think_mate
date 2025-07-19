@@ -75,6 +75,7 @@ class SubscriptionProvider with ChangeNotifier {
             response['subscriptions'] != null) {
           _getSubscriptionModel = GetSubscriptionModel.fromJson(response);
         } else {
+          _getSubscriptionModel = null;
           debugPrint('Failed to load subscriptions or "success" key missing.');
         }
       } else {

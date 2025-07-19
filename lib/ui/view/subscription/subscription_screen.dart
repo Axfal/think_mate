@@ -397,7 +397,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.grey.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: Offset(0, 4),
           ),

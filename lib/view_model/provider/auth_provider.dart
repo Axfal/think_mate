@@ -39,7 +39,7 @@ class AuthProvider with ChangeNotifier {
       final response = await _authRepository.setSubject();
 
       if (response != null) {
-         if (response.success == true && response.data != null) {
+        if (response.success == true && response.data != null) {
           _courseList = response;
           _userId = response.toJson()['user_id'] ?? 0;
         } else {
@@ -56,7 +56,7 @@ class AuthProvider with ChangeNotifier {
       if (kDebugMode) {
         print("Error in subjectsList(): $error");
       }
-    }finally{
+    } finally {
       _loading = false;
       notifyListeners();
     }
@@ -81,7 +81,12 @@ class AuthProvider with ChangeNotifier {
           );
           await userBox.put('session', _userSession!);
 
-          await getUserTestData(); /// load user test data
+          /// call user data
+          userData(context);
+
+          await getUserTestData();
+
+          /// load user test data
 
           ToastHelper.showSuccess("Login Successfully!");
 
@@ -106,6 +111,12 @@ class AuthProvider with ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  void userData(context) async {
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    await profileProvider.getUserProfileData(context);
   }
 
   void setUserTypeToPremium() {

@@ -71,11 +71,14 @@ class _SplashScreenState extends State<SplashScreen>
     await authProvider.fetchCoursesList();
   }
 
-  void navigateToNextScreen(BuildContext context) {
+  void navigateToNextScreen(BuildContext context) async {
     final provider = Provider.of<AuthProvider>(context, listen: false);
 
     if (provider.userSession != null) {
+
+      ///api calling then navigate to next screen bro
       getUserData();
+
       Navigator.pushReplacementNamed(context, RoutesName.home);
     } else {
       Navigator.pushReplacementNamed(context, RoutesName.login);
