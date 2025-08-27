@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final NoScreenshot _noScreenshot = NoScreenshot.instance;
 
-
   @override
   void initState() {
     super.initState();
@@ -32,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     await _updateUserSubscription(subscriptionProvider, authProvider);
-
   }
 
   /// Helper method to fetch and update user subscription and type
@@ -62,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void fetchCourses() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.fetchCoursesList();
+    await authProvider.fetchCoursesList();
   }
 
   Widget shimmerBox({required double width, required double height}) {
@@ -171,18 +169,30 @@ class _HomeScreenState extends State<HomeScreen> {
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           backgroundColor: AppColors.whiteColor,
-          elevation: 2,
+          elevation: 0,
           shadowColor: AppColors.darkShadow, // Soft custom shadow
           centerTitle: true,
           surfaceTintColor: Colors.transparent,
-          iconTheme: IconThemeData(color: AppColors.darkText),
+          iconTheme: IconThemeData(color: AppColors.whiteColor),
           title: Text(
             'ThinkMatte',
             style: GoogleFonts.poppins(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: AppColors.darkText,
+              color: AppColors.whiteColor,
               letterSpacing: 0.45,
+            ),
+          ),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.deepPurple,
+                  AppColors.lightPurple,
+                ],
+              ),
             ),
           ),
         ),
@@ -243,26 +253,26 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // if (userData?.profileModel?.success == true)
-                                Text(
-                                  'Hi, ${userData?.profileModel?.user?.username ?? "Not found!"}',
-                                  style: GoogleFonts.poppins(
-                                    textStyle: TextStyle(
-                                      fontSize: 18,
-                                      overflow: TextOverflow.ellipsis,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.whiteColor,
-                                      shadows: [
-                                        Shadow(
-                                          offset: Offset(0, 2),
-                                          blurRadius: 4,
-                                          color: AppColors.blackOverlay10,
-                                        ),
-                                      ],
-                                    ),
+                              Text(
+                                'Hi, ${userData?.profileModel?.user?.username ?? "Not found!"}',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontSize: 18,
+                                    overflow: TextOverflow.ellipsis,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.whiteColor,
+                                    shadows: [
+                                      Shadow(
+                                        offset: Offset(0, 2),
+                                        blurRadius: 4,
+                                        color: AppColors.blackOverlay10,
+                                      ),
+                                    ],
                                   ),
-                                  maxLines: 1,
-                                  // overflow: TextOverflow.ellipsis,
                                 ),
+                                maxLines: 1,
+                                // overflow: TextOverflow.ellipsis,
+                              ),
                               // else
                               //   Text(
                               //     'Hello',
