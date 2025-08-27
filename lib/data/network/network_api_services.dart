@@ -9,8 +9,7 @@ class NetworkApiServices extends BaseApiServices {
     dynamic responseJson;
 
     try {
-      final response =
-          await http.get(Uri.parse(url)).timeout(Duration(seconds: 20));
+      final response = await http.get(Uri.parse(url)).timeout(Duration(seconds: 20));
       responseJson = returnResponse(response);
     } on SocketException {
       throw FetchDataException("No Internet Connection");
@@ -148,6 +147,7 @@ class NetworkApiServices extends BaseApiServices {
   dynamic returnResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:
+      case 201:
         return jsonDecode(response.body);
       case 400:
         throw BadRequestException(response.body.toString());

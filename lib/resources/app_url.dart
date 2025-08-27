@@ -49,6 +49,10 @@ class AppUrl {
   /// https://nomore.com.pk/MDCAT_ECAT_Education/API/get_notes.php?user_id=10&test_id=3&subject_id=10
   static var deleteNote = '$baseUrl/delete_note.php';
   static var updateNote = '$baseUrl/update_note.php';
+
+
+  /// Library
+  static var getFolders = '$baseUrl/get_folders.php';
   static var getNoteBook = '$baseUrl/get_upload_books.php?user_id=';
 
   /// maintain user test data session

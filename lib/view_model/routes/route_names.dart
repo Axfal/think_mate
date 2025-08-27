@@ -41,4 +41,6 @@ class RoutesName {
   static const String createdMockTestScreen = "created_screen";
 
   static const String terms = "/terms";
+
+  static const String foldersScreen = 'folder_screen';
 }

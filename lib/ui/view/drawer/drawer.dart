@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, avoid_print
 
 import 'package:education_app/resources/exports.dart';
 import 'package:education_app/ui/view/drawer/help/help_screen.dart';
@@ -129,7 +129,7 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
                           _showPremiumAccessDialog(context);
                         } else {
                           Navigator.pushNamed(
-                              context, RoutesName.myNoteBookScreen);
+                              context, RoutesName.foldersScreen);
                         }
                       }, Icons.book_outlined),
                       drawerItems('Help', () {

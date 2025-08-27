@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:education_app/resources/exports.dart';
+import 'package:education_app/ui/view/drawer/note_book/folder_screen.dart';
 
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -83,10 +84,17 @@ class Routes {
       case RoutesName.chapterScreen:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final testId = args['testId'] ?? 0;
-        return MaterialPageRoute(builder: (context) => ChaptersScreen(testId: testId));
+        return MaterialPageRoute(
+            builder: (context) => ChaptersScreen(testId: testId));
 
       case RoutesName.myNoteBookScreen:
-        return MaterialPageRoute(builder: (context) => MyNoteBook());
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final folderId = args['folder_id'] ?? 0;
+        return MaterialPageRoute(
+            builder: (context) => MyNoteBook(folderId: folderId));
+
+      case RoutesName.foldersScreen:
+        return MaterialPageRoute(builder: (context) => FolderScreen());
 
       case RoutesName.questionScreen:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -97,7 +105,7 @@ class Routes {
             builder: (context) => QuestionScreen(
                   subjectId: subjectId,
                   chapterId: chapterId,
-              testId: testId,
+                  testId: testId,
                 ));
 
       case RoutesName.createdMockTestScreen:

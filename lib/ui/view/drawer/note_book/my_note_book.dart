@@ -6,7 +6,8 @@ import 'package:flutter/cupertino.dart';
 import '../../../../view_model/provider/note_book_provider.dart';
 
 class MyNoteBook extends StatefulWidget {
-  const MyNoteBook({super.key});
+  final int folderId;
+  const MyNoteBook({super.key, required this.folderId});
 
   @override
   State<MyNoteBook> createState() => _MyNoteBookState();
@@ -16,7 +17,9 @@ class _MyNoteBookState extends State<MyNoteBook> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<NoteBookProvider>().getNoteBooks(context));
+    Future.microtask(() => context
+        .read<NoteBookProvider>()
+        .getNoteBooks(context, widget.folderId));
   }
 
   @override
