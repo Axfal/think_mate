@@ -1,6 +1,5 @@
 import 'package:education_app/resources/exports.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import 'package:http/http.dart' as http;
 
 class PDFViewerScreen extends StatefulWidget {
   final String title;
@@ -17,10 +16,19 @@ class _PDFViewerScreenState extends State<PDFViewerScreen> {
   final TextEditingController _pageController = TextEditingController();
   int _currentPage = 0;
   int _totalPages = 0;
-  bool _isDownloading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScreenshotProtector.enableProtection();
+    });
+  }
+
 
   @override
   void dispose() {
+    ScreenshotProtector.disableProtection();
     _pageController.dispose();
     super.dispose();
   }
@@ -46,31 +54,6 @@ class _PDFViewerScreenState extends State<PDFViewerScreen> {
     }
   }
 
-  // void _bookmark() {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text('Bookmark feature coming soon!')),
-  //   );
-  // }
-
-  // Future<void> _downloadPDF() async {
-  //   setState(() => _isDownloading = true);
-  //   try {
-  //     final response = await http.get(Uri.parse(widget.url));
-  //     if (response.statusCode == 200) {
-  //       final dir = await getApplicationDocumentsDirectory();
-  //       final file = File('${dir.path}/${widget.title}.pdf');
-  //       await file.writeAsBytes(response.bodyBytes);
-  //       ToastHelper.showSuccess('Downloaded to ${file.path}');
-  //     } else {
-  //       throw Exception('Failed to download PDF');
-  //     }
-  //   } catch (e) {
-  //     ToastHelper.showError('Download failed: $e');
-  //   } finally {
-  //     setState(() => _isDownloading = false);
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,13 +66,6 @@ class _PDFViewerScreenState extends State<PDFViewerScreen> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor),
         ),
-        // actions: [
-        //   IconButton(
-        //     onPressed: _bookmark,
-        //     icon: Icon(Icons.bookmark_border, color: Colors.white),
-        //     tooltip: 'Bookmark',
-        //   ),
-        // ],
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -161,14 +137,6 @@ class _PDFViewerScreenState extends State<PDFViewerScreen> {
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   // onPressed: _isDownloading ? null : _downloadPDF,
-      //   icon: _isDownloading
-      //       ? CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-      //       : Icon(Icons.download),
-      //   label: Text(_isDownloading ? 'Downloading...' : 'Download'),
-      //   backgroundColor: Colors.deepPurple,
-      // ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

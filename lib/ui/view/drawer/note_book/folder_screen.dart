@@ -88,6 +88,7 @@ class _FolderScreenState extends State<FolderScreen> {
                     );
                   },
                   child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       gradient: LinearGradient(
