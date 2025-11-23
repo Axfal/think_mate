@@ -61,7 +61,7 @@ class CreatedMockTestScreenState extends State<CreatedMockTestScreen> {
 
   void _disableScreenshotProtection() {
     try {
-      ScreenshotProtector.disableProtection();
+      // ScreenshotProtector.disableProtection();
       _noScreenshot.screenshotOff();
       debugPrint('Screenshot protection disabled on leaving test screen');
     } catch (e) {

@@ -15,13 +15,13 @@ class _NotesSubjectScreenState extends State<NotesSubjectScreen> {
   @override
   void initState() {
     super.initState();
-    ScreenshotProtector.enableProtection();
+    // ScreenshotProtector.enableProtection();
     getSubjects();
   }
 
   @override
   void dispose() {
-    ScreenshotProtector.disableProtection();
+    // ScreenshotProtector.disableProtection();
     super.dispose();
   }
 

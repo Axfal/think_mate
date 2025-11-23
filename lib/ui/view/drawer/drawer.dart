@@ -6,7 +6,6 @@ import 'package:education_app/view_model/provider/profile_provider.dart';
 import 'package:flutter/cupertino.dart';
 
 Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
-
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       child: Container(
         decoration: BoxDecoration(
@@ -21,15 +20,14 @@ Widget drawerWidget(BuildContext context, ProfileProvider userdata) => Drawer(
         ),
         child: Consumer<BottomNavigatorBarProvider>(
           builder: (context, provider, child) {
-            final String baseUrl =
-                "https://nomore.com.pk/MDCAT_ECAT_Education/API/";
+            final String baseUrl = AppUrl.baseUrl;
             String? profileImage = userdata.profileModel?.user?.profileImage;
             String defaultImageUrl =
                 'https://storage.needpix.com/rsynced_images/head-659651_1280.png';
             String imageUrl =
                 (profileImage != null && profileImage.startsWith('http'))
                     ? profileImage
-                    : '$baseUrl$profileImage';
+                    : '$baseUrl/$profileImage';
 
             if (profileImage == null || profileImage.isEmpty) {
               imageUrl = defaultImageUrl;

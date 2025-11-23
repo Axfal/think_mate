@@ -1,5 +1,5 @@
 class AppUrl {
-  static var baseUrl = 'https://nomore.com.pk/MDCAT_ECAT_Education/API';
+  static var baseUrl = 'https://itgenesis.space/MDCAT_ECAT_Education/API';
 
   static var signIn = '$baseUrl/SignIn.php';
   static var signUp = '$baseUrl/Signup.php';

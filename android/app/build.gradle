@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace "com.example.education_app"
-    compileSdk 35
+
+    // Updated as required by Flutter (plugins need SDK 36)
+    compileSdk 36
+
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -20,8 +23,9 @@ android {
 
     defaultConfig {
         applicationId "com.example.education_app"
-        minSdk 21
-        targetSdk 34
+        minSdkVersion flutter.minSdkVersion
+        targetSdk 36
+
         versionCode flutter.versionCode
         versionName flutter.versionName
     }

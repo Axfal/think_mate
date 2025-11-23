@@ -170,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: AppBar(
           backgroundColor: AppColors.whiteColor,
           elevation: 0,
-          shadowColor: AppColors.darkShadow, // Soft custom shadow
+          shadowColor: AppColors.darkShadow,
           centerTitle: true,
           surfaceTintColor: Colors.transparent,
           iconTheme: IconThemeData(color: AppColors.whiteColor),

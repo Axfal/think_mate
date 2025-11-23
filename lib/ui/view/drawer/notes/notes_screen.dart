@@ -24,7 +24,7 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   void initState() {
     super.initState();
-    ScreenshotProtector.enableProtection();
+    // ScreenshotProtector.enableProtection();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<NotesProvider>(context, listen: false)
           .getNotes(context, widget.subjectId);
@@ -33,7 +33,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   void dispose() {
-    ScreenshotProtector.disableProtection();
+    // ScreenshotProtector.disableProtection();
     super.dispose();
   }
 
