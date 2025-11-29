@@ -5,12 +5,9 @@ plugins {
 }
 
 android {
-    namespace "com.example.education_app"
-
-    // Updated as required by Flutter (plugins need SDK 36)
+    namespace "com.thinkmate.thinkmatte"
     compileSdk 36
-
-    ndkVersion flutter.ndkVersion
+    ndkVersion "29.0.14206865"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -22,17 +19,32 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.education_app"
+        applicationId "com.thinkmate.thinkmatte"
         minSdkVersion flutter.minSdkVersion
         targetSdk 36
 
         versionCode flutter.versionCode
         versionName flutter.versionName
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
+        }
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("upload-keystore.jks")
+            storePassword "090078601"
+            keyAlias "upload"
+            keyPassword "090078601"
+        }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }
